@@ -18,3 +18,12 @@ Soccer Bets Prediction Application
 
 # Make Real-Time Predictions
 ![Prediction](https://github.com/kochlisGit/Soccer-Bets-Predictor/blob/main/predictions.png)
+
+# Requirements
+Python
+TKinter
+Numpy
+Pandas
+Matplotlib
+XGBoost
+Tensorflow
