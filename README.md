@@ -20,10 +20,10 @@ Soccer Bets Prediction Application
 ![Prediction](https://github.com/kochlisGit/Soccer-Bets-Predictor/blob/main/predictions.png)
 
 # Requirements
-Python
-TKinter
-Numpy
-Pandas
-Matplotlib
-XGBoost
-Tensorflow
+1. Python
+1. TKinter
+1. Numpy
+1. Pandas
+1. Matplotlib
+1. XGBoost
+1. Tensorflow
