@@ -5,6 +5,8 @@ from tkinter import messagebox, Text, StringVar, DISABLED, NORMAL, END, CENTER, 
 from tkinter.ttk import Label, Entry, Button, Treeview, Combobox, Scrollbar
 from models.model import FCModel
 from database.utils import preprocess_data
+from analysis.predictions.filters import EvaluationFilter
+from itertools import compress
 import numpy as np
 import threading
 
@@ -123,12 +125,12 @@ class TrainDialog(Dialog):
 
         if form_validation_result == 'Valid':
             if self._training_on_progress:
-                messagebox.showerror('showerror', 'ERROR: ' + "Another training is on progress.")
+                messagebox.showerror('ERROR', 'Another training is on progress.')
             else:
                 train_thread = threading.Thread(target=self._train_model)
                 train_thread.start()
         else:
-            messagebox.showerror('showerror', 'ERROR: ' + form_validation_result)
+            messagebox.showerror('ERROR', form_validation_result)
 
     def _train_model(self):
         self._training_on_progress = True
@@ -208,12 +210,19 @@ class EvaluationDialog(Dialog):
             '2 Prob %'
         ]
         self._last_n_values = [10, 25, 50, 100, 150, 200]
+        self._result_filter_values = ['All', '1', 'X', '2']
+        self._inputs = None
+        self._targets = None
+        self._evaluation_results_and_stats = None
+        self._predicted_results = None
+        self._evaluation_filter = EvaluationFilter()
 
         self._title = 'Evaluation'
         self._loading_title = 'Loading Model'
         self._window_sizes = {'width': 1050, 'height': 700}
 
         self._last_n_var = StringVar()
+        self._result_filter_var = StringVar()
 
         self._treeview_columns = basic_columns + self._evaluation_columns
         self._treeview = None
@@ -233,16 +242,30 @@ class EvaluationDialog(Dialog):
         self._window.resizable(False, False)
 
     def _initialize_form(self):
-        Label(self._window, text='Last N:', font=('Arial', 12)).place(x=250, y=10)
+        Label(self._window, text='Last N:', font=('Arial', 12)).place(x=50, y=10)
 
-        leagues_cb = Combobox(self._window, width=15, font=('Arial', 10), textvariable=self._last_n_var)
+        leagues_cb = Combobox(
+            self._window, state='readonly', width=10, font=('Arial', 10), textvariable=self._last_n_var
+        )
         leagues_cb['values'] = self._last_n_values
-        leagues_cb.place(x=320, y=10)
+        leagues_cb.place(x=120, y=10)
         leagues_cb.bind('<<ComboboxSelected>>', self._eval_matches)
 
-        Label(self._window, text='Accuracy:', font=('Arial', 12)).place(x=470, y=10)
+        Label(self._window, text='Odds Filter:', font=('Arial', 12)).place(x=250, y=10)
+
+        result_filter_cb = Combobox(
+            self._window, state='readonly', width=10, font=('Arial', 10), textvariable=self._result_filter_var
+        )
+        result_filter_cb['values'] = self._result_filter_values
+        result_filter_cb.current(0)
+        result_filter_cb.place(x=350, y=10)
+        result_filter_cb.bind('<<ComboboxSelected>>', self._eval_matches)
+
+        Button(self._window, text='Show Filtered Accuracy', command=self._display_detailed_accuracy).place(x=500, y=10)
+
+        Label(self._window, text='Accuracy:', font=('Arial', 12)).place(x=700, y=10)
         self._accuracy_label = Label(self._window, font=('Arial', 10))
-        self._accuracy_label.place(x=550, y=10)
+        self._accuracy_label.place(x=770, y=13)
 
         self._treeview = Treeview(
             self._window,
@@ -279,19 +302,45 @@ class EvaluationDialog(Dialog):
         self._model.load()
         task_dialog.exit()
 
-    def _eval_matches(self, event):
-        last_n = int(self._last_n_var.get())
-        evaluation_results_and_stats = self._results_and_stats[:last_n]
-        y_inputs, y_targets = preprocess_data(evaluation_results_and_stats, self._all_columns)
+    def _filter_data(self, inputs, targets, evaluation_results_and_stats):
+        filter_result = self._result_filter_var.get()
 
-        predictions = self._model.predict(y_inputs)
+        if filter_result == 'All':
+            return inputs, targets, evaluation_results_and_stats
+        elif filter_result == '1':
+            indices = targets == 0
+        elif filter_result == 'X':
+            indices = targets == 1
+        elif filter_result == '2':
+            indices = targets == 2
+        else:
+            return inputs, targets, evaluation_results_and_stats
+        return inputs[indices], targets[indices], list(compress(evaluation_results_and_stats, indices))
+
+    def _eval_matches(self, event):
+        last_n_var = self._last_n_var.get()
+
+        if last_n_var == '':
+            return
+
+        last_n = int(last_n_var)
+        evaluation_results_and_stats = self._results_and_stats[:last_n]
+        inputs, targets = preprocess_data(evaluation_results_and_stats, self._all_columns)
+        targets = np.argmax(targets, axis=1)
+        self._inputs, self._targets, self._evaluation_results_and_stats = self._filter_data(
+            inputs,
+            targets,
+            evaluation_results_and_stats
+        )
+
+        predictions = self._model.predict(self._inputs)
         for i in range(predictions.shape[0]):
             for result_index in range(3):
                 predictions[i][result_index] = round(predictions[i][result_index], 2)
+        self._predicted_results = np.argmax(predictions, axis=1)
 
-        predicted_results = np.argmax(predictions, axis=1)
-        self._display_treeview_items(evaluation_results_and_stats, predictions, predicted_results)
-        self._display_validation_accuracy(np.argmax(y_targets, axis=1), predicted_results)
+        self._display_treeview_items(self._evaluation_results_and_stats, predictions, self._predicted_results)
+        self._display_validation_accuracy(self._targets, self._predicted_results)
 
     def _display_treeview_items(self, evaluation_results_and_stats, predictions, predicted_results):
         for item in self._treeview.get_children():
@@ -314,12 +363,44 @@ class EvaluationDialog(Dialog):
         n_predictions = predicted_results.shape[0]
 
         for i in range(n_predictions):
-            print(y_targets[i], predicted_results[i])
             if y_targets[i] == predicted_results[i]:
                 correct_predictions += 1
         accuracy = round(100 * correct_predictions/n_predictions, 2)
 
         self._accuracy_label['text'] = str(accuracy) + '%'
+
+    def _display_detailed_accuracy(self):
+        if self._targets is None:
+            return
+
+        filter_result = self._result_filter_var.get()
+
+        if filter_result == 'All':
+            messagebox.showerror('ERROR', 'You need to select result first.')
+            return
+        elif filter_result == '1':
+            column = 0
+        elif filter_result == 'X':
+            column = 1
+        elif filter_result == '2':
+            column = 2
+        else:
+            return
+
+        accuracies = self._evaluation_filter.filter_odd_accuracy_per_range(
+            self._inputs, self._targets, self._predicted_results, column
+        )
+        message_str = ''
+
+        for i in range(self._evaluation_filter.n_ranges):
+            message_str += 'Range: {}, Accuracy: {}%\n'.format(
+                self._evaluation_filter.odd_ranges[i], round(accuracies[i], 2)
+            )
+        message_str += 'Range > {}, Accuracy: {}%'.format(
+            self._evaluation_filter.end_of_range,
+            accuracies[self._evaluation_filter.n_ranges]
+        )
+        messagebox.showinfo('Detailed Accuracies', message_str)
 
 
 class PredictionsDialog(Dialog):

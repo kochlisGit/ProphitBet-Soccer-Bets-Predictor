@@ -1,8 +1,8 @@
 from tkinter import Tk, Menu, NORMAL, DISABLED, CENTER, HORIZONTAL, VERTICAL, messagebox
 from tkinter.ttk import Treeview, Scrollbar, Style
 from windows.dialogs.league import LeagueCreatorDialog, LeagueLoaderDialog, LeagueDeleteDialog
-from analysis.correlation import CorrelationAnalyzer
-from analysis.importance import ImportanceAnalyzer
+from analysis.features.correlation import CorrelationAnalyzer
+from analysis.features.importance import ImportanceAnalyzer
 from windows.plotters.analysis.correlation import CorrelationPlotter
 from windows.plotters.analysis.importance import ImportancePlotter
 from windows.dialogs.model import TrainDialog, EvaluationDialog, PredictionsDialog
