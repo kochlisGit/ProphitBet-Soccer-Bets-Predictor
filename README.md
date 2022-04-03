@@ -27,3 +27,9 @@ Soccer Bets Prediction Application
 1. Matplotlib
 1. XGBoost
 1. Tensorflow
+
+# Release Notes:
+
+Mar, 20, 2022: First commit. 
+
+Apr, 3, 2022: Added filters & detailed accuracy option at the evaluation dialog.
