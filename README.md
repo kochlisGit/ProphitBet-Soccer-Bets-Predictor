@@ -30,5 +30,5 @@ Soccer Bets Prediction Application
 
 # Release Notes:
 
-* Mar, 20, 2022: First commit. 
+* Mar, 20, 2022: Initial commit. 
 * Apr, 3, 2022: Added filters & detailed accuracy option at the evaluation dialog.
