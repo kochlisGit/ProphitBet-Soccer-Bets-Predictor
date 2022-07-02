@@ -1,34 +1,31 @@
 # ProphitBet - Soccer Bets Predictor
-Soccer Bets Prediction Application
+ProphitBet is a Machine Learning Soccer Bet prediction application. It analyzes the form of teams, computes statistics from previous matches of a selected league and predicts the outcomes of a match using Machine Learning (ML) methods. The supported algorithms in this application are Neural Networks and Random Forests.
 
-# Create Leagues & Train a Model
-![Create League](https://github.com/kochlisGit/Soccer-Bets-Predictor/blob/main/create_league.png)
+# Features
 
-# View League's Statistics
-![League Statistics](https://github.com/kochlisGit/Soccer-Bets-Predictor/blob/main/main.png)
 
-# Compute Correlation Between Features
-![Correlations](https://github.com/kochlisGit/Soccer-Bets-Predictor/blob/main/correlation_analysis.png)
+|  | Download Link
+--------------------------------
+        | https://www.python.org/
+Numpy                  | 
+Pandas                 | https://pypi.org/project/pandas/
+Matplotlib
+Seaborn
+Scikit-Learn
+XGBoost
+Tensorflow
+Tensorflow-Addons
+TKinter
 
-# Compute Importance for a Variety of Features
-![Importance](https://github.com/kochlisGit/Soccer-Bets-Predictor/blob/main/importance_analysis.png)
-
-# Evaluate your Model
-![Evaluation](https://github.com/kochlisGit/Soccer-Bets-Predictor/blob/main/evaluation.png)
-
-# Make Real-Time Predictions
-![Prediction](https://github.com/kochlisGit/Soccer-Bets-Predictor/blob/main/predictions.png)
-
-# Requirements
-1. Python
-1. TKinter
-1. Numpy
-1. Pandas
-1. Matplotlib
-1. XGBoost
-1. Tensorflow
-
-# Release Notes:
-
-* Mar, 20, 2022: Initial commit. 
-* Apr, 3, 2022: Added filters & detailed accuracy option at the evaluation dialog.
+| Library/Module  | Download Url |
+| ------------- | ------------- |
+| Python Language  | https://www.python.org/ |
+| Numpy  | https://numpy.org/ |
+| Pandas  | https://pandas.pydata.org/ |
+| Matplotlib  | https://matplotlib.org/ |
+| Seaborn  | https://seaborn.pydata.org/ |
+| Scikit-Learn  | https://scikit-learn.org/stable/ |
+| XGBoost  | https://xgboost.readthedocs.io/en/stable/ |
+| Tensorflow  | https://www.tensorflow.org/ |
+| Tensorflow-Addons  | https://www.tensorflow.org/addons |
+| TKinter  | https://docs.python.org/3/library/tkinter.html |
