@@ -1,4 +1,4 @@
-# Soccer-Bets-Predictor
+# ProphitBet - Soccer Bets Predictor
 Soccer Bets Prediction Application
 
 # Create Leagues & Train a Model
