@@ -3,23 +3,9 @@ ProphitBet is a Machine Learning Soccer Bet prediction application. It analyzes 
 
 # Features
 
-
-|  | Download Link
---------------------------------
-        | https://www.python.org/
-Numpy                  | 
-Pandas                 | https://pypi.org/project/pandas/
-Matplotlib
-Seaborn
-Scikit-Learn
-XGBoost
-Tensorflow
-Tensorflow-Addons
-TKinter
-
 | Library/Module  | Download Url |
 | ------------- | ------------- |
-| Python Language  | https://www.python.org/ |
+| Python Language | https://www.python.org/ |
 | Numpy  | https://numpy.org/ |
 | Pandas  | https://pandas.pydata.org/ |
 | Matplotlib  | https://matplotlib.org/ |
