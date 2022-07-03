@@ -109,7 +109,9 @@ In order to request a prediction for a match, You need to select the home/away t
 # Fixture Parsing
 
 An alternative way to predict multiple matches at once is to use the "**Fixture Parsing**" option. When you click on that option, it will open the browser and ask you
-to download the specified fixture from *footystats.org*. This can be done by pressing *Ctrl + S* or right click and "Save As" option. Then, You will need to specify the filepath of the downloaded fixture and the application will automatically parse and predict the upcoming matches for you. You may also choose to export these predictions to a csv file, which you can open with Microsoft Excel. 
+to download the specified fixture from *footystats.org*. This can be done by pressing *Ctrl + S* or right click and "Save As" option. Then, You will need to specify the filepath of the downloaded fixture and the application will automatically parse and predict the upcoming matches for you. You may also choose to export these predictions to a csv file, which you can open with Microsoft Excel.
+
+![fixture parsing & upcoming match prediction](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/fixtures.png)
 
 # Requirements
 
