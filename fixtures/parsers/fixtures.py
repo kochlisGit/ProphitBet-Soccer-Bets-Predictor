@@ -28,20 +28,26 @@ class FixtureParser:
     def _parse_odds(self, odd_element_lines: list, n_matches: int) -> list:
         odds = []
         for i in range(0, n_matches*3, 3):
-            odd_1 = float(odd_element_lines[i].split('\n<span', 1)[0])
-            odd_x = float(odd_element_lines[i+1].split('\n<span', 1)[0])
-            odd_2 = float(odd_element_lines[i+2].split('\n<span', 1)[0])
+            odd_1 = float(odd_element_lines[i].split('<span', 1)[0].replace('\n', ''))
+            odd_x = float(odd_element_lines[i+1].split('<span', 1)[0].replace('\n', ''))
+            odd_2 = float(odd_element_lines[i+2].split('<span', 1)[0].replace('\n', ''))
             odds.append((odd_1, odd_x, odd_2))
         return odds
 
-    def parse_fixture(self, fixture_filepath: str) -> (list, list):
+    def parse_fixture(
+            self,
+            fixture_filepath: str,
+            fixtures_month: str,
+            fixtures_day: str
+    ) -> (list, list):
         upcoming_matches = []
         odds = []
+        upcoming_date_table = f'{fixtures_month} {fixtures_day} ~'
 
         with open(fixture_filepath, 'r', encoding='utf-8') as fixture_html:
             lines = fixture_html.read()
 
-        match_table_lines = lines.split(self.table_id)
+        match_table_lines = lines.split(upcoming_date_table)
         match_table_str = None if len(match_table_lines) < 2 else match_table_lines[1]
 
         if match_table_str is not None:
