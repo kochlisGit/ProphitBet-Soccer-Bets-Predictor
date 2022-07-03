@@ -134,4 +134,4 @@ to download the specified fixture from *footystats.org*. This can be done by pre
 
 This app can be run on both Windows & Linux!
 
-For further questions about the development of this app, email me at: "kohliaridis97@gmail.com"
+For further questions about the development of this app, don't hesitate to email me at: "kohliaridis97@gmail.com"
