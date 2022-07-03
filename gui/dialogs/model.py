@@ -686,13 +686,16 @@ class PredictionUpcomingDialog(Dialog):
         self._treeview_columns = [
             'Home Team', 'Away Team', '1', 'X', '2', 'Prediction', '1 Prob %', 'X Prob %', '2 Prob %'
         ]
+
+        self._fixture_month_var = StringVar()
+        self._fixture_day_var = StringVar()
         self._selected_model_var = StringVar()
 
         self._import_btn = None
         self._predict_btn = None
         self._treeview = None
 
-        super().__init__(master=master, title='Predict Upcoming', window_size={'width': 1050, 'height': 780})
+        super().__init__(master=master, title='Predict Upcoming', window_size={'width': 835, 'height': 780})
 
     @property
     def models(self) -> dict:
@@ -729,9 +732,24 @@ class PredictionUpcomingDialog(Dialog):
         models_cb.current(0)
         models_cb.place(x=320, y=11)
 
+        Label(self._window, text='Upcoming Date', font=('Arial', 12)).place(x=520, y=11)
+        models_cb = Combobox(
+            self._window, state='readonly', width=6, font=('Arial', 10), textvariable=self._fixture_month_var
+        )
+        models_cb['values'] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        models_cb.current(0)
+        models_cb.place(x=640, y=11)
+
+        models_cb = Combobox(
+            self._window, state='readonly', width=6, font=('Arial', 10), textvariable=self._fixture_day_var
+        )
+        models_cb['values'] = [str(i) for i in range(1, 32)]
+        models_cb.current(0)
+        models_cb.place(x=720, y=11)
+
         self._predict_btn = Button(self._window, text='Export Predictions', command=self._predict_fixtures)
         self._predict_btn['state'] = DISABLED
-        self._predict_btn.place(x=560, y=10)
+        self._predict_btn.place(x=370, y=710)
 
         self._treeview = Treeview(
             self._window,
@@ -745,14 +763,18 @@ class PredictionUpcomingDialog(Dialog):
             self._treeview.heading(column_name, text=column_name, anchor=CENTER)
         self._treeview.column('Home Team', anchor=CENTER, stretch=True, width=100)
         self._treeview.column('Away Team', anchor=CENTER, stretch=True, width=100)
-        self._treeview.place(x=25, y=50)
+        self._treeview.place(x=50, y=50)
 
     def _import_fixtures(self):
         fixtures_filepath = filedialog.askopenfilename()
 
         if '.html' in fixtures_filepath:
             try:
-                fixture_matches, fixture_odds = self.fixture_parser.parse_fixture(fixtures_filepath)
+                fixture_matches, fixture_odds = self.fixture_parser.parse_fixture(
+                    fixture_filepath=fixtures_filepath,
+                    fixtures_month=self._fixture_month_var.get(),
+                    fixtures_day=self._fixture_day_var.get()
+                )
 
                 if not fixture_matches:
                     messagebox.showerror('Match Parsing ERROR', 'An error occurred while parsing teams.')
@@ -769,9 +791,9 @@ class PredictionUpcomingDialog(Dialog):
                 self._predict_btn['state'] = NORMAL
             except:
                 messagebox.showerror('Parsing ERROR',
-                                     'An error occured while trying to parse the fixtures. Probably the '
-                                     'static HTML code of "footystats.org" has changed and cannot be '
-                                     'recognised by the parser.')
+                                     'An error occured while trying to parse the fixtures. Check if the upcoming date '
+                                     'is correct. If it is, Probably the static HTML code of "footystats.org" has '
+                                     'changed and cannot be recognised by the parser. Please, contact the developer.')
 
     def _construct_inputs_from_fixture_matches(self, fixture_matches: list, fixture_odds: list):
         all_teams = list(
