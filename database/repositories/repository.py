@@ -14,6 +14,7 @@ class LeagueRepository:
     def __init__(self, repository_directory: str, checkpoint_directory: str):
         self._repository_directory = repository_directory
         self._checkpoint_directory = checkpoint_directory
+        self._initialize_repositories()
 
     @property
     def repository_directory(self):
@@ -58,6 +59,11 @@ class LeagueRepository:
     def _initialize_directory(directory_path: str):
         if not os.path.exists(directory_path):
             os.mkdir(directory_path)
+
+    def _initialize_repositories(self):
+        for filepath in [self._checkpoint_directory, self._repository_directory]:
+            if not os.path.exists(filepath):
+                os.makedirs(filepath)
 
     def get_downloaded_league_configs(self) -> dict:
         downloaded_leagues = {}
