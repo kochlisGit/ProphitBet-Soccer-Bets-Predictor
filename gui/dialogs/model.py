@@ -789,6 +789,7 @@ class PredictionUpcomingDialog(Dialog):
                 )
                 self._import_btn['state'] = DISABLED
                 self._predict_btn['state'] = NORMAL
+                messagebox.showinfo('Done', 'Fixtured are imported correctly. Click on Export Predictions.')
             except:
                 messagebox.showerror('Parsing ERROR',
                                      'An error occured while trying to parse the fixtures. Check if the upcoming date '
