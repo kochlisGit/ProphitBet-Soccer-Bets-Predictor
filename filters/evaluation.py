@@ -13,9 +13,9 @@ class EvaluationFilter:
     @property
     def odd_intervals(self) -> list:
         return [
-            (1.00, 1.31), (1.30, 1.61), (1.60, 1.91), (1.90, 2.21),
-            (2.20, 2.51), (2.50, 2.81), (2.80, 3.11),
-            (3.10, 3.41), (3.40, 3.71), (3.70, self.end_of_interval)
+            (1.00, 1.31), (1.31, 1.61), (1.61, 1.91), (1.91, 2.21),
+            (2.21, 2.51), (2.51, 2.81), (2.81, 3.11),
+            (3.11, 3.41), (3.41, 3.71), (3.71, self.end_of_interval)
         ]
 
     @property
@@ -27,7 +27,7 @@ class EvaluationFilter:
             odds: np.ndarray,
             targets: np.ndarray,
             predictions: np.ndarray
-    ) -> list:
+    ) -> (list, list, list):
         accuracies = [0] * (self.num_intervals + 1)
         correct_predictions = [0] * (self.num_intervals + 1)
         wrong_predictions = [0] * (self.num_intervals + 1)
@@ -49,4 +49,4 @@ class EvaluationFilter:
         for i in range(self.num_intervals + 1):
             total_predictions = correct_predictions[i] + wrong_predictions[i]
             accuracies[i] = 0.0 if total_predictions == 0 else correct_predictions[i] / total_predictions
-        return accuracies
+        return accuracies, correct_predictions, wrong_predictions
