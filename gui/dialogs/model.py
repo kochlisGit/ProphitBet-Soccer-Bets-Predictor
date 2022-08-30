@@ -106,7 +106,10 @@ class TrainNNDialog(TrainDialog):
 
         self._layers_var = StringVar()
         self._validation_var = StringVar()
-        self._noise_var = StringVar()
+        self._noise_1_var = StringVar()
+        self._noise_x_var = StringVar()
+        self._noise_2_var = StringVar()
+        self._favorite_var = StringVar()
         self._performance_rate_noise = StringVar()
         self._epochs_var = StringVar()
         self._patience_var = StringVar()
@@ -114,7 +117,7 @@ class TrainNNDialog(TrainDialog):
         super().__init__(
             master=master,
             title='Training Neural Network',
-            window_size={'width': 400, 'height': 640},
+            window_size={'width': 400, 'height': 680},
             checkpoint_path=checkpoint_path,
             league_identifier=league_identifier,
             results_and_stats=results_and_stats
@@ -124,10 +127,11 @@ class TrainNNDialog(TrainDialog):
         Label(self._window, text='Model\'s Name', font=('Arial', 14)).place(x=30, y=20)
         Label(self._window, text='Hidden Layers', font=('Arial', 14)).place(x=30, y=60)
         Label(self._window, text='Validation Size', font=('Arial', 14)).place(x=30, y=100)
-        Label(self._window, text='Noise Range', font=('Arial', 14)).place(x=30, y=140)
-        Label(self._window, text='Win/Draw % Noise', font=('Arial', 14)).place(x=30, y=180)
-        Label(self._window, text='Epochs', font=('Arial', 14)).place(x=30, y=220)
-        Label(self._window, text='Patience', font=('Arial', 14)).place(x=30, y=260)
+        Label(self._window, text='Noise Range(1-X-2)', font=('Arial', 14)).place(x=30, y=140)
+        Label(self._window, text='Noise Favorites Only', font=('Arial', 14)).place(x=30, y=180)
+        Label(self._window, text='Win/Draw % Noise', font=('Arial', 14)).place(x=30, y=220)
+        Label(self._window, text='Epochs', font=('Arial', 14)).place(x=30, y=260)
+        Label(self._window, text='Patience', font=('Arial', 14)).place(x=30, y=300)
 
         name_entry = Entry(self._window, width=15, font=('Arial', 10))
         name_entry.insert(0, self.model_name)
@@ -142,35 +146,51 @@ class TrainNNDialog(TrainDialog):
         validation_entry.insert(0, str(self._validation_size))
         validation_entry.place(x=220, y=100)
 
-        noise_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._noise_var)
-        noise_entry.insert(0, str(self._odd_noise_range))
-        noise_entry.place(x=220, y=140)
+        noise_1_entry = Entry(self._window, width=5, font=('Arial', 10), textvariable=self._noise_1_var)
+        noise_1_entry.insert(0, str(self._odd_noise_range))
+        noise_1_entry.place(x=220, y=140)
+
+        noise_x_entry = Entry(self._window, width=5, font=('Arial', 10), textvariable=self._noise_x_var)
+        noise_x_entry.insert(0, str(self._odd_noise_range))
+        noise_x_entry.place(x=280, y=140)
+
+        noise_2_entry = Entry(self._window, width=5, font=('Arial', 10), textvariable=self._noise_2_var)
+        noise_2_entry.insert(0, str(self._odd_noise_range))
+        noise_2_entry.place(x=340, y=140)
+
+        favorites_cb = Combobox(
+            self._window, width=15, state='readonly', font=('Arial', 10), textvariable=self._favorite_var
+        )
+        favorites_cb['values'] = ['False', 'True']
+        favorites_cb.current(0)
+        favorites_cb.place(x=220, y=180)
 
         performance_noise_cb = Combobox(
-            self._window, width=13, font=('Arial', 10), textvariable=self._performance_rate_noise
+            self._window, width=13, state='readonly', font=('Arial', 10), textvariable=self._performance_rate_noise
         )
         performance_noise_cb['values'] = ['True', 'False']
         performance_noise_cb.current(0)
-        performance_noise_cb.place(x=220, y=180)
+        performance_noise_cb.place(x=220, y=220)
 
         epochs_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._epochs_var)
         epochs_entry.insert(0, str(self._epochs))
-        epochs_entry.place(x=220, y=220)
+        epochs_entry.place(x=220, y=260)
 
         patience_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._patience_var)
         patience_entry.insert(0, str(self._patience))
-        patience_entry.place(x=220, y=260)
+        patience_entry.place(x=220, y=300)
 
-        Button(self._window, text='Train', command=self._train).place(x=150, y=300)
+        Button(self._window, text='Train', command=self._train).place(x=150, y=340)
 
         self._text_area = Text(self._window, state=DISABLED, font=('Arial', 10))
-        self._text_area.place(x=0, y=340)
+        self._text_area.place(x=0, y=380)
 
     def _validate_form(self) -> str or None:
         layers_str = self._layers_var.get()
         validation_size = self._validation_var.get()
-        noise = self._noise_var.get()
-        noise = noise.replace('.', '')
+        noise1 = self._noise_1_var.get()
+        noisex = self._noise_x_var.get()
+        noise2 = self._noise_2_var.get()
         epochs = self._epochs_var.get()
         patience = self._patience_var.get()
 
@@ -178,10 +198,18 @@ class TrainNNDialog(TrainDialog):
             ast.literal_eval(layers_str) == list
         except:
             return 'List should be in form "[l1, l2, l3, ...]"'
+
+        try:
+            noise1 = float(noise1)
+            noisex = float(noisex)
+            noise2 = float(noise2)
+        except:
+            return 'Error. Noise should be a float number between 0.0 and 1.0'
+
         if not validation_size.isdigit() or int(validation_size) < 0:
             return 'Validation Size should be a positive number'
-        if not noise.isdigit() or float(noise) < 0:
-            return 'Noise Range should have a positive value < 1.0'
+        if not ((0 <= noise1 <= 1.0) and (0 <= noisex <= 1.0) and (0 <= noise2 <= 1.0)):
+            return 'Noise Ranges should have a positive value < 1.0'
         if not epochs.isdigit() or int(epochs) < 0:
             return 'Epochs should be a positive number'
         if not patience.isdigit() or int(patience) < 0:
@@ -194,8 +222,11 @@ class TrainNNDialog(TrainDialog):
 
         hidden_layers = ast.literal_eval(self._layers_var.get())
         validation_size = int(self._validation_var.get())
-        noise_range = float(self._noise_var.get())
-        performance_rate_noise = bool(self._performance_rate_noise.get())
+        noise_1_range = float(self._noise_1_var.get())
+        noise_x_range = float(self._noise_x_var.get())
+        noise_2_range = float(self._noise_2_var.get())
+        noise_favorites_only = self._favorite_var.get() == 'True'
+        performance_rate_noise = self._performance_rate_noise.get() == 'True'
         epochs = int(self._epochs_var.get())
         patience = int(self._patience_var.get())
 
@@ -229,8 +260,9 @@ class TrainNNDialog(TrainDialog):
                 y_train=y_train,
                 x_test=x_test,
                 y_test=y_test,
-                odd_noise_range=noise_range,
-                performance_rate_noise=performance_rate_noise
+                odd_noise_ranges=np.float32([noise_1_range, noise_x_range, noise_2_range]),
+                performance_rate_noise=performance_rate_noise,
+                noise_favorites_only=noise_favorites_only
             )
 
             self._report_training_log(default_train_log.format(
@@ -295,7 +327,9 @@ class TrainRFDialog(TrainDialog):
         estimators_entry.insert(0, str(self._n_estimators))
         estimators_entry.place(x=200, y=60)
 
-        calibration_cb = Combobox(self._window, width=15, font=('Arial', 10), textvariable=self._calibration_var)
+        calibration_cb = Combobox(
+            self._window, width=15, font=('Arial', 10), state='readonly', textvariable=self._calibration_var
+        )
         calibration_cb['values'] = ['True', 'False']
         calibration_cb.current(0)
         calibration_cb.place(x=200, y=100)
@@ -323,7 +357,7 @@ class TrainRFDialog(TrainDialog):
         self._training_on_progress = True
 
         n_estimators = int(self._n_estimators_var.get())
-        calibration = bool(self._calibration_var.get())
+        calibration = self._calibration_var.get() == 'True'
         validation_size = int(self._validation_var.get())
 
         self._clear_training_log()
@@ -591,11 +625,15 @@ class PredictionDialog(Dialog):
         Label(self._window, text='Home Team', font=('Arial', 12)).place(x=40, y=15)
         Label(self._window, text='Away Team', font=('Arial', 12)).place(x=195, y=15)
 
-        home_team_cb = Combobox(self._window, width=15, font=('Arial', 10), textvariable=self._home_team_var)
+        home_team_cb = Combobox(
+            self._window, width=15, font=('Arial', 10), state="readonly", textvariable=self._home_team_var
+        )
         home_team_cb['values'] = self.results_and_stats['Home Team'].unique().tolist()
         home_team_cb.place(x=20, y=50)
 
-        away_team_cb = Combobox(self._window, width=15, font=('Arial', 10), textvariable=self._away_team_var)
+        away_team_cb = Combobox(
+            self._window, width=15, font=('Arial', 10), state='readonly', textvariable=self._away_team_var
+        )
         away_team_cb['values'] = self.results_and_stats['Away Team'].unique().tolist()
         away_team_cb.place(x=170, y=50)
 
