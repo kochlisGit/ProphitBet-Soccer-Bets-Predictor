@@ -577,15 +577,15 @@ class EvaluationDialog(Dialog):
         else:
             return
 
-        accuracies = self._evaluation_filter.compute_prediction_accuracy_per_odd_range(
+        accuracies, correct_predictions, wrong_predictions = self._evaluation_filter.compute_prediction_accuracy_per_odd_range(
             self._inputs[:, column], self._targets, self._predictions
         )
         message_str = ''
 
         for i in range(self._evaluation_filter.num_intervals):
-            message_str += f'Range: {self._evaluation_filter.odd_intervals[i]}, Accuracy: {round(accuracies[i] * 100, 2)}%\n '
+            message_str += f'Range: {self._evaluation_filter.odd_intervals[i]}, Accuracy: {round(accuracies[i] * 100, 2)}% ({correct_predictions[i]}/{wrong_predictions[i] + correct_predictions[i]})\n'
 
-        message_str += f'Range > {self._evaluation_filter.end_of_interval}:    Accuracy: {accuracies[-1] * 100}%'
+        message_str += f'Range > {self._evaluation_filter.end_of_interval}:    Accuracy: {round(accuracies[-1] * 100, 2)}% ({correct_predictions[-1]}/{correct_predictions[-1] + wrong_predictions[-1]})\n'
         messagebox.showinfo('Accuracy Details', message_str)
 
 
