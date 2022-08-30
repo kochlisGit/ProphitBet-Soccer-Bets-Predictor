@@ -14,17 +14,19 @@ For each league, the application computes several statistics (features) about th
 1. **Home Wins (HW)**: Last N wins of the home team in its home
 2. **Home Losses (HL)**: Last N losses of the home team in its home
 3. **Home Goal Forward (HGF)**: Sum of goals that the home team scored in the last N matches in its home
-4. **Home G-Goal Difference Wins (HGD-W)** Last N wins of the home team with G difference in the final score in its home (${HG - AG \geq 2}$)
-5. **Home G-Goal Difference Losses (HGD-L)** Last N losses of the home team with G difference in the final score in its home (${HG - AG \geq 2}$)
-6. **Home Win Rate (HW%)** Total win rate of the home team from the start of the league in its home
-7. **Home Loss Rate (HL%)** Total loss rate of the home team from the start of the league in its home
-8. **Away Wins (AW)**: Last N wins of the away team away its home
-9. **Away Losses (AL)**: Last N losses of the away team away its home
-10. **Away Goal Forward (AGF)**: Sum of goals that the away team scored in the last N matches away its home
-11. **Away G-Goal Difference Wins (AGD-W)** Last N wins of the away team with G difference in the final score away its home(${HG - AG \geq 2}$)
-12. **Away G-Goal Difference Losses (AGD-L)** Last N losses of the away team with G difference in the final score away its home (${HG - AG \geq 2}$)
-13. **Away Win Rate (AW%)** Total win rate from the start of the league away its home
-14. **Away Loss Rate (AL%)** Total loss rate from the start of the league away its home
+4. **Home Goal Against (HGA)**: Sum of goals that the away teams scored in the last N matches.
+5. **Home G-Goal Difference Wins (HGD-W)** Last N wins of the home team with G difference in the final score in its home (${HG - AG \geq 2}$)
+6. **Home G-Goal Difference Losses (HGD-L)** Last N losses of the home team with G difference in the final score in its home (${HG - AG \geq 2}$)
+7. **Home Win Rate (HW%)** Total win rate of the home team from the start of the league in its home
+8. **Home Loss Rate (HL%)** Total loss rate of the home team from the start of the league in its home
+9. **Away Wins (AW)**: Last N wins of the away team away its home
+10. **Away Losses (AL)**: Last N losses of the away team away its home
+11. **Away Goal Forward (AGF)**: Sum of goals that the away team scored in the last N matches away its home
+12. **Away Goal Against (AGA)**: Sum of goals that the home teams scored in the last N matches.
+13. **Away G-Goal Difference Wins (AGD-W)** Last N wins of the away team with G difference in the final score away its home(${HG - AG \geq 2}$)
+14. **Away G-Goal Difference Losses (AGD-L)** Last N losses of the away team with G difference in the final score away its home (${HG - AG \geq 2}$)
+15. **Away Win Rate (AW%)** Total win rate from the start of the league away its home
+16. **Away Loss Rate (AL%)** Total loss rate from the start of the league away its home
 
 # Leagues
 
@@ -137,3 +139,11 @@ to download the specified fixture from *footystats.org*. This can be done by pre
 This app can be run on both Windows & Linux!
 
 For further questions about the development of this app, don't hesitate to email me at: "kohliaridis97@gmail.com"
+
+# Release (2022/08/30)
+
+* Fixed a bug in Evaluation Filters
+* Fixed Fixture Parser
+* Added 2 new statistic features (columns): HGA, AGA
+* Neural Network now supports different noise ranges for each odd (1/x/2).
+* Neural Network may now add noise only to favorite teams (teams with odd < 2.0)
