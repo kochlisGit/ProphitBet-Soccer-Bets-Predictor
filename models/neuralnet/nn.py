@@ -20,6 +20,8 @@ class FCNet(Model):
             model_name=model_name
         )
 
+        self._max_favorite_odd_noise = 2.0
+
     @property
     def num_classes(self) -> int:
         return 3
@@ -70,15 +72,33 @@ class FCNet(Model):
             y_test: np.ndarray,
             **kwargs,
     ) -> float:
-        odd_noise_range = kwargs['odd_noise_range']
+        odd_noise_ranges = kwargs['odd_noise_ranges']
         performance_rate_noise = kwargs['performance_rate_noise']
+        noise_favorites_only = kwargs['noise_favorites_only']
 
-        odd_noise = np.random.uniform(
-            low=-odd_noise_range,
-            high=odd_noise_range,
-            size=(x_train.shape[0], self.num_classes)
-        )
         x = x_train.copy()
+        if noise_favorites_only:
+            favorite_home_indices = x[:, 0] < self._max_favorite_odd_noise
+            favorite_away_indices = x[:, 2] < self._max_favorite_odd_noise
+
+            odd_noise = np.zeros(shape=(x_train.shape[0], self.num_classes))
+            odd_noise[favorite_home_indices, 0] += np.random.uniform(
+                low=-odd_noise_ranges[0],
+                high=odd_noise_ranges[0],
+                size=(np.sum(favorite_home_indices),)
+            )
+            odd_noise[favorite_away_indices, 2] += np.random.uniform(
+                low=-odd_noise_ranges[2],
+                high=odd_noise_ranges[2],
+                size=(np.sum(favorite_away_indices,))
+            )
+        else:
+            odd_noise = np.random.uniform(
+                low=-odd_noise_ranges,
+                high=odd_noise_ranges,
+                size=(x_train.shape[0], self.num_classes)
+            )
+
         x[:, 0:3] += odd_noise
 
         if performance_rate_noise:
