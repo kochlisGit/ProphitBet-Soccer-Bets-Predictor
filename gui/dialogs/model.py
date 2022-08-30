@@ -815,7 +815,7 @@ class PredictionUpcomingDialog(Dialog):
                 )
 
                 if not fixture_matches:
-                    messagebox.showerror('Match Parsing ERROR', 'An error occurred while parsing teams.')
+                    messagebox.showerror('Match Parsing ERROR', 'An error occurred while parsing teams. Make Sure the date is correct.')
                     return
                 if not fixture_odds:
                     messagebox.showerror('Odd Parsing ERROR', 'An error occurred while parsing the odds of matches.')
