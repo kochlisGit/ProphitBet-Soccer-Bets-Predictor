@@ -7,8 +7,8 @@ class CorrelationAnalyzer(FeatureAnalyzer):
     def __init__(self, results_and_stats: pd.DataFrame):
         super().__init__(results_and_stats=results_and_stats)
         self.correlation_columns = {
-            'Home-Result': ['1', 'X', '2', 'HW', 'HL', 'HGF', 'HGD-W', 'HGD-L', 'HW%', 'HD%'],
-            'Away-Result': ['1', 'X', '2', 'AW', 'AL', 'AGF', 'AGD-W', 'AGD-L', 'AW%', 'AD%']
+            'Home-Result': ['1', 'X', '2', 'HW', 'HL', 'HGF', 'HGA', 'HGD-W', 'HGD-L', 'HW%', 'HD%'],
+            'Away-Result': ['1', 'X', '2', 'AW', 'AL', 'AGF', 'AGA', 'AGD-W', 'AGD-L', 'AW%', 'AD%']
         }
 
     def plot_feature_correlations(
