@@ -47,8 +47,8 @@ class LeagueRepository:
     @property
     def stats_columns(self) -> list:
         return [
-            'HW', 'HL', 'HGF', 'HGD-W', 'HGD-L', 'HW%', 'HD%',
-            'AW', 'AL', 'AGF', 'AGD-W', 'AGD-L', 'AW%', 'AD%'
+            'HW', 'HL', 'HGF', 'HGA', 'HGD-W', 'HGD-L', 'HW%', 'HD%',
+            'AW', 'AL', 'AGF', 'AGA', 'AGD-W', 'AGD-L', 'AW%', 'AD%'
         ]
 
     @property
@@ -192,6 +192,13 @@ class LeagueRepository:
                 )
                 if hgf is None:
                     continue
+                hga = stats_engine.compute_last_goal_against(
+                    match_history=previous_match_history,
+                    team_name=match_history[i][column_indices['Home Team']],
+                    is_home=True
+                )
+                if hga is None:
+                    continue
 
                 hgdw = stats_engine.compute_last_n_goal_diff_wins(
                     match_history=previous_match_history,
@@ -248,6 +255,13 @@ class LeagueRepository:
                 )
                 if agf is None:
                     continue
+                aga = stats_engine.compute_last_goal_against(
+                    match_history=previous_match_history,
+                    team_name=match_history[i][column_indices['Away Team']],
+                    is_home=False
+                )
+                if aga is None:
+                    continue
 
                 agdw = stats_engine.compute_last_n_goal_diff_wins(
                     match_history=previous_match_history,
@@ -283,6 +297,7 @@ class LeagueRepository:
 
                 results_and_stats.append(
                     [match_history[i][column_indices[col_name]] for col_name in self.basic_columns] +
-                    [hw, hl, hgf, hgdw, hgdl, hw_perc, hwd_perc, aw, al, agf, agdw, agdl, aw_perc, awd_perc]
+                    [hw, hl, hgf, hga, hgdw, hgdl, hw_perc, hwd_perc, aw, al, agf, aga, agdw, agdl, aw_perc, awd_perc]
                 )
-        return pd.DataFrame(data=results_and_stats, columns=self.all_columns)
+        results_and_stats_df = pd.DataFrame(data=results_and_stats, columns=self.all_columns)
+        return results_and_stats_df.dropna()
