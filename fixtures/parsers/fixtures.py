@@ -2,7 +2,8 @@ class FixtureParser:
     def __init__(self):
         self._table_id = 'data-game-week'
         self._team_id = 'data-comp-id'
-        self._odds_id = 'hover-modal-parent\'>'
+        self._odds_id = 'hover-modal-parent">'
+        self._odds_id_alt = 'hover-modal-parent\'>'
 
     @property
     def table_id(self) -> str:
@@ -15,6 +16,10 @@ class FixtureParser:
     @property
     def odds_id(self) -> str:
         return self._odds_id
+
+    @property
+    def odds_id_alt(self) -> str:
+        return self._odds_id_alt
 
     def _parse_matches(self, teams_lines: list, n_teams: int) -> list:
         matches = []
@@ -69,8 +74,12 @@ class FixtureParser:
 
         n_teams = len(teams_lines)
         upcoming_matches = self._parse_matches(teams_lines=teams_lines, n_teams=n_teams)
+        print(upcoming_matches)
         n_upcoming_matches = len(upcoming_matches)
         odd_element_lines = match_table_str.split(self.odds_id)[1:]
+
+        if len(odd_element_lines) == 1:
+            odd_element_lines = match_table_str.split(self.odds_id_alt)[1:]
 
         if len(odd_element_lines) >= n_upcoming_matches * 3:
             odds = self._parse_odds(odd_element_lines=odd_element_lines, n_matches=n_upcoming_matches)
