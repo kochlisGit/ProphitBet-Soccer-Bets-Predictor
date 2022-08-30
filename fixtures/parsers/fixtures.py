@@ -1,8 +1,8 @@
 class FixtureParser:
     def __init__(self):
-        self._table_id = 'full-matches-table mt1e'
+        self._table_id = 'data-game-week'
         self._team_id = 'data-comp-id'
-        self._odds_id = 'hover-modal-parent">'
+        self._odds_id = 'hover-modal-parent\'>'
 
     @property
     def table_id(self) -> str:
@@ -40,25 +40,40 @@ class FixtureParser:
             fixtures_month: str,
             fixtures_day: str
     ) -> (list, list):
-        upcoming_matches = []
-        odds = []
-        upcoming_date_table = f'{fixtures_month} {fixtures_day} ~'
-
         with open(fixture_filepath, 'r', encoding='utf-8') as fixture_html:
             lines = fixture_html.read()
 
-        match_table_lines = lines.split(upcoming_date_table)
-        match_table_str = None if len(match_table_lines) < 2 else match_table_lines[1]
+        tables = lines.split(self._table_id)
+        if len(tables) == 1:
+            return None, None
 
-        if match_table_str is not None:
-            teams_lines = match_table_str.split(self.team_id)[1:]
-            n_teams = len(teams_lines)
+        upcoming_date_table = f'{fixtures_month} {fixtures_day} ~'
+        target_table_str = None
 
-            if len(teams_lines) > 0:
-                upcoming_matches = self._parse_matches(teams_lines=teams_lines, n_teams=n_teams)
-                n_upcoming_matches = len(upcoming_matches)
-                odd_element_lines = match_table_str.split(self.odds_id)[1:]
+        for table_str in tables:
+            if upcoming_date_table in table_str:
+                target_table_str = table_str
+                break
 
-                if len(odd_element_lines) >= n_upcoming_matches * 3:
-                    odds = self._parse_odds(odd_element_lines=odd_element_lines, n_matches=n_upcoming_matches)
-        return upcoming_matches, odds
+        if target_table_str is None:
+            return None, None
+
+        match_table_lines = target_table_str.split(upcoming_date_table)
+        if len(match_table_lines) < 2:
+            return None, None
+
+        match_table_str = match_table_lines[1]
+        teams_lines = match_table_str.split(self.team_id)[1:]
+        if len(teams_lines) == 1:
+            return None, None
+
+        n_teams = len(teams_lines)
+        upcoming_matches = self._parse_matches(teams_lines=teams_lines, n_teams=n_teams)
+        n_upcoming_matches = len(upcoming_matches)
+        odd_element_lines = match_table_str.split(self.odds_id)[1:]
+
+        if len(odd_element_lines) >= n_upcoming_matches * 3:
+            odds = self._parse_odds(odd_element_lines=odd_element_lines, n_matches=n_upcoming_matches)
+            return upcoming_matches, odds
+
+        return upcoming_matches, None
