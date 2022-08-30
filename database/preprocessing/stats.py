@@ -93,6 +93,20 @@ class LeagueStats:
                     break
         return None if last_n > 0 else last_goals_forward
 
+    def compute_last_goal_against(self, match_history: list, team_name: str, is_home: bool) -> int or None:
+        team_index = self.home_index if is_home else self.away_index
+        last_n = self._last_n_matches
+        last_goals_against = 0
+
+        for match in match_history:
+            if match[team_index] == team_name:
+                last_goals_against += match[self._ag_index] if is_home else match[self.hg_index]
+
+                last_n -= 1
+                if last_n == 0:
+                    break
+        return None if last_n > 0 else last_goals_against
+
     def compute_last_n_goal_diff_wins(self, match_history: list, team_name: str, is_home: bool) -> int or None:
         team_index = self.home_index if is_home else self.away_index
         last_n = self._last_n_matches

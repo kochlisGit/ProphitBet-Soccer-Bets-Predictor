@@ -35,6 +35,6 @@ def construct_input(
     away_team_row = results_and_stats[results_and_stats['Away Team'] == away_team].head(1)
     return np.hstack((
         np.float64([odd_1, odd_x, odd_2]),
-        home_team_row[['HW', 'HL', 'HGF', 'HGD-W', 'HGD-L', 'HW%', 'HD%']].to_numpy().flatten(),
-        away_team_row[['AW', 'AL', 'AGF', 'AGD-W', 'AGD-L', 'AW%', 'AD%']].to_numpy().flatten()
+        home_team_row[['HW', 'HL', 'HGF', 'HGA', 'HGD-W', 'HGD-L', 'HW%', 'HD%']].to_numpy().flatten(),
+        away_team_row[['AW', 'AL', 'AGF', 'AGA', 'AGD-W', 'AGD-L', 'AW%', 'AD%']].to_numpy().flatten()
     ))
