@@ -25,13 +25,19 @@ class FootballDataLeaguesAPI:
         league_dfs = []
 
         for url in league.url_list:
-            league_df = self._convert_main_to_basic_league(df=pd.read_csv(url))
+            try:
+                df = pd.read_csv(url)
+            except:
+                df = None
 
-            if pd.DatetimeIndex(league_df.head(1)['Date'], dayfirst=True) < \
-                    pd.DatetimeIndex(league_df.tail(1)['Date'], dayfirst=True):
-                league_df = league_df.iloc[::-1]
+            if df is not None:
+                league_df = self._convert_main_to_basic_league(df=df)
 
-            league_dfs.append(league_df)
+                if pd.DatetimeIndex(league_df.head(1)['Date'], dayfirst=True) < \
+                        pd.DatetimeIndex(league_df.tail(1)['Date'], dayfirst=True):
+                    league_df = league_df.iloc[::-1]
+
+                league_dfs.append(league_df)
         return league_dfs
 
     def _download_extra_league(self, league: League) -> list:
