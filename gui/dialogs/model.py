@@ -569,16 +569,27 @@ class EvaluationDialog(Dialog):
             messagebox.showerror('ERROR', 'You need to select odd column first (1/X/2).')
             return
         elif filter_result == '1':
-            column = 0
+            filter_indices = self._predictions == 0
+            inputs = self._inputs[filter_indices, 0]
+            targets = self._targets[filter_indices]
+            predictions = self._predictions[filter_indices]
         elif filter_result == 'X':
-            column = 1
+            filter_indices = self._predictions == 1
+            inputs = self._inputs[filter_indices, 1]
+            targets = self._targets[filter_indices]
+            predictions = self._predictions[filter_indices]
         elif filter_result == '2':
-            column = 2
+            filter_indices = self._predictions == 2
+            inputs = self._inputs[filter_indices, 2]
+            targets = self._targets[filter_indices]
+            predictions = self._predictions[filter_indices]
         else:
+            messagebox.showerror(f'ERROR', 'Not Implemented Filter: {filter_result}')
             return
 
         accuracies, correct_predictions, wrong_predictions = self._evaluation_filter.compute_prediction_accuracy_per_odd_range(
-            self._inputs[:, column], self._targets, self._predictions
+            # self._inputs[:, column], self._targets, self._predictions
+            inputs, targets, predictions
         )
         message_str = ''
 
