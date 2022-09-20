@@ -147,3 +147,8 @@ For further questions about the development of this app, don't hesitate to email
 * Added 2 new statistic features (columns): HGA, AGA
 * Neural Network now supports different noise ranges for each odd (1/x/2).
 * Neural Network may now add noise only to favorite teams (teams with odd < 2.0)
+
+# Release (2022/09/19)
+
+* Fixed a bug where several leagues would not be updated
+* Fixed a bug in evaluation filters
