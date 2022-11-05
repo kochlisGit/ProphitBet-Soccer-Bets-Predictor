@@ -32,28 +32,46 @@ class FCNet(Model):
 
     def build_model(self, **kwargs):
         hidden_layers = kwargs['hidden_layers']
+        batch_normalization = kwargs['batch_normalization']
+        dropout = kwargs['dropout']
+        regularization = kwargs['regularization']
+        optimizer = kwargs['optimizer']
+        learning_rate = kwargs['learning_rate']
+
+        if optimizer == 'adam':
+            optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+        elif optimizer == 'yogi':
+            optimizer = tfa.optimizers.Yogi(learning_rate=learning_rate)
+        elif optimizer == 'adamw':
+            optimizer = tfa.optimizers.AdamW(weight_decay=0.001, learning_rate=learning_rate)
+        else:
+            raise NotImplementedError(f'Optimizer "{optimizer}" has not been implemented yet')
 
         model = tf.keras.models.Sequential()
         model.add(tf.keras.layers.Input(self.input_shape))
 
         model.add(tf.keras.layers.Dense(
-            units=hidden_layers[0], activation=None, use_bias=False, kernel_regularizer='l2')
+            units=hidden_layers[0], activation=None, use_bias=False, kernel_regularizer=regularization)
         )
         model.add(tf.keras.layers.BatchNormalization())
         model.add(tf.keras.layers.Activation(tf.keras.activations.gelu))
 
         for units in hidden_layers[1:]:
-            model.add(tf.keras.layers.Dense(units=units, activation=None, use_bias=False))
-            model.add(tf.keras.layers.BatchNormalization())
+            model.add(tf.keras.layers.Dense(units=units, activation=None, use_bias=not batch_normalization))
+
+            if batch_normalization:
+                model.add(tf.keras.layers.BatchNormalization())
             model.add(tf.keras.layers.Activation(tf.keras.activations.gelu))
-            model.add(tf.keras.layers.Dropout(rate=0.4))
+
+            if dropout is not None:
+                model.add(tf.keras.layers.Dropout(rate=dropout))
 
         model.add(tf.keras.layers.Dense(
             units=self.num_classes, activation='softmax', use_bias=True, kernel_regularizer='l1')
         )
         model.compile(
-            optimizer=tfa.optimizers.Yogi(learning_rate=0.0005),
-            loss='huber',
+            optimizer=optimizer,
+            loss='categorical_crossentropy',
             metrics=['accuracy']
         )
         self._model = model
@@ -70,6 +88,8 @@ class FCNet(Model):
             y_train: np.ndarray,
             x_test: np.ndarray,
             y_test: np.ndarray,
+            epochs: int = 1,
+            early_stopping_epochs: int or None = None,
             **kwargs,
     ) -> float:
         odd_noise_ranges = kwargs['odd_noise_ranges']
@@ -113,19 +133,26 @@ class FCNet(Model):
                 size=(x_train.shape[0], 2)
             )
 
+        callbacks = None if early_stopping_epochs is None else tf.keras.callbacks.EarlyStopping(
+            monitor='val_accuracy',
+            patience=early_stopping_epochs,
+            restore_best_weights=True
+        )
+
         history = self._model.fit(
             x,
             y_train,
             batch_size=self.batch_size,
             validation_data=(x_test, y_test),
-            epochs=1,
+            epochs=epochs,
+            callbacks=callbacks,
             verbose=0
         )
 
         accuracy = history.history['val_accuracy'][-1]
         return accuracy
 
-    def predict(self, x_inputs: np.ndarray):
+    def predict(self, x_inputs: np.ndarray) -> (np.ndarray, np.ndarray):
         predict_proba = np.round(self.model.predict(x_inputs), 2)
         y_pred = np.argmax(predict_proba, axis=1)
         return predict_proba, y_pred
