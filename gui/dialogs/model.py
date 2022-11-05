@@ -6,12 +6,14 @@ from filters.evaluation import EvaluationFilter
 from gui.dialogs.dialog import Dialog
 from fixtures.parsers.fixtures import FixtureParser
 from fixtures.similarities.matching import TeamSimilarityMatching
+from tuners.nntuner import NNTuner
 from abc import ABC, abstractmethod
 from tkinter import messagebox, Text, StringVar, DISABLED, NORMAL, END, CENTER, VERTICAL, HORIZONTAL
 from tkinter.ttk import Label, Entry, Button, Treeview, Combobox, Scrollbar
 from tkinter import filedialog
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 import csv
 import threading
 import ast
@@ -96,139 +98,41 @@ class TrainDialog(Dialog, ABC):
         pass
 
 
-class TrainNNDialog(TrainDialog):
-    def __init__(self, master, checkpoint_path: str, league_identifier: str, results_and_stats: pd.DataFrame):
-        self._hidden_layers = [128, 128]
-        self._validation_size = 50
-        self._odd_noise_range = 0.15
-        self._epochs = 200
-        self._patience = 50
-
-        self._layers_var = StringVar()
-        self._validation_var = StringVar()
-        self._noise_1_var = StringVar()
-        self._noise_x_var = StringVar()
-        self._noise_2_var = StringVar()
-        self._favorite_var = StringVar()
-        self._performance_rate_noise = StringVar()
-        self._epochs_var = StringVar()
-        self._patience_var = StringVar()
-
+class TrainNNDialog(TrainDialog, ABC):
+    def __init__(
+            self,
+            master,
+            title: str,
+            window_size: dict,
+            checkpoint_path: str,
+            league_identifier: str,
+            results_and_stats: pd.DataFrame
+    ):
         super().__init__(
             master=master,
-            title='Training Neural Network',
-            window_size={'width': 400, 'height': 680},
+            title=title,
+            window_size=window_size,
             checkpoint_path=checkpoint_path,
             league_identifier=league_identifier,
             results_and_stats=results_and_stats
         )
 
-    def _initialize_form(self):
-        Label(self._window, text='Model\'s Name', font=('Arial', 14)).place(x=30, y=20)
-        Label(self._window, text='Hidden Layers', font=('Arial', 14)).place(x=30, y=60)
-        Label(self._window, text='Validation Size', font=('Arial', 14)).place(x=30, y=100)
-        Label(self._window, text='Noise Range(1-X-2)', font=('Arial', 14)).place(x=30, y=140)
-        Label(self._window, text='Noise Favorites Only', font=('Arial', 14)).place(x=30, y=180)
-        Label(self._window, text='Win/Draw % Noise', font=('Arial', 14)).place(x=30, y=220)
-        Label(self._window, text='Epochs', font=('Arial', 14)).place(x=30, y=260)
-        Label(self._window, text='Patience', font=('Arial', 14)).place(x=30, y=300)
-
-        name_entry = Entry(self._window, width=15, font=('Arial', 10))
-        name_entry.insert(0, self.model_name)
-        name_entry.config(state=DISABLED)
-        name_entry.place(x=220, y=20)
-
-        layers_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._layers_var)
-        layers_entry.insert(0, str(self._hidden_layers))
-        layers_entry.place(x=220, y=60)
-
-        validation_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._validation_var)
-        validation_entry.insert(0, str(self._validation_size))
-        validation_entry.place(x=220, y=100)
-
-        noise_1_entry = Entry(self._window, width=5, font=('Arial', 10), textvariable=self._noise_1_var)
-        noise_1_entry.insert(0, str(self._odd_noise_range))
-        noise_1_entry.place(x=220, y=140)
-
-        noise_x_entry = Entry(self._window, width=5, font=('Arial', 10), textvariable=self._noise_x_var)
-        noise_x_entry.insert(0, str(self._odd_noise_range))
-        noise_x_entry.place(x=280, y=140)
-
-        noise_2_entry = Entry(self._window, width=5, font=('Arial', 10), textvariable=self._noise_2_var)
-        noise_2_entry.insert(0, str(self._odd_noise_range))
-        noise_2_entry.place(x=340, y=140)
-
-        favorites_cb = Combobox(
-            self._window, width=15, state='readonly', font=('Arial', 10), textvariable=self._favorite_var
-        )
-        favorites_cb['values'] = ['False', 'True']
-        favorites_cb.current(0)
-        favorites_cb.place(x=220, y=180)
-
-        performance_noise_cb = Combobox(
-            self._window, width=13, state='readonly', font=('Arial', 10), textvariable=self._performance_rate_noise
-        )
-        performance_noise_cb['values'] = ['True', 'False']
-        performance_noise_cb.current(0)
-        performance_noise_cb.place(x=220, y=220)
-
-        epochs_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._epochs_var)
-        epochs_entry.insert(0, str(self._epochs))
-        epochs_entry.place(x=220, y=260)
-
-        patience_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._patience_var)
-        patience_entry.insert(0, str(self._patience))
-        patience_entry.place(x=220, y=300)
-
-        Button(self._window, text='Train', command=self._train).place(x=150, y=340)
-
-        self._text_area = Text(self._window, state=DISABLED, font=('Arial', 10))
-        self._text_area.place(x=0, y=380)
-
-    def _validate_form(self) -> str or None:
-        layers_str = self._layers_var.get()
-        validation_size = self._validation_var.get()
-        noise1 = self._noise_1_var.get()
-        noisex = self._noise_x_var.get()
-        noise2 = self._noise_2_var.get()
-        epochs = self._epochs_var.get()
-        patience = self._patience_var.get()
-
-        try:
-            ast.literal_eval(layers_str) == list
-        except:
-            return 'List should be in form "[l1, l2, l3, ...]"'
-
-        try:
-            noise1 = float(noise1)
-            noisex = float(noisex)
-            noise2 = float(noise2)
-        except:
-            return 'Error. Noise should be a float number between 0.0 and 1.0'
-
-        if not validation_size.isdigit() or int(validation_size) < 0:
-            return 'Validation Size should be a positive number'
-        if not ((0 <= noise1 <= 1.0) and (0 <= noisex <= 1.0) and (0 <= noise2 <= 1.0)):
-            return 'Noise Ranges should have a positive value < 1.0'
-        if not epochs.isdigit() or int(epochs) < 0:
-            return 'Epochs should be a positive number'
-        if not patience.isdigit() or int(patience) < 0:
-            return 'Patience should be a positive number'
-        return 'Valid'
-
-    def _train_model(self):
+    def _train_nn(
+            self,
+            validation_size: int,
+            hidden_layers: list,
+            batch_normalization: bool,
+            dropout: float or None,
+            regularization: str,
+            optimizer: str,
+            learning_rate: float,
+            epochs: int,
+            patience: int,
+            odd_noise_ranges: list,
+            performance_rate_noise: bool,
+            noise_favorites_only: bool
+    ):
         self._training_on_progress = True
-        default_train_log = 'Current Epoch: {}, Validation Accuracy = {}\n'
-
-        hidden_layers = ast.literal_eval(self._layers_var.get())
-        validation_size = int(self._validation_var.get())
-        noise_1_range = float(self._noise_1_var.get())
-        noise_x_range = float(self._noise_x_var.get())
-        noise_2_range = float(self._noise_2_var.get())
-        noise_favorites_only = self._favorite_var.get() == 'True'
-        performance_rate_noise = self._performance_rate_noise.get() == 'True'
-        epochs = int(self._epochs_var.get())
-        patience = int(self._patience_var.get())
 
         self._report_training_log('Preprocessing data...\n')
 
@@ -246,13 +150,23 @@ class TrainNNDialog(TrainDialog):
             league_identifier=self.league_identifier,
             model_name=self.model_name
         )
-        model.build_model(hidden_layers=hidden_layers)
+        model.build_model(
+            hidden_layers=hidden_layers,
+            batch_normalization=batch_normalization,
+            dropout=dropout,
+            regularization=regularization,
+            optimizer=optimizer,
+            learning_rate=learning_rate
+        )
 
+        self._report_training_log('Ready to train...\n')
+
+        default_train_log = 'Current Epoch: {}, Validation Accuracy = {}\n'
+
+        noise_1_range, noise_x_range, noise_2_range = odd_noise_ranges
         current_epoch = 0
         best_accuracy = 0
         patience_counter = 0
-
-        self._report_training_log('Ready to train...\n')
 
         while current_epoch < epochs and patience_counter < patience:
             accuracy = model.train(
@@ -291,6 +205,341 @@ class TrainNNDialog(TrainDialog):
             current_epoch
         ))
         self._training_on_progress = False
+
+
+class TrainNNAutoDialog(TrainNNDialog):
+    def __init__(self, master, checkpoint_path: str, league_identifier: str, results_and_stats: pd.DataFrame):
+        self._validation_size = 50
+        self._epochs = 100
+        self._patience = 20
+        self._n_trials = 10
+
+        self._validation_var = StringVar()
+        self._epochs_var = StringVar()
+        self._patience_var = StringVar()
+        self._trials_var = StringVar()
+
+        super().__init__(
+            master=master,
+            title='Training Neural Network (Auto)',
+            window_size={'width': 400, 'height': 700},
+            checkpoint_path=checkpoint_path,
+            league_identifier=league_identifier,
+            results_and_stats=results_and_stats
+        )
+
+    def _initialize_form(self):
+        Label(self._window, text='Model\'s Name', font=('Arial', 12)).place(x=30, y=20)
+        Label(self._window, text='Validation Size', font=('Arial', 12)).place(x=30, y=55)
+        Label(self._window, text='Epochs', font=('Arial', 12)).place(x=30, y=90)
+        Label(self._window, text='Early Stopping Patience', font=('Arial', 12)).place(x=30, y=125)
+        Label(self._window, text='Number of Trials', font=('Arial', 12)).place(x=30, y=160)
+
+        name_entry = Entry(self._window, width=15, font=('Arial', 10))
+        name_entry.insert(0, self.model_name)
+        name_entry.config(state=DISABLED)
+        name_entry.place(x=220, y=20)
+
+        validation_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._validation_var)
+        validation_entry.insert(0, str(self._validation_size))
+        validation_entry.place(x=220, y=55)
+
+        epochs_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._epochs_var)
+        epochs_entry.insert(0, str(self._epochs))
+        epochs_entry.place(x=220, y=90)
+
+        patience_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._patience_var)
+        patience_entry.insert(0, str(self._patience))
+        patience_entry.place(x=220, y=125)
+
+        patience_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._trials_var)
+        patience_entry.insert(0, str(self._n_trials))
+        patience_entry.place(x=220, y=160)
+
+        Button(self._window, text='Train', command=self._train).place(x=150, y=195)
+
+        self._text_area = Text(self._window, state=DISABLED, font=('Arial', 10))
+        self._text_area.place(x=0, y=230)
+
+    def _validate_form(self) -> str or None:
+        validation_size = self._validation_var.get()
+        epochs = self._epochs_var.get()
+        patience = self._patience_var.get()
+        n_trials = self._trials_var.get()
+
+        if not validation_size.isdigit() or int(validation_size) < 1:
+            return 'Validation Size should be a positive number'
+        if not epochs.isdigit() or int(epochs) < 1:
+            return 'Epochs should be a positive number'
+        if not patience.isdigit() or int(patience) < 1:
+            return 'Patience should be a positive number'
+        if not n_trials.isdigit() or int(n_trials) < 1:
+            return 'Number of Trials should be a positive number'
+        return 'Valid'
+
+    def _train_model(self):
+        validation_size = int(self._validation_var.get())
+        epochs = int(self._epochs_var.get())
+        patience = int(self._patience_var.get())
+        n_trials = int(self._trials_var.get())
+
+        self._training_on_progress = True
+
+        self._report_training_log('Preprocessing data...\n')
+
+        inputs, targets = preprocessing.preprocess_data(self._results_and_stats, one_hot=True)
+        x_test = inputs[:validation_size]
+        y_test = targets[:validation_size]
+        x_train = inputs[validation_size:]
+        y_train = targets[validation_size:]
+
+        self._report_training_log('Building the model...\n')
+
+        tuner = NNTuner(
+            checkpoint_path=self.checkpoint_path,
+            league_identifier=self.league_identifier,
+            model_name=self.model_name,
+            epochs=epochs,
+            early_stopping_patience=patience,
+            n_trials=n_trials,
+            x_train=x_train,
+            y_train=y_train,
+            x_test=x_test,
+            y_test=y_test
+        )
+
+        self._report_training_log('Searching best parameters for the model. It might take some time...\n')
+
+        best_params = tuner.tune()
+        print(best_params)
+
+        n_layers = best_params['n_layers']
+        hidden_layers = [best_params[f'hidden_units_{i}'] for i in range(n_layers)]
+
+        tf.random.set_seed(0)
+        super()._train_nn(
+            validation_size=validation_size,
+            hidden_layers=hidden_layers,
+            batch_normalization=best_params['batch_normalization'],
+            dropout=best_params['dropout'],
+            regularization=best_params['regularization'],
+            optimizer=best_params['optimizer'],
+            learning_rate=best_params['learning_rate'],
+            epochs=epochs,
+            patience=patience,
+            performance_rate_noise=best_params['win_draw_noise'],
+            noise_favorites_only=best_params['noise_favorites_only'],
+            odd_noise_ranges=[best_params['noise_1'], best_params['noise_x'], best_params['noise_2']]
+        )
+
+        self._report_training_log('\n\nBest parameters:\n')
+        self._report_training_log(f'Hidden Layers = {hidden_layers}\n')
+        self._report_training_log(f'Batch Normalization = {best_params["batch_normalization"]}\n')
+        self._report_training_log(f'Dropout = {best_params["dropout"]}\n')
+        self._report_training_log(f'Regularization = {best_params["regularization"]}\n')
+        self._report_training_log(f'Optimizer = {best_params["optimizer"]}\n')
+        self._report_training_log(f'Learning Rate = {best_params["learning_rate"]}\n')
+        self._report_training_log(f'Win-Draw Noise = {best_params["win_draw_noise"]}\n')
+        self._report_training_log(f'Odd Noise 1 = {best_params["noise_1"]}\n')
+        self._report_training_log(f'Odd Noise X = {best_params["noise_x"]}\n')
+        self._report_training_log(f'Odd Noise 2 = {best_params["noise_2"]}\n')
+
+
+class TrainNNCustomDialog(TrainNNDialog):
+    def __init__(self, master, checkpoint_path: str, league_identifier: str, results_and_stats: pd.DataFrame):
+        self._hidden_layers = [128, 128]
+        self._validation_size = 50
+        self._odd_noise_range = 0.15
+        self._epochs = 200
+        self._patience = 50
+
+        self._layers_var = StringVar()
+        self._validation_var = StringVar()
+        self._noise_1_var = StringVar()
+        self._noise_x_var = StringVar()
+        self._noise_2_var = StringVar()
+        self._favorite_var = StringVar()
+        self._performance_rate_noise = StringVar()
+        self._epochs_var = StringVar()
+        self._patience_var = StringVar()
+        self._batch_normalization = StringVar()
+        self._dropout = StringVar()
+        self._regularization = StringVar()
+        self._optimizer = StringVar()
+        self._learning_rate = StringVar()
+
+        super().__init__(
+            master=master,
+            title='Training Neural Network (Custom)',
+            window_size={'width': 400, 'height': 800},
+            checkpoint_path=checkpoint_path,
+            league_identifier=league_identifier,
+            results_and_stats=results_and_stats
+        )
+
+    def _initialize_form(self):
+        Label(self._window, text='Model\'s Name', font=('Arial', 12)).place(x=30, y=20)
+        Label(self._window, text='Hidden Layers', font=('Arial', 12)).place(x=30, y=55)
+        Label(self._window, text='Validation Size', font=('Arial', 12)).place(x=30, y=90)
+        Label(self._window, text='Win/Draw % Noise', font=('Arial', 12)).place(x=30, y=125)
+        Label(self._window, text='Noise Range(1-X-2)', font=('Arial', 12)).place(x=30, y=160)
+        Label(self._window, text='Noise Favorites Only', font=('Arial', 12)).place(x=30, y=195)
+        Label(self._window, text='Epochs', font=('Arial', 12)).place(x=30, y=230)
+        Label(self._window, text='Early Stopping Patience', font=('Arial', 12)).place(x=30, y=265)
+        Label(self._window, text='Batch Normalization', font=('Arial', 12)).place(x=30, y=300)
+        Label(self._window, text='Dropout Layers', font=('Arial', 12)).place(x=30, y=335)
+        Label(self._window, text='Regularization', font=('Arial', 12)).place(x=30, y=370)
+        Label(self._window, text='Optimizer', font=('Arial', 12)).place(x=30, y=405)
+        Label(self._window, text='Learning Rate', font=('Arial', 12)).place(x=30, y=440)
+
+        name_entry = Entry(self._window, width=15, font=('Arial', 10))
+        name_entry.insert(0, self.model_name)
+        name_entry.config(state=DISABLED)
+        name_entry.place(x=220, y=20)
+
+        layers_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._layers_var)
+        layers_entry.insert(0, str(self._hidden_layers))
+        layers_entry.place(x=220, y=55)
+
+        validation_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._validation_var)
+        validation_entry.insert(0, str(self._validation_size))
+        validation_entry.place(x=220, y=90)
+
+        performance_noise_cb = Combobox(
+            self._window, width=13, state='readonly', font=('Arial', 10), textvariable=self._performance_rate_noise
+        )
+        performance_noise_cb['values'] = ['True', 'False']
+        performance_noise_cb.current(0)
+        performance_noise_cb.place(x=220, y=125)
+
+        noise_1_entry = Entry(self._window, width=5, font=('Arial', 10), textvariable=self._noise_1_var)
+        noise_1_entry.insert(0, str(self._odd_noise_range))
+        noise_1_entry.place(x=220, y=160)
+
+        noise_x_entry = Entry(self._window, width=5, font=('Arial', 10), textvariable=self._noise_x_var)
+        noise_x_entry.insert(0, str(self._odd_noise_range))
+        noise_x_entry.place(x=280, y=160)
+
+        noise_2_entry = Entry(self._window, width=5, font=('Arial', 10), textvariable=self._noise_2_var)
+        noise_2_entry.insert(0, str(self._odd_noise_range))
+        noise_2_entry.place(x=340, y=160)
+
+        favorites_cb = Combobox(
+            self._window, width=15, state='readonly', font=('Arial', 10), textvariable=self._favorite_var
+        )
+        favorites_cb['values'] = ['False', 'True']
+        favorites_cb.current(0)
+        favorites_cb.place(x=220, y=195)
+
+        epochs_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._epochs_var)
+        epochs_entry.insert(0, str(self._epochs))
+        epochs_entry.place(x=220, y=230)
+
+        patience_entry = Entry(self._window, width=15, font=('Arial', 10), textvariable=self._patience_var)
+        patience_entry.insert(0, str(self._patience))
+        patience_entry.place(x=220, y=265)
+
+        batch_normalization_cb = Combobox(
+            self._window, width=13, state='readonly', font=('Arial', 10), textvariable=self._batch_normalization
+        )
+        batch_normalization_cb['values'] = ['True', 'False']
+        batch_normalization_cb.current(0)
+        batch_normalization_cb.place(x=220, y=300)
+
+        dropouts_cb = Combobox(
+            self._window, width=13, state='readonly', font=('Arial', 10), textvariable=self._dropout
+        )
+        dropouts_cb['values'] = ['None', '0.1', '0.2', '0.3', '0.4']
+        dropouts_cb.current(4)
+        dropouts_cb.place(x=220, y=335)
+
+        regularization_cb = Combobox(
+            self._window, width=13, state='readonly', font=('Arial', 10), textvariable=self._regularization
+        )
+        regularization_cb['values'] = ['None', 'l1', 'l2']
+        regularization_cb.current(2)
+        regularization_cb.place(x=220, y=370)
+
+        optimizer_cb = Combobox(
+            self._window, width=13, state='readonly', font=('Arial', 10), textvariable=self._optimizer
+        )
+        optimizer_cb['values'] = ['adam', 'yogi', 'adamw']
+        optimizer_cb.current(1)
+        optimizer_cb.place(x=220, y=405)
+
+        regularization_cb = Combobox(
+            self._window, width=13, state='readonly', font=('Arial', 10), textvariable=self._learning_rate
+        )
+        regularization_cb['values'] = ['0.01', '0.001', '0.0005', '0.0002']
+        regularization_cb.current(2)
+        regularization_cb.place(x=220, y=440)
+
+        Button(self._window, text='Train', command=self._train).place(x=150, y=480)
+
+        self._text_area = Text(self._window, state=DISABLED, font=('Arial', 10))
+        self._text_area.place(x=0, y=510)
+
+    def _validate_form(self) -> str or None:
+        layers_str = self._layers_var.get()
+        validation_size = self._validation_var.get()
+        noise1 = self._noise_1_var.get()
+        noisex = self._noise_x_var.get()
+        noise2 = self._noise_2_var.get()
+        epochs = self._epochs_var.get()
+        patience = self._patience_var.get()
+
+        try:
+            ast.literal_eval(layers_str) == list
+        except:
+            return 'List should be in form "[l1, l2, l3, ...]"'
+
+        try:
+            noise1 = float(noise1)
+            noisex = float(noisex)
+            noise2 = float(noise2)
+        except:
+            return 'Error. Noise should be a float number between 0.0 and 1.0'
+
+        if not validation_size.isdigit() or int(validation_size) < 0:
+            return 'Validation Size should be a positive number'
+        if not ((0 <= noise1 <= 1.0) and (0 <= noisex <= 1.0) and (0 <= noise2 <= 1.0)):
+            return 'Noise Ranges should have a positive value < 1.0'
+        if not epochs.isdigit() or int(epochs) < 0:
+            return 'Epochs should be a positive number'
+        if not patience.isdigit() or int(patience) < 0:
+            return 'Patience should be a positive number'
+        return 'Valid'
+
+    def _train_model(self):
+        hidden_layers = ast.literal_eval(self._layers_var.get())
+        validation_size = int(self._validation_var.get())
+        noise_1_range = float(self._noise_1_var.get())
+        noise_x_range = float(self._noise_x_var.get())
+        noise_2_range = float(self._noise_2_var.get())
+        noise_favorites_only = self._favorite_var.get() == 'True'
+        performance_rate_noise = self._performance_rate_noise.get() == 'True'
+        epochs = int(self._epochs_var.get())
+        patience = int(self._patience_var.get())
+        batch_normalization = self._batch_normalization.get() == 'True'
+        dropout = None if self._dropout.get() == 'None' else float(self._dropout.get())
+        regularization = None if self._regularization.get() == 'None' else self._regularization.get()
+        optimizer = self._optimizer.get()
+        learning_rate = float(self._learning_rate.get())
+
+        super()._train_nn(
+            validation_size=validation_size,
+            hidden_layers=hidden_layers,
+            batch_normalization=batch_normalization,
+            dropout=dropout,
+            regularization=regularization,
+            optimizer=optimizer,
+            learning_rate=learning_rate,
+            epochs=epochs,
+            patience=patience,
+            performance_rate_noise=performance_rate_noise,
+            noise_favorites_only=noise_favorites_only,
+            odd_noise_ranges=[noise_1_range, noise_x_range, noise_2_range]
+        )
 
 
 class TrainRFDialog(TrainDialog):
