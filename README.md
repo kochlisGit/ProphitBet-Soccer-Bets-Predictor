@@ -117,18 +117,21 @@ to download the specified fixture from *footystats.org*. This can be done by pre
 
 # Requirements
 
-| Library/Module  | Download Url |
-| ------------- | ------------- |
-| Python Language | https://www.python.org/ |
-| Numpy  | https://numpy.org/ |
-| Pandas  | https://pandas.pydata.org/ |
-| Matplotlib  | https://matplotlib.org/ |
-| Seaborn  | https://seaborn.pydata.org/ |
-| Scikit-Learn  | https://scikit-learn.org/stable/ |
-| XGBoost  | https://xgboost.readthedocs.io/en/stable/ |
-| Tensorflow  | https://www.tensorflow.org/ |
-| Tensorflow-Addons  | https://www.tensorflow.org/addons |
-| TKinter  | https://docs.python.org/3/library/tkinter.html |
+| Library/Module  | Download Url | Installation |
+| ------------- | ------------- | -------------
+| Python Language | https://www.python.org/ | Download from website |
+| Numpy  | https://numpy.org/ | `pip install numpy` |
+| Pandas  | https://pandas.pydata.org/ | `pip install pandas` |
+| Matplotlib  | https://matplotlib.org/ | `pip install matplotlib` |
+| Seaborn  | https://seaborn.pydata.org/ | `pip install seaborn` |
+| Scikit-Learn  | https://scikit-learn.org/stable/ | `pip install scikit-learn` |
+| XGBoost  | https://xgboost.readthedocs.io/en/stable/ | `pip install xgboost` |
+| Tensorflow  | https://www.tensorflow.org/ | `pip install tensorflow` |
+| Tensorflow-Addons  | https://www.tensorflow.org/addons | `pip install tensorflow_addons` |
+| TKinter  | https://docs.python.org/3/library/tkinter.html | `pip install tk ` |
+| Optuna | https://optuna.org/ | `pip install optuna` |
+
+To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd on the search. In linux, You can use the linux terminal.
 
 # Instructions (How to Run)
 
@@ -152,3 +155,11 @@ For further questions about the development of this app, don't hesitate to email
 
 * Fixed a bug where several leagues would not be updated
 * Fixed a bug in evaluation filters
+
+# Release (2022/11/05)
+
+* Improved Model's Training
+* Added more training parameters, including, Dropout layers, Batch Normalization, Optimizers, Learning Rate, Regularizers
+* Model may now achieve higher accuracies
+* Added option to automatically search for best parameters, using OPTUNA package (Requires the installation of optuna, see instructions)
+* Updated Documentation
