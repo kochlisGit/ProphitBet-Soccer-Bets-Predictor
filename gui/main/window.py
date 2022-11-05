@@ -8,7 +8,7 @@ from gui.dialogs.league import LeagueCreatorDialog, LeagueLoaderDialog, LeagueDe
 from gui.analysis.correlation import CorrelationPlotter
 from gui.analysis.importance import ImportancePlotter
 from gui.analysis.classes import ClassDistributionPlotter
-from gui.dialogs.model import TrainNNDialog, TrainRFDialog, EvaluationDialog, PredictionDialog, PredictionUpcomingDialog
+from gui.dialogs.model import TrainNNCustomDialog, TrainNNAutoDialog, TrainRFDialog, EvaluationDialog, PredictionDialog, PredictionUpcomingDialog
 from tkinter import Tk, Menu, NORMAL, DISABLED, CENTER, HORIZONTAL, VERTICAL, messagebox, BooleanVar
 from tkinter.ttk import Treeview, Scrollbar, Style
 
@@ -95,7 +95,8 @@ class MainWindow:
         model_menu = Menu(menubar, tearoff=0)
 
         train_menu = Menu(model_menu, tearoff=0)
-        train_menu.add_command(label='Neural Network', command=self._train_nn)
+        train_menu.add_command(label='Neural Network (Auto)', command=self._train_nn_auto)
+        train_menu.add_command(label='Neural Network (Custom)', command=self._train_nn_custom)
         train_menu.add_command(label='Random Forest', command=self._train_rf)
         model_menu.add_cascade(label='Train', menu=train_menu)
 
@@ -232,8 +233,16 @@ class MainWindow:
 
         ClassDistributionPlotter(self._window, self._class_distribution_analyzer, self._show_help_var.get()).open()
 
-    def _train_nn(self):
-        TrainNNDialog(
+    def _train_nn_auto(self):
+        TrainNNAutoDialog(
+            master=self._window,
+            checkpoint_path=variables.checkpoint_directory,
+            league_identifier=self._league_identifier,
+            results_and_stats=self._results_and_stats
+        ).start()
+
+    def _train_nn_custom(self):
+        TrainNNCustomDialog(
             master=self._window,
             checkpoint_path=variables.checkpoint_directory,
             league_identifier=self._league_identifier,
