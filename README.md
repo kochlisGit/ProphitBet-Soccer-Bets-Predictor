@@ -163,3 +163,5 @@ For further questions about the development of this app, don't hesitate to email
 * Model may now achieve higher accuracies
 * Added option to automatically search for best parameters, using OPTUNA package (Requires the installation of optuna, see instructions)
 * Updated Documentation
+
+![Training Parameters](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/parameteres.png)
