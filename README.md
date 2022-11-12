@@ -149,7 +149,7 @@ For further questions about the development of this app, don't hesitate to email
 * Fixed a bug in Evaluation Filters
 * Fixed Fixture Parser
 * Added 2 new statistic features (columns): HGA, AGA
-* Neural Network now supports different noise ranges for each odd (1/x/2).
+* Neural Network now supports different noise ranges for each odd (1/x/2)
 * Neural Network may now add noise only to favorite teams (teams with odd < 2.0)
 
 # Release (2022/09/19)
@@ -166,3 +166,7 @@ For further questions about the development of this app, don't hesitate to email
 * Updated Documentation
 
 ![Training Parameters](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/parameters.png)
+
+# Release (2022/11/12)
+
+* Fixed a bug where leagues wouldn't be updated up to last day
