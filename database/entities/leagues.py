@@ -50,5 +50,5 @@ class League:
     def url_list(self) -> list:
         return [
             self.base_url.format(str(year)[2:] + str(year + 1)[2:])
-            for year in range(self.year_start, date.today().year)
+            for year in range(self.year_start, date.today().year + 1)
         ]
