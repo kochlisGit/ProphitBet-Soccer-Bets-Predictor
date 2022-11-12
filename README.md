@@ -130,7 +130,7 @@ to download the specified fixture from *footystats.org*. This can be done by pre
 | Tensorflow-Addons  | https://www.tensorflow.org/addons | `pip install tensorflow_addons` |
 | TKinter  | https://docs.python.org/3/library/tkinter.html | `pip install tk ` |
 | Optuna | https://optuna.org/ | `pip install optuna` |
-| PyS-tringMatching | https://pypi.org/project/py-stringmatching/ | `pip install py_stringmatching` |
+| Py-StringMatching | https://pypi.org/project/py-stringmatching/ | `pip install py_stringmatching` |
 
 To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd on the search. In linux, You can use the linux terminal.
 
