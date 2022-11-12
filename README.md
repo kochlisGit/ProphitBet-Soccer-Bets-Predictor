@@ -137,12 +137,16 @@ To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd 
 # Instructions (How to Run)
 
 1. Download & Install python. During the installation, you should choose  **add to "Path"**
-2. After you download & install python, you can Download the above libraries using pip module (e.g. `pip install numpy`)
-3. Open the cmd on the project directory and run: `python main.py`
+2. After you download & install python, you can Download the above libraries using pip module (e.g. `pip install numpy`). These modules can be installed via the cmd (in windows) or terminal (in linux). 
+3. On windows, you can double click the main.py file. Alternatively (Both Windows & Linux), You can open the cmd on the project directory and run: `python main.py`. 
 
-This app can be run on both Windows & Linux!
+# Supported Platforms
+1. Windows
+2. Linux
+3. Mac
 
-For further questions about the development of this app, don't hesitate to email me at: "kohliaridis97@gmail.com"
+# Contact Me
+For further questions about the development of this ap, don't hesitate to email me at: "kohliaridis97@gmail.com"
 
 # Release (2022/08/30)
 
