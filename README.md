@@ -1,11 +1,26 @@
 # ProphitBet - Soccer Bets Predictor
-ProphitBet is a Machine Learning Soccer Bet prediction application. The name is a combination of "Profit" & "Prophet". It analyzes the form of teams with stunning visualizations, computes statistics from previous matches of a selected league and predicts the outcomes of a match using Machine Learning (ML) methods. The supported algorithms in this application are Neural Networks and Random Forests. Additionally, the users may analyze the features of the models and adjust the models accordingly. The model extracts soccer data for multiple leagues from *football-data*(https://www.football-data.co.uk/). Additionally, the application can parse upcoming fixtures from *Footystats*(https://footystats.org/) and predict the upcoming matches for a league. There is also an auto-save feature, which saves the training of the models, so that users can re-load them on the next run. Finally, the application requires **Internet Connection**, in order to download the league data.
+ProphitBet is a Machine Learning Soccer Bet prediction application. The name is a combination of "Profit" & "Prophet". It analyzes the form of teams with stunning visualizations, computes statistics from previous matches of a selected league and predicts the outcomes of a match using Advanced Machine Learning (ML) methods. The supported algorithms in this application are Neural Networks, Random Forests & Ensemble models. Additionally, the users may analyze the features of the models and adjust the models accordingly. The model extracts soccer data for multiple leagues from *football-data*(https://www.football-data.co.uk/). Additionally, the application can parse upcoming fixtures from *Footystats*(https://footystats.org/) and predict the upcoming matches for a league. There is also an auto-save feature, which saves the training of the models, so that users can re-load them on the next run. Finally, the application requires **Internet Connection**, in order to download the league data.
 
-# Simple Graphical Interface
+# Stunning Graphical Interface
 
-The user interface is pretty simple: Every action can be done via a menu-bar on the top of the application.
+The user interface is pretty simple: Every action can be done via a menu-bar on the top of the application. There are 5 available menus:
 
-![gui](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/stats.png)
+* Application: Create/Load/Delete Leagues
+* Analysis: Data Analysis & Feature Importance
+* Model: Train/Evaluate Models & Predict Matches
+* Theme: Select a Theme for the Application Window
+* Help: Additional Resources to Read about Machine Learning Topics
+
+Also, 4 custom themes have been added and can be selected via "Theme" menu. The themes are:
+
+1. Breeze-Light
+1. Breeze-Dark
+1. Forest-Light
+1. Forest-Dark
+
+![gui](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/create_league.png)
+
+![gui](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/loaded_league.png)
 
 # League Statistics
 
@@ -27,6 +42,8 @@ For each league, the application computes several statistics (features) about th
 14. **Away G-Goal Difference Losses (AGD-L)** Last N losses of the away team with G difference in the final score away its home (${HG - AG \geq 2}$)
 15. **Away Win Rate (AW%)** Total win rate from the start of the league away its home
 16. **Away Loss Rate (AL%)** Total loss rate from the start of the league away its home
+
+Each column can be added or removed from a league during the creating phase. 
 
 # Leagues
 
@@ -95,6 +112,10 @@ A detailed description of random forests can be found in the link below:
 https://www.section.io/engineering-education/introduction-to-random-forest-in-machine-learning/
 
 ![random forests](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/randomforest.png)
+
+# The Ensemble Model
+
+This type of combines the predictions of a Neural Network & Random Forest. Typically, a well tuned Random Forest makes similar predictions with a Neural Network. However, there are some cases where these 2 model output different output probabilities (e.g. Random Forest might give higher probability that an outcome is Home). In that case, the ensemble model can be used which averages the output probabilities of both models and decides on the predicted outcome.
 
 # Evaluating Models
 
