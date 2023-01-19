@@ -148,6 +148,7 @@ A `requirements.txt` file has been added to the project directory. However, the 
 | Matplotlib  | https://matplotlib.org/ | `pip install matplotlib` |
 | Seaborn  | https://seaborn.pydata.org/ | `pip install seaborn` |
 | Scikit-Learn  | https://scikit-learn.org/stable/ | `pip install scikit-learn` |
+| Imbalanced-Learn  | https://imbalanced-learn.org/stable/ | `pip install imbalanced-learn` |
 | XGBoost  | https://xgboost.readthedocs.io/en/stable/ | `pip install xgboost` |
 | Tensorflow  | https://www.tensorflow.org/ | `pip install tensorflow` |
 | Tensorflow-Addons  | https://www.tensorflow.org/addons | `pip install tensorflow_addons` |
@@ -171,12 +172,20 @@ To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd 
 # Contact Me
 For further questions or to report any bugs, don't hesitate to email me at: "kohliaridis97@gmail.com"
 
+# Known Issues
+
+1. **Neural Network's Training Dialog Height is too large and as a result, "Train" button cannot be displayed.**
+
+Solution: You can press "ENTER" button to start training. The same applies to Random Forest Training Dialog, as well as the tuning dialogs.
+
 # Release (2023/01/19)
 
 * Improved Graphical User Interface (GUI)
 * Added Custom Themes
 * Added "Ensemble" Model
-* Fixtures are now imported, even if odds are missing. You can also manually add them or edit them.
+* Training can now start by pressing "ENTER" button
+* Added option for SVM-Smote resampling method (https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.SVMSMOTE.html)
+* Fixtures are now imported, even if odds are missing. You can also manually add them or edit them
 * Fixed Bugs (Leagues not updating, Fixtures not being imported, etc.)
 
 # Release (2022/08/30)
