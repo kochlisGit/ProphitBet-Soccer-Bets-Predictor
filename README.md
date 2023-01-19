@@ -184,9 +184,15 @@ Solution: You can press "ENTER" button to start training. The same applies to Ra
 * Added Custom Themes
 * Added "Ensemble" Model
 * Training can now start by pressing "ENTER" button
-* Added option for SVM-Smote resampling method (https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.SVMSMOTE.html)
+* Added option for SVM-Smote resampling method (https://imbalanced-learn.org/stable/references/generated/imblearn.over_sampling.SVMSMOTE.html). It requires imbalanced-learn to be installed
+* Replaced `py_stringmatching` library, which was a bit confusing to install, with `fuzzywuzzy` (Check requirements.txt) 
 * Fixtures are now imported, even if odds are missing. You can also manually add them or edit them
 * Fixed Bugs (Leagues not updating, Fixtures not being imported, etc.)
+* Added `Weighting` method to Random Forest.
+* Neural Networks may now have different activation, regularization or batch normalization option on each layer separately. 
+* Added more metrics (F1-Score, Precision, Recall)
+* Tuning may now focus on maximizing F1-Score, Precision and Recall of a specified target (Home, Draw or Away).
+* Updated Documentation!
 
 # Release (2022/08/30)
 
