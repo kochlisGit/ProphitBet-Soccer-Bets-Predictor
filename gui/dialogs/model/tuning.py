@@ -49,6 +49,7 @@ class TuningDialog(Dialog, ABC):
         self._metric_target_var = StringVar(value='Home')
         self._num_eval_samples_var = IntVar(value=50)
         self._tune_btn = Button(self.window, text='Tune', command=self._submit_tuning)
+        self.window.bind('<Return>', lambda event: self._submit_tuning())
 
     @property
     def n_trials_var(self) -> IntVar:

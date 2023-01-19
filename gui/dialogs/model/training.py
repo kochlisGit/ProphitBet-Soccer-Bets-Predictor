@@ -39,6 +39,7 @@ class CustomTrainDialog(Dialog, ABC):
         self._use_over_sampling_var = BooleanVar(value=True)
         self._num_eval_samples_var = IntVar(value=50)
         self._train_btn = Button(self.window, text='Train', command=self._submit_training)
+        self.window.bind('<Return>', lambda event: self._submit_training())
 
     @property
     def model(self) -> Model:
