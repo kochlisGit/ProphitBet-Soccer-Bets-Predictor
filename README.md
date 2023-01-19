@@ -138,6 +138,8 @@ to download the specified fixture from *footystats.org*. This can be done by pre
 
 # Requirements
 
+A `requirements.txt` file has been added to the project directory. However, the following table also presents the required libraries. Check the `requirements.txt` file for library versions.
+
 | Library/Module  | Download Url | Installation |
 | ------------- | ------------- | -------------
 | Python Language | https://www.python.org/ | Download from website |
@@ -151,13 +153,13 @@ to download the specified fixture from *footystats.org*. This can be done by pre
 | Tensorflow-Addons  | https://www.tensorflow.org/addons | `pip install tensorflow_addons` |
 | TKinter  | https://docs.python.org/3/library/tkinter.html | `pip install tk ` |
 | Optuna | https://optuna.org/ | `pip install optuna` |
-| Py-StringMatching | https://pypi.org/project/py-stringmatching/ | `pip install py_stringmatching` |
+| Fuzzy-Wuzzy | https://pypi.org/project/py-stringmatching (https://pypi.org/project/fuzzywuzzy/) | `pip install fuzzywuzzy` |
 
 To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd on the search. In linux, You can use the linux terminal.
 
 # Instructions (How to Run)
 
-1. Download & Install python. During the installation, you should choose  **add to "Path"**
+1. Download & Install python. During the installation, you should choose  **add to "Path"** It is recommended to download python 3.9.
 2. After you download & install python, you can Download the above libraries using pip module (e.g. `pip install numpy`). These modules can be installed via the cmd (in windows) or terminal (in linux). 
 3. On windows, you can double click the main.py file. Alternatively (Both Windows & Linux), You can open the cmd on the project directory and run: `python main.py`. 
 
@@ -167,7 +169,15 @@ To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd 
 3. Mac
 
 # Contact Me
-For further questions about the development of this ap, don't hesitate to email me at: "kohliaridis97@gmail.com"
+For further questions or to report any bugs, don't hesitate to email me at: "kohliaridis97@gmail.com"
+
+# Release (2023/01/19)
+
+* Improved Graphical User Interface (GUI)
+* Added Custom Themes
+* Added "Ensemble" Model
+* Fixtures are now imported, even if odds are missing. You can also manually add them or edit them.
+* Fixed Bugs (Leagues not updating, Fixtures not being imported, etc.)
 
 # Release (2022/08/30)
 
