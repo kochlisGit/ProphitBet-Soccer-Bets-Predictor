@@ -83,9 +83,8 @@ class PredictionDialog(Dialog):
             self.window, width=12, font=('Arial', 10), state='readonly', textvariable=self._model_name_var
         )
 
-        model_names = self._saved_model_names
-        if len(model_names) > 1:
-            model_names.append('Ensemble')
+        model_names = self._saved_model_names if len(self._saved_model_names) == 1 \
+            else self._saved_model_names + ['Ensemble']
 
         model_name_cb['values'] = model_names
         model_name_cb.current(0)
