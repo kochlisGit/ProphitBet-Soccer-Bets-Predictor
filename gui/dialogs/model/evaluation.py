@@ -20,7 +20,7 @@ class EvaluationDialog(Dialog):
             model_repository: ModelRepository,
             league_name: str
     ):
-        super().__init__(root=root, title='Evaluation', window_size={'width': 900, 'height': 770})
+        super().__init__(root=root, title='Evaluation', window_size={'width': 900, 'height': 700})
 
         self._matches_df = matches_df
         self._model_repository = model_repository
@@ -83,7 +83,7 @@ class EvaluationDialog(Dialog):
             columns=treeview_columns,
             show='headings',
             selectmode='extended',
-            height=30
+            height=25
         )
         for column_name in treeview_columns:
             self._treeview.column(column_name, anchor='center', stretch=True, width=70)
@@ -93,19 +93,19 @@ class EvaluationDialog(Dialog):
         self._treeview.place(x=10, y=50)
 
         v_scroll = Scrollbar(self._window, orient='vertical', command=self._treeview.yview)
-        v_scroll.place(x=870, y=50, height=635)
+        v_scroll.place(x=870, y=50, height=550)
         self._treeview.configure(yscroll=v_scroll.set)
 
-        Label(self.window, text='Accuracy:', font=('Arial', 12)).place(x=30, y=725)
-        Label(self.window, font=('Arial', 10, 'bold'), textvariable=self._acc_var).place(x=110, y=726)
+        Label(self.window, text='Accuracy:', font=('Arial', 12)).place(x=30, y=625)
+        Label(self.window, font=('Arial', 10, 'bold'), textvariable=self._acc_var).place(x=110, y=626)
 
-        Label(self.window, text='F1 Score:', font=('Arial', 12)).place(x=230, y=725)
-        Label(self.window, font=('Arial', 10, 'bold'), textvariable=self._f1_var).place(x=310, y=726)
+        Label(self.window, text='F1 Score:', font=('Arial', 12)).place(x=230, y=625)
+        Label(self.window, font=('Arial', 10, 'bold'), textvariable=self._f1_var).place(x=310, y=626)
 
-        Label(self.window, text='Precision:', font=('Arial', 12)).place(x=535, y=715)
-        Label(self.window, font=('Arial', 10, 'bold'), textvariable=self._prec_var).place(x=620, y=716)
-        Label(self.window, text='Recall:', font=('Arial', 12)).place(x=535, y=745)
-        Label(self.window, font=('Arial', 10, 'bold'), textvariable=self._rec_var).place(x=620, y=746)
+        Label(self.window, text='Precision:', font=('Arial', 12)).place(x=535, y=625)
+        Label(self.window, font=('Arial', 10, 'bold'), textvariable=self._prec_var).place(x=620, y=626)
+        Label(self.window, text='Recall:', font=('Arial', 12)).place(x=535, y=645)
+        Label(self.window, font=('Arial', 10, 'bold'), textvariable=self._rec_var).place(x=620, y=646)
 
         self._add_items(
             matches_df=self._matches_df.iloc[0: int(self._num_eval_samples_var.get())],
