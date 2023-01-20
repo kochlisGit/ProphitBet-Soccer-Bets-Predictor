@@ -22,7 +22,7 @@ class FixturesDialog(Dialog):
             league_name: str,
             league_fixture_url: str
     ):
-        super().__init__(root=root, title='Fixture Prediction', window_size={'width': 900, 'height': 780})
+        super().__init__(root=root, title='Fixture Prediction', window_size={'width': 900, 'height': 690})
 
         self._matches_df = matches_df
         self._model_repository = model_repository
@@ -74,7 +74,7 @@ class FixturesDialog(Dialog):
             columns=self._treeview_columns,
             show='headings',
             selectmode='browse',
-            height=30
+            height=25
         )
         for column_name in self._treeview_columns:
             self._treeview.column(column_name, anchor='center', stretch=True, width=70)
@@ -86,21 +86,21 @@ class FixturesDialog(Dialog):
         self._treeview.bind('<Double-1>', self._edit_item_on_double_click_event)
 
         v_scroll = Scrollbar(self._window, orient='vertical', command=self._treeview.yview)
-        v_scroll.place(x=850, y=50, height=635)
+        v_scroll.place(x=850, y=50, height=550)
         self._treeview.configure(yscroll=v_scroll.set)
 
         model_names = self._saved_model_names if len(self._saved_model_names) == 1 \
             else self._saved_model_names + ['Ensemble']
-        Label(self.window, font=('Arial', 12), text='Select Model:').place(x=200, y=730)
+        Label(self.window, font=('Arial', 12), text='Select Model:').place(x=200, y=630)
         model_cb = Combobox(self.window, state='readonly', width=15, textvariable=self._model_name_var)
         model_cb['values'] = model_names
         model_cb.current(0)
-        model_cb.place(x=320, y=730)
+        model_cb.place(x=320, y=630)
 
         self._predict_btn = Button(
             self.window, text='Predict Fixture', state='disabled', command=self._submit_fixture_prediction
         )
-        self._predict_btn.place(x=550, y=730)
+        self._predict_btn.place(x=550, y=630)
 
         messagebox.showinfo(
             'Fixture Parsing',
