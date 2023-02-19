@@ -220,3 +220,10 @@ Solution: You can press "ENTER" button to start training. The same applies to Ra
 # Release (2022/11/12)
 
 * Fixed a bug where leagues wouldn't be updated up to last day
+
+# Release (2023/02/19)
+
+* Smaller windows sizes
+* Better parameter selection for neural network tuning
+* Train Dialogs may now initiate training by hitting "ENTER" button
+* Small bug fixes
