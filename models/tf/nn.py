@@ -96,13 +96,13 @@ class FCNet(Model):
         callbacks = []
         if self._early_stopping_epochs > 0:
             callbacks.append(tf.keras.callbacks.EarlyStopping(
-                monitor='val_acc',
+                monitor='val_accuracy',
                 patience=self._early_stopping_epochs,
                 restore_best_weights=True
             ))
         if self._learning_rate_decay_epochs > 0 and self._learning_rate_decay_factor > 0.0:
             callbacks.append(tf.keras.callbacks.ReduceLROnPlateau(
-                monitor='val_acc',
+                monitor='val_accuracy',
                 factor=self._learning_rate_decay_factor,
                 patience=self._learning_rate_decay_epochs
             ))
