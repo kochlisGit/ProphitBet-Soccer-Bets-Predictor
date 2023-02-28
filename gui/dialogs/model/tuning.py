@@ -195,7 +195,7 @@ class TuningNNDialog(TuningDialog):
     ):
         super().__init__(
             root=root,
-            title='Random Forest Tuning',
+            title='Neural Network Tuning',
             window_size={'width': 550, 'height': 800},
             model_repository=model_repository,
             league_name=league_name,
