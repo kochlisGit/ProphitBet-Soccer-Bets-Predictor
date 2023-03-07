@@ -244,3 +244,9 @@ However, such data are not available for free. I would like your help to improve
 or via QR-Code:
 
 ![Donation](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/QR%20Code.png)
+
+# Currently Donated Money
+0.0€
+
+# Top Donators
+-
