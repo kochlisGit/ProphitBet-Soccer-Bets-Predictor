@@ -249,4 +249,5 @@ or via QR-Code:
 0.0€
 
 # Top Donators
--
+- Agnieszka Fidura (5€)
+- 
