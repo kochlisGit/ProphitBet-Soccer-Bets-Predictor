@@ -246,7 +246,7 @@ or via QR-Code:
 ![Donation](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/QR%20Code.png)
 
 # Currently Donated Money
-0.0€
+5.0€/20.0
 
 # Top Donators
 - Agnieszka Fidura (5€)
