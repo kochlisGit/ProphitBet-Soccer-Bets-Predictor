@@ -3,8 +3,8 @@ import threading
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from tkinter import StringVar
-from tkinter.ttk import Treeview, Combobox, Label, Scrollbar
+from tkinter import StringVar, filedialog, messagebox
+from tkinter.ttk import Treeview, Combobox, Label, Scrollbar, Button
 from database.repositories.model import ModelRepository
 from gui.dialogs.dialog import Dialog
 from gui.dialogs.task import TaskDialog
@@ -35,7 +35,12 @@ class EvaluationDialog(Dialog):
         self._prec_var = StringVar(value='N/A')
         self._rec_var = StringVar(value='N/A')
 
+        self._treeview_columns = [
+            'Index', 'Home Team', 'Away Team', '1', 'X', '2', 'Result', 'Predicted', 'Prob-H', 'Prob-D', 'Prob-A'
+        ]
+
         self._treeview = None
+        self._export_predictions_btn = None
 
     def _initialize(self):
         Label(self.window, text='Evaluation Samples:', font=('Arial', 12)).place(x=10, y=10)
@@ -52,9 +57,9 @@ class EvaluationDialog(Dialog):
         )
         odd_filter_cb['values'] = [
             'None',
-            '1:(1.00 - 1.30)', '1:(1.31 - 2.00)', '1:(2.01 - 3.00)', '1:>3.01',
+            '1:(1.00 - 1.30)', '1:(1.31 - 1.60)', '1:(1.61 - 2.00)', '1:(2.01 - 3.00)', '1:>3.01',
             'X:(1.00 - 2.00)', 'X:(2.01 - 3.00)', 'X:(3.01 - 4.00)', 'X:>4.00',
-            '2:(1.00 - 1.30)', '2:(1.31 - 2.00)', '2:(2.01 - 3.00)', '2:>3.01'
+            '2:(1.00 - 1.30)', '2:(1.31 - 1.60)', '2:(1.61 - 2.00)', '2:(2.01 - 3.00)', '2:>3.01'
         ]
         odd_filter_cb.current(0)
         odd_filter_cb.place(x=390, y=10)
@@ -75,17 +80,14 @@ class EvaluationDialog(Dialog):
         odd_filter_cb.bind('<<ComboboxSelected>>', self._submit_evaluation_task)
         selected_model_cb.bind('<<ComboboxSelected>>', self._submit_evaluation_task)
 
-        treeview_columns = [
-            'Index', 'Home Team', 'Away Team', '1', 'X', '2', 'Result', 'Predicted', 'Prob-H', 'Prob-D', 'Prob-A'
-        ]
         self._treeview = Treeview(
             self.window,
-            columns=treeview_columns,
+            columns=self._treeview_columns,
             show='headings',
             selectmode='extended',
             height=25
         )
-        for column_name in treeview_columns:
+        for column_name in self._treeview_columns:
             self._treeview.column(column_name, anchor='center', stretch=True, width=70)
             self._treeview.heading(column_name, text=column_name, anchor='center')
         self._treeview.column('Home Team', anchor='center', stretch=True, width=100)
@@ -107,6 +109,11 @@ class EvaluationDialog(Dialog):
         Label(self.window, text='Recall:', font=('Arial', 12)).place(x=535, y=645)
         Label(self.window, font=('Arial', 10, 'bold'), textvariable=self._rec_var).place(x=620, y=646)
 
+        self._export_predictions_btn = Button(
+            self.window, text='Export', state='disabled', command=self._export_predictions
+        )
+        self._export_predictions_btn.place(x=390, y=650)
+
         self._add_items(
             matches_df=self._matches_df.iloc[0: int(self._num_eval_samples_var.get())],
             y_pred=None,
@@ -116,6 +123,7 @@ class EvaluationDialog(Dialog):
     def _clear_items(self):
         for item in self._treeview.get_children():
             self._treeview.delete(item)
+        self._export_predictions_btn['state'] = 'disabled'
 
     def _add_items(self, matches_df: pd.DataFrame, y_pred: np.ndarray or None, predict_proba: np.ndarray or None):
         items_df = matches_df[['Home Team', 'Away Team', '1', 'X', '2', 'Result']]
@@ -130,6 +138,8 @@ class EvaluationDialog(Dialog):
             for i, col in enumerate(['Prob-H', 'Prob-D', 'Prob-A']):
                 items_df.insert(loc=8+i, column=col, value=predict_proba[:, i])
                 items_df[col] = items_df[col].round(decimals=2)
+
+            self._export_predictions_btn['state'] = 'normal'
 
         items_df['Predicted'] = items_df['Predicted'].replace({0: 'H', 1: 'D', 2: 'A'})
         for i, values in enumerate(items_df.values.tolist()):
@@ -237,6 +247,18 @@ class EvaluationDialog(Dialog):
         task_thread = threading.Thread(target=self._evaluate_task, args=(task_dialog,))
         task_thread.start()
         task_dialog.open()
+
+    def _export_predictions(self):
+        fixture_filepath = filedialog.asksaveasfile(
+            defaultextension='.csv',
+            filetypes=[("CSV files", "*.csv")]
+        ).name
+
+        if fixture_filepath is not None:
+            row_list = [self._treeview.item(row)["values"] for row in self._treeview.get_children()]
+            fixture_df = pd.DataFrame(data=row_list, columns=self._treeview_columns)
+            fixture_df.to_csv(fixture_filepath, index=False, line_terminator='\n')
+            messagebox.showinfo('Exported', 'Done')
 
     def _dialog_result(self) -> None:
         return None
