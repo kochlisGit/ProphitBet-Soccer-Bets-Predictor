@@ -228,10 +228,13 @@ Solution: You can press "ENTER" button to start training. The same applies to Ra
 * Train Dialogs may now initiate training by hitting "ENTER" button
 * Small bug fixes
 
-# Release (2023/02/19)
+# Release (2023/04/01)
 
-* Fixed a bug where model could not be saved during training.
-* Increased number of 
+* Fixed a bug where model could not be saved during training
+* Fixed a bug where validation accuracy was not properly monitored during tuning
+* Increased number of available Trials to 2000
+* Added more options, including layers of neural network during training
+* Updated documentation
 
 # Contribution
 
