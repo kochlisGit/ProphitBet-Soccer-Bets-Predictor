@@ -196,7 +196,7 @@ class TuningNNDialog(TuningDialog):
         super().__init__(
             root=root,
             title='Neural Network Tuning',
-            window_size={'width': 550, 'height': 800},
+            window_size={'width': 1020, 'height': 800},
             model_repository=model_repository,
             league_name=league_name,
             random_seed=random_seed,
@@ -208,6 +208,11 @@ class TuningNNDialog(TuningDialog):
         self._early_stopping_epochs_var = IntVar(value=35)
         self._learning_rate_decay_factor_var = StringVar(value='0.2')
         self._learning_rate_decay_epochs_var = IntVar(value=10)
+        self._min_layers_var = IntVar(value=3)
+        self._max_layers_var = IntVar(value=5)
+        self._min_units_var = IntVar(value=32)
+        self._max_units_var = IntVar(value=128)
+        self._units_increment_var = IntVar(value=16)
 
         self._text = None
 
@@ -221,7 +226,12 @@ class TuningNNDialog(TuningDialog):
         Label(self.window, text='Epochs', font=('Arial', 10)).place(x=20, y=220)
         Label(self.window, text='Early Stopping Epochs', font=('Arial', 10)).place(x=20, y=275)
         Label(self.window, text='Learning Rate Decay Factor', font=('Arial', 10)).place(x=20, y=325)
-        Label(self.window, text='Learning Rate Decay Epochs', font=('Arial', 10)).place(x=20, y=375)
+        Label(self.window, text='Learning Rate Decay Epochs', font=('Arial', 10)).place(x=20, y=385)
+        Label(self.window, text='Min Layers', font=('Arial', 10)).place(x=580, y=165)
+        Label(self.window, text='Max Layers', font=('Arial', 10)).place(x=580, y=220)
+        Label(self.window, text='Min Neurons', font=('Arial', 10)).place(x=580, y=275)
+        Label(self.window, text='Max Neurons', font=('Arial', 10)).place(x=580, y=325)
+        Label(self.window, text='Neuron Increment', font=('Arial', 10)).place(x=580, y=385)
 
         create_tooltip_btn(
             root=self.window, x=240, y=15,
@@ -260,15 +270,35 @@ class TuningNNDialog(TuningDialog):
                  '\n0.0 and 1.0, usually (0.1-0.4). Set it to 0 to disable Learning Rate Decay'
         )
         create_tooltip_btn(
-            root=self.window, x=240, y=375,
+            root=self.window, x=240, y=385,
             text='Number of epochs to wait for validation loss improvement,'
                  '\nbefore reducing learning rate. Should be positive integer or zero, usually (5-15).'
                  '\nSet it to 0 to disable Learning Rate Decay'
         )
+        create_tooltip_btn(
+            root=self.window, x=720, y=165,
+            text='Minimum number of hidden layers'
+        )
+        create_tooltip_btn(
+            root=self.window, x=720, y=220,
+            text='Maximum number of hidden layers'
+        )
+        create_tooltip_btn(
+            root=self.window, x=720, y=275,
+            text='Minimum number of units (Neurons)'
+        )
+        create_tooltip_btn(
+            root=self.window, x=720, y=325,
+            text='Maximum number of units (Neurons)'
+        )
+        create_tooltip_btn(
+            root=self.window, x=720, y=385,
+            text='Increment of units during each trial'
+        )
 
         Scale(
-            self.window, from_=1, to=500, tickinterval=100,
-            orient='horizontal', length=220, variable=self.n_trials_var
+            self.window, from_=1, to=2000, tickinterval=100,
+            orient='horizontal', length=500, variable=self.n_trials_var
         ).place(x=315, y=1)
 
         metric_cb = Combobox(
@@ -287,7 +317,7 @@ class TuningNNDialog(TuningDialog):
 
         Scale(
             self.window, from_=0, to=250, tickinterval=50, orient='horizontal',
-            length=220, variable=self.num_eval_samples_var
+            length=280, variable=self.num_eval_samples_var
         ).place(x=315, y=145)
 
         Scale(
@@ -309,10 +339,34 @@ class TuningNNDialog(TuningDialog):
             length=140, variable=self._learning_rate_decay_epochs_var
         ).place(x=315, y=360)
 
-        self.tune_btn.place(x=215, y=425)
+        Scale(
+            self.window, from_=1, to=5, tickinterval=1, orient='horizontal',
+            length=150, variable=self._min_layers_var
+        ).place(x=775, y=145)
+
+        Scale(
+            self.window, from_=1, to=5, tickinterval=1, orient='horizontal', length=150, variable=self._max_layers_var
+        ).place(x=775, y=205)
+
+        Scale(
+            self.window, from_=8, to=32, tickinterval=8, orient='horizontal',
+            length=200, variable=self._min_units_var
+        ).place(x=775, y=260)
+
+        Scale(
+            self.window, from_=32, to=532, tickinterval=100, orient='horizontal',
+            length=200, variable=self._max_units_var
+        ).place(x=775, y=315)
+
+        Scale(
+            self.window, from_=1, to=32, tickinterval=10, orient='horizontal',
+            length=140, variable=self._units_increment_var
+        ).place(x=775, y=370)
+
+        self.tune_btn.place(x=490, y=425)
 
         self._text = scrolledtext.ScrolledText(self.window, width=60, height=19, state='disabled')
-        self._text.place(x=35, y=470)
+        self._text.place(x=285, y=470)
 
     def _construct_tuner(
             self,
@@ -331,6 +385,11 @@ class TuningNNDialog(TuningDialog):
             early_stopping_epochs=self._early_stopping_epochs_var.get(),
             learning_rate_decay_factor=float(self._learning_rate_decay_factor_var.get()),
             learning_rate_decay_epochs=self._learning_rate_decay_epochs_var.get(),
+            min_layers=self._min_layers_var.get(),
+            max_layers=self._max_layers_var.get(),
+            min_units=self._min_units_var.get(),
+            max_units=self._max_units_var.get(),
+            units_increment=self._units_increment_var.get(),
             random_seed=random_seed
         )
 
