@@ -228,6 +228,11 @@ Solution: You can press "ENTER" button to start training. The same applies to Ra
 * Train Dialogs may now initiate training by hitting "ENTER" button
 * Small bug fixes
 
+# Release (2023/02/19)
+
+* Fixed a bug where model could not be saved during training.
+* Increased number of 
+
 # Contribution
 
 If you liked the app and would like to contribute, You are allowed to make changes to the code and make a pull request! Usually, it takes 1-3 days for me to
