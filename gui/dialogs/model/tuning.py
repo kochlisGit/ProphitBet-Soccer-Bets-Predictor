@@ -297,8 +297,8 @@ class TuningNNDialog(TuningDialog):
         )
 
         Scale(
-            self.window, from_=1, to=2000, tickinterval=100,
-            orient='horizontal', length=500, variable=self.n_trials_var
+            self.window, from_=1, to=2000, tickinterval=150,
+            orient='horizontal', length=540, variable=self.n_trials_var
         ).place(x=315, y=1)
 
         metric_cb = Combobox(
