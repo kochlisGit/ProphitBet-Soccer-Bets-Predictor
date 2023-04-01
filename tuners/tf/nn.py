@@ -15,6 +15,11 @@ class FCNetTuner(Tuner):
             early_stopping_epochs: int,
             learning_rate_decay_factor: float,
             learning_rate_decay_epochs: int,
+            min_layers: int,
+            max_layers: int,
+            min_units: int,
+            max_units: int,
+            units_increment: int,
             random_seed: int
     ):
         super().__init__(
@@ -30,6 +35,11 @@ class FCNetTuner(Tuner):
         self._early_stopping_epochs = early_stopping_epochs
         self._learning_rate_decay_factor = learning_rate_decay_factor
         self._learning_rate_decay_epochs = learning_rate_decay_epochs
+        self._min_layers = min_layers
+        self._max_layers = max_layers
+        self._min_units = min_units
+        self._max_units = max_units
+        self._units_increment = units_increment
 
     def _create_model(self, trial) -> Model:
         batch_size = trial.suggest_categorical('batch_size', [16, 32, 64, 128, 256])
@@ -41,9 +51,10 @@ class FCNetTuner(Tuner):
 
         noise_range = trial.suggest_float('noise_range', low=0.0, high=0.4)
 
-        num_hidden_layers = trial.suggest_int('num_hidden_layers', low=1, high=5, step=1)
+        num_hidden_layers = trial.suggest_int('num_hidden_layers', low=self._min_layers, high=self._max_layers, step=1)
+        hidden_units_list = list(range(self._min_units, self._max_units + 1, self._units_increment))
         hidden_layers = [trial.suggest_categorical(
-            f'layer_{i}', [16, 32, 64, 128, 256]) for i in range(num_hidden_layers)
+            f'layer_{i}', hidden_units_list) for i in range(num_hidden_layers)
         ]
         batch_normalizations = [
             trial.suggest_categorical(f'bn_{i}', [False, True]) for i in range(num_hidden_layers)
