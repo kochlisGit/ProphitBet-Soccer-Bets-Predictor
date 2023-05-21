@@ -165,7 +165,7 @@ To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd 
 3. On windows, you can double click the main.py file. Alternatively (Both Windows & Linux), You can open the cmd on the project directory and run: `python main.py`. 
 
 # Common Errors
-1. `Cannot install tensorflow.` In case this happens, email me the error. Sometimes it also requires visual studio to be installed. Download the community edition which is free here:  [https://pypi.org/project/py-stringmatching](https://visualstudio.microsoft.com/downloads/)
+1. `Cannot install tensorflow.` Sometimes, it requires visual studio to be installed. Download the community edition which is free here:  [https://pypi.org/project/py-stringmatching](https://visualstudio.microsoft.com/downloads/)
 2. `pip command was not found` in terminal. In this case, you forgot to choose **add to Path** option during the the installation of python. Delete python and repeat download instructions 1-3.
 3. `File main.py was not found`. This is because when you open command line (cmd) tool on windows, or terminal on linux, the default directory that cmd is looking at is the home directory, not prophitbet directory. You need to navigate to prophitbet directory, where the main.py file exists. To do that, you can use the `cd` command. e.g. if prophitbit is downloaded on "Downloads" folder, then type `cd Downloads/ProphitBet-Soccer-Bets-Predictor` and then type `python main.py`
 4. `python command not found` on linux. This is because python command is `python3` on linux systems
@@ -176,8 +176,8 @@ To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd 
 2. Linux
 3. Mac
 
-# Contact Me
-For further questions or to report any bugs, don't hesitate to email me at: "kohliaridis97@gmail.com"
+# Open An Issue
+In case there is an error with the application, open a Github Issue so that I can get informed and (resolve the issue if required).
 
 # Known Issues
 
