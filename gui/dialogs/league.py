@@ -10,14 +10,14 @@ from gui.dialogs.task import TaskDialog
 
 class CreateLeagueDialog(Dialog):
     def __init__(self, root, league_repository: LeagueRepository):
-        super().__init__(root=root, title='Creating League', window_size={'width': 550, 'height': 340})
+        super().__init__(root=root, title='Creating League', window_size={'width': 1100, 'height': 680})
 
         self._league_repository = league_repository
         self._all_leagues = league_repository.get_all_available_leagues()
 
         all_columns = league_repository.get_all_available_columns()
         self._home_columns = [col for col in all_columns if col[0] =='H']
-        self._away_columns = [col for col in all_columns if col[0] == 'A']
+        self._away_columns = [col for col in all_columns if col[0] == 'A']  
 
         self._default_last_n_matches = 3
         self._default_goal_diff_margin = 2
@@ -44,11 +44,11 @@ class CreateLeagueDialog(Dialog):
             self.window, width=25, font=('Arial', 10), state='readonly', textvariable=self._selected_league_var
         )
         leagues_cb['values'] = [f'{league.country} - {league.name}' for league in all_leagues]
-        leagues_cb.current(0)
+        leagues_cb.current(10)
         leagues_cb.place(x=325, y=15)
 
         league_name_entry = Entry(self.window, width=28, font=('Arial', 10), textvariable=self._league_name_var)
-        league_name_entry.insert(0, all_leagues[0].name.replace('-', ''))
+        league_name_entry.insert(0, all_leagues[10].name.replace('-', ''))
         league_name_entry.place(x=325, y=50)
 
         last_n_entry = Entry(self.window, width=10, font=('Arial', 10), textvariable=self._last_n_matches_var)
