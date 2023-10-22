@@ -58,7 +58,7 @@ class FixturesDialog(Dialog):
         months_cb.current(0)
         months_cb.place(x=370, y=20)
 
-        days = [f'0{i}' if i < 10 else str(i) for i in range(1, 32)]
+        days = [str(i) for i in range(1, 32)]
         days_cb = Combobox(self.window, state='readonly', width=10, textvariable=self._day_var)
         days_cb['values'] = days
         days_cb.current(0)
