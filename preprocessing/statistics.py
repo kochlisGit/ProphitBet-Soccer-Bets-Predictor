@@ -4,8 +4,8 @@ import pandas as pd
 
 class StatisticsEngine:
     Columns = [
-        'HW', 'HL', 'HGF', 'HGA', 'HGDW', 'HGDL', 'HW%', 'HD%',
-        'AW', 'AL', 'AGF', 'AGA', 'AGDW', 'AGDL', 'AW%', 'AD%',
+        'HW', 'HL', 'HD', 'HGF', 'HGA', 'HGDW', 'HGDL', 'HW%', 'HD%',
+        'AW', 'AL', 'AD', 'AGF', 'AGA', 'AGDW', 'AGDL', 'AW%', 'AD%',
     ]
 
     def __init__(
@@ -25,6 +25,7 @@ class StatisticsEngine:
         self._statistics_mapper = {
             'HW': self._compute_last_n_home_wins,
             'HL': self._compute_last_n_home_losses,
+            'HD': self._compute_last_n_home_draws,
             'HGF': self._compute_last_n_home_goals_forward,
             'HGA': self._compute_last_n_home_goals_against,
             'HGDW': self._compute_last_n_home_wins_goals_diff,
@@ -33,6 +34,7 @@ class StatisticsEngine:
             'HD%': self._compute_total_home_draw_rate,
             'AW': self._compute_last_n_away_wins,
             'AL': self._compute_last_n_away_losses,
+            'AD': self._compute_last_n_away_draws,
             'AGF': self._compute_last_n_away_goals_forward,
             'AGA': self._compute_last_n_away_goals_against,
             'AGDW': self._compute_last_n_away_wins_goals_diff,
@@ -64,6 +66,12 @@ class StatisticsEngine:
 
     def _compute_last_n_away_losses(self) -> pd.Series:
         return self._compute_last_results(team_index=2, target_result_value='H')
+    
+    def _compute_last_n_home_draws(self) -> pd.Series:
+        return self._compute_last_results(team_index=1, target_result_value='D')
+
+    def _compute_last_n_away_draws(self) -> pd.Series:
+        return self._compute_last_results(team_index=2, target_result_value='D')
 
     def _compute_last_results(self, team_index: int, target_result_value: str):
         last_results = []
