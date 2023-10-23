@@ -4,7 +4,8 @@ import tensorflow.keras.utils as utils
 
 
 def preprocess_training_dataframe(matches_df: pd.DataFrame, one_hot: bool) -> (np.ndarray, np.ndarray):
-    inputs = matches_df.dropna().drop(columns=['Season', 'Date', 'Result', 'Home Team', 'Away Team', 'HG', 'AG'])
+    inputs = matches_df.dropna().drop(columns=['Season', 'Date', 'Result', 'Home Team', 'Away Team'])
+    print(inputs.columns)
     inputs = inputs.to_numpy(dtype=np.float64)
     targets = matches_df['Result'].replace({'H': 0, 'D': 1, 'A': 2}).to_numpy(dtype=np.int64)
 
@@ -23,10 +24,10 @@ def construct_input_from_team_names(
         odd_2: float
 ) -> np.ndarray:
     home_team_row = matches_df[matches_df['Home Team'] == home_team].head(1).drop(
-        columns=['Season', 'Date', 'Result', 'Home Team', 'Away Team', 'HG', 'AG']
+        columns=['Season', 'Date', 'Result', 'Home Team', 'Away Team']
     )
     away_team_row = matches_df[matches_df['Away Team'] == away_team].head(1).drop(
-        columns=['Season', 'Date', 'Result', 'Home Team', 'Away Team', 'HG', 'AG']
+        columns=['Season', 'Date', 'Result', 'Home Team', 'Away Team']
     )
     return np.hstack((
         np.float64([odd_1, odd_x, odd_2]),
