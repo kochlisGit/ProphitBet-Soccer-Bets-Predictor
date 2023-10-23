@@ -4,9 +4,14 @@ import pandas as pd
 
 class StatisticsEngine:
     Columns = [
-        'HW', 'HL', 'HD','HWC', 'HLC', 'HDC', 'HGF', 'HGA', 'HGDW', 'HGDL', 'HW%', 'HD%',
-        'AW', 'AL', 'AD','AWC', 'ALC', 'ADC', 'AGF', 'AGA', 'AGDW', 'AGDL', 'AW%', 'AD%',
+        'HW', 'HL', 'HD','HWC', 'HLC', 'HDC', #HOME WINS, LOSES AND DRAWS FOR THE LAST N AND CUMULATED
+        'HGF', 'HGA', 'HGDW', 'HGDL', 'HW%', 'HD%',  #HOME GOALS
+        'AW', 'AL', 'AD','AWC', 'ALC', 'ADC',  #AWAY WINS, LOSES AND DRAWS FOR THE LAST N AND CUMULATED
+        'AGF', 'AGA', 'AGDW', 'AGDL', 'AW%', 'AD%', #AWAY GOALS
+        'HYC', 'HYCC', 'AYC', 'AYCC', #YELLOW CARDS
+        'HRC','HRCC','ARC','ARCC', #RED CARDS
     ]
+
 
     def __init__(
             self,
@@ -15,7 +20,7 @@ class StatisticsEngine:
             goal_diff_margin: int
     ):
         self._matches_df = matches_df
-        self._match_history = matches_df[['Season', 'Home Team', 'Away Team', 'HG', 'AG', 'Result']].values
+        self._match_history = matches_df[['Season', 'Home Team', 'Away Team', 'HG', 'AG', 'Result', 'HY', 'AY', 'HR', 'AR']].values
         self._max_season = self._match_history[0, 0]
         self._min_season = self._match_history[-1, 0]
 
@@ -46,7 +51,15 @@ class StatisticsEngine:
             'AGDW': self._compute_last_n_away_wins_goals_diff,
             'AGDL': self._compute_last_n_away_losses_goals_diff,
             'AW%': self._compute_total_home_win_rate,
-            'AD%': self._compute_total_home_draw_rate
+            'AD%': self._compute_total_home_draw_rate,
+            'HYC': self._compute_last_n_home_yellow_cards,
+            'HYCC': self._compute_cumulated_home_yellow_cards,
+            'AYC': self._compute_last_n_away_yellow_cards,
+            'AYCC': self._compute_cumulated_away_yellow_cards,
+            'HRC': self._compute_last_n_home_red_cards,
+            'HRCC': self._compute_cumulated_home_red_cards,
+            'ARC': self._compute_last_n_away_red_cards,
+            'ARCC': self._compute_cumulated_away_red_cards,
         }
 
     def compute_statistics(
@@ -237,3 +250,47 @@ class StatisticsEngine:
                 total_results = target_results + non_target_results
                 last_result_rates.append(np.nan if total_results == 0 else round(target_results*100/total_results))
         return pd.Series(last_result_rates)
+
+    def _compute_last_n_home_yellow_cards(self) -> pd.Series:
+        return self._compute_last_cards(team_index=1, card_index=6)
+
+    def _compute_last_n_away_yellow_cards(self) -> pd.Series:
+        return self._compute_last_cards(team_index=2, card_index=7)
+
+    def _compute_last_n_home_red_cards(self) -> pd.Series:
+        return self._compute_last_cards(team_index=1, card_index=8)
+
+    def _compute_last_n_away_red_cards(self) -> pd.Series:
+        return self._compute_last_cards(team_index=2, card_index=9)
+
+    def _compute_cumulated_home_yellow_cards(self) -> pd.Series:
+        return self._compute_last_cards(team_index=1, card_index=6, all_matches= True)
+
+    def _compute_cumulated_away_yellow_cards(self) -> pd.Series:
+        return self._compute_last_cards(team_index=2, card_index=7, all_matches= True)
+
+    def _compute_cumulated_home_red_cards(self) -> pd.Series:
+        return self._compute_last_cards(team_index=1, card_index=8, all_matches= True)
+
+    def _compute_cumulated_away_red_cards(self) -> pd.Series:
+        return self._compute_last_cards(team_index=2, card_index=9, all_matches= True)
+
+    def _compute_last_cards(self, team_index: int, card_index: int, all_matches: bool = False):
+        last_cards = []
+
+        for season in range(self._max_season, self._min_season - 1, -1):
+            match_history = self._match_history[self._match_history[:, 0] == season]
+
+            for i, match in enumerate(match_history):
+                team_name = match[team_index]
+                cards = 0
+                last_n = 0
+
+                for previous_match in match_history[i + 1:]:
+                    if previous_match[team_index] == team_name:
+                        cards += previous_match[card_index]
+                        last_n += 1
+                    if last_n == self._last_n_matches and not all_matches:
+                        break
+                last_cards.append(cards)
+        return pd.Series(last_cards)

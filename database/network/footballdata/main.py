@@ -20,7 +20,7 @@ class MainLeagueAPI(FootballDataAPI):
 
     def _process_features(self, matches_df: pd.DataFrame) -> pd.DataFrame:
         matches_df = matches_df[[
-            'Date', 'Season', 'HomeTeam', 'AwayTeam', 'B365H', 'B365D', 'B365A', 'FTHG', 'FTAG', 'FTR'
+            'Date', 'Season', 'HomeTeam', 'AwayTeam', 'B365H', 'B365D', 'B365A', 'FTHG', 'FTAG', 'FTR', 'HY', 'AY', 'HR', 'AR'
         ]]
         matches_df = matches_df.rename(columns={
             'HomeTeam': 'Home Team',
