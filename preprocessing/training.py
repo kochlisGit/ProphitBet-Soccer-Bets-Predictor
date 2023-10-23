@@ -5,7 +5,6 @@ import tensorflow.keras.utils as utils
 
 def preprocess_training_dataframe(matches_df: pd.DataFrame, one_hot: bool) -> (np.ndarray, np.ndarray):
     inputs = matches_df.dropna().drop(columns=['Season', 'Date', 'Result', 'Home Team', 'Away Team'])
-    print(inputs.columns)
     inputs = inputs.to_numpy(dtype=np.float64)
     targets = matches_df['Result'].replace({'H': 0, 'D': 1, 'A': 2}).to_numpy(dtype=np.int64)
 
