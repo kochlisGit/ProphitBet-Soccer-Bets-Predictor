@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Web App</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Your Web App</h1>
+        {% include 'menu.html' %}
+    </header>
+    <nav>
+        <!-- Add navigation links here, if needed -->
+    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <!-- Add footer content here, if needed -->
+    </footer>
+</body>
+</html>

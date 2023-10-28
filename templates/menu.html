@@ -1,0 +1,37 @@
+<nav class="menu">
+    <ul>
+        <li class="menu-item">
+            <a href="#">Application</a>
+            <ul class="submenu">
+                <li><a href="{{ url_for('create_league') }}">Create League</a></li>
+                <li><a href="{{ url_for('load_league') }}">Load League</a></li>
+                <li><a href="{{ url_for('delete_league') }}">Delete League</a></li>
+            </ul>
+        </li>
+        <li class="menu-item">
+            <a href="#">Analysis</a>
+            <ul class="submenu">
+                <li><a href="{{ url_for('plot_correlations') }}">Correlations</a></li>
+                <li><a href="{{ url_for('plot_importance') }}">Feature Importance</a></li>
+                <li><a href="{{ url_for('plot_target_distribution') }}">Target Distribution</a></li>
+            </ul>
+        </li>
+        <li class="menu-item">
+            <a href="#">Model</a>
+            <ul class="submenu">
+                <li><a href="#">Train</a>
+                    <ul class="submenu">
+                        <li><a href="{{ url_for('tune_nn') }}">Neural Network (Auto Tuning)</a></li>
+                        <li><a href="{{ url_for('train_custom_nn') }}">Neural Network (Custom)</a></li>
+                        <li class="separator"></li>
+                        <li><a href="{{ url_for('tune_rf') }}">Random Forest (Auto Tuning)</a></li>
+                        <li><a href="{{ url_for('train_custom_rf') }}">Random Forest (Custom)</a></li>
+                    </ul>
+                </li>
+                <li><a href="{{ url_for('evaluate_models') }}">Evaluate</a></li>
+                <li><a href="{{ url_for('predict_matches') }}">Predict Matches</a></li>
+                <li><a href="{{ url_for('predict_fixture') }}">Predict Fixture</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>

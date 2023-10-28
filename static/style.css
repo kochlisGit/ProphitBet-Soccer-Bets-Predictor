@@ -1,0 +1,16 @@
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  nav li {
+    display: inline-block;
+    margin-right: 20px; /* Adjust as needed */
+  }
+
+  nav a {
+    text-decoration: none;
+    color: #333; /* Adjust the color */
+    font-weight: bold;
+  }
