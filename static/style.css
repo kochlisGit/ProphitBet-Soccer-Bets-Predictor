@@ -1,16 +1,24 @@
 nav ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-  }
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
 
-  nav li {
-    display: inline-block;
-    margin-right: 20px; /* Adjust as needed */
-  }
+nav li {
+  display: inline-block;
+  margin-right: 20px; /* Adjust as needed */
+}
 
-  nav a {
-    text-decoration: none;
-    color: #333; /* Adjust the color */
-    font-weight: bold;
-  }
+nav a {
+  text-decoration: none;
+  color: #333; /* Adjust the color */
+  font-weight: bold;
+}
+.horizontal-checkboxes {
+  display: inline-block; /* Make the container inline-block */
+}
+
+.checkbox {
+    display: inline-block; /* Make the checkboxes inline-block */
+    margin-right: 10px; /* Adjust spacing as needed */
+}

@@ -30,6 +30,7 @@ def get_league_repo():
 # Define your Flask routes
 @app.route('/')
 def index():
+    league_repo = get_league_repo()
     return render_template('index.html')
 
 @app.route('/create_league', methods=['GET', 'POST'])
@@ -37,8 +38,9 @@ def create_league():
     league_repo = get_league_repo()
     form = CreateLeagueForm(league_repository=league_repo)
     if request.method == 'POST' and form.validate():
-        form.submit()
-        return render_template('index.html')
+        league_name, matches_df = form.submit()
+        context = {'matches': matches_df.to_html(classes='table table-bordered', escape=False), 'league_name': league_name}
+        return render_template('index.html', context=context)
 
         # Handle form submission, e.g., save the form data to your database
         # Access form data using form.selected_league.data, form.league_name.data, etc.

@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>Welcome to Your Web App</h2>
-    <p>This is the home page of your web application.</p>
-    <!-- Add content specific to the index page here -->
+    {% if context is defined %}
+        <body>
+            <h1>{{ context.league_name}}</h1>
+            <table class="table table-dark">
+            {{ context.matches | safe }}
+            </table>
+        </body>
+    {% else %}
+        <h1>No data to display.</h1>
+    {% endif %}
 {% endblock %}

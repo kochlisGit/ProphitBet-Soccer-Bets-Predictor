@@ -1,5 +1,6 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
+
+{% block content %}
 <head>
     <title>Create League</title>
 </head>
@@ -31,7 +32,7 @@
 
         <div>
             {{ form.home_columns.label }}
-            <div>
+            <div class="horizontal-checkboxes">
                 {% for choice, label in form.home_columns.choices %}
                 <div class="checkbox">
                     <label>
@@ -44,7 +45,7 @@
 
         <div>
             {{ form.away_columns.label }}
-            <div>
+            <div class="horizontal-checkboxes">
                 {% for choice, label in form.away_columns.choices %}
                 <div class="checkbox">
                     <label>
@@ -59,4 +60,4 @@
         <button type="submit">Create</button>
     </form>
 </body>
-</html>
+{% endblock %}

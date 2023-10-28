@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectMultipleField, widgets, SelectField, IntegerField
-from wtforms.widgets import CheckboxInput
+from wtforms import StringField, SelectMultipleField, SelectField, IntegerField
 from wtforms.validators import InputRequired, NoneOf
 from database.repositories.league import LeagueRepository
+import pandas as pd
 
 
 class CreateLeagueForm(FlaskForm):
@@ -30,14 +30,14 @@ class CreateLeagueForm(FlaskForm):
         self.away_columns.choices = [(col, col) for  col in self._away_columns]
         self.away_columns.data = [col for col in self._away_columns]
 
-    def submit(self):
+    def submit(self) -> (str, pd.DataFrame):
         league_name = self.league_name.data
 
         if not self._league_repository.league_exists(league_name=league_name):
-            self._store_league()
+            return self._store_league()
 
 
-    def _store_league(self):
+    def _store_league(self) -> (str, pd.DataFrame):
         league_name = self.league_name.data
         last_n_matches = int(self.last_n_matches.data)
         goal_diff_margin = int(self.goal_diff_margin.data)
@@ -59,4 +59,4 @@ class CreateLeagueForm(FlaskForm):
                 'Application cannot connect to the internet. Check internet connection'
             )
         else:
-            self._selected_league_and_matches_df = (league_name, league, matches_df)
+            return (league_name, matches_df)
