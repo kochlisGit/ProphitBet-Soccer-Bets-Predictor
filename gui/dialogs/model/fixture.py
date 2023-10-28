@@ -1,7 +1,10 @@
 import threading
 import numpy as np
 import pandas as pd
+import requests
 import webbrowser
+from os import getcwd
+from datetime import datetime
 from tkinter import messagebox, filedialog, StringVar
 from tkinter.ttk import Treeview, Combobox, Label, Scrollbar, Button, Entry
 from database.repositories.model import ModelRepository
@@ -170,13 +173,28 @@ class FixturesDialog(Dialog):
                 entry.destroy()
             entry.bind("<Return>", on_entry_return)
 
-    def _import_fixture(self) -> pd.DataFrame or str:
-        webbrowser.open(self._league_fixture_url)
-        fixture_filepath = filedialog.askopenfilename(filetypes=[("HTML files", "*.html")])
+    def _download_fixture(self):
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+        response = requests.get(self._league_fixture_url, headers=headers)
+        if response.status_code == 200:
+            html_content = response.text
+            current_time = datetime.now().strftime("%Y-%m-%d")
+            filename = f"fixture_{current_time}.html"
+            # Write the HTML content to the file
+            self.fixture_path = f"{getcwd()}/database/storage/{filename}"
+            with open(self.fixture_path, "w", encoding="utf-8") as file:
+                file.write(html_content)
+        else:
+            print(f"Failed to download webpage. Status code: {response.status_code}")
 
-        if fixture_filepath is not None:
+    def _import_fixture(self) -> pd.DataFrame or str:
+        self._download_fixture()
+        webbrowser.open(self._league_fixture_url)
+        #fixture_filepath = filedialog.askopenfilename(filetypes=[("HTML files", "*.html")],initialdir=self.fixture_path)
+
+        if self.fixture_path is not None:
             parsing_result = self._fixture_parser.parse_fixture(
-                fixture_filepath=fixture_filepath,
+                fixture_filepath=self.fixture_path,
                 fixtures_month=self._month_var.get(),
                 fixtures_day=self._day_var.get(),
                 unique_league_teams=self._all_teams
