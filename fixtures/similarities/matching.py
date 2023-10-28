@@ -6,6 +6,8 @@ def match_fixture_teams(fix_home_teams: list, fix_away_teams: list, unique_leagu
     team_similarity_dict = {}
 
     for fix_team in fix_home_teams + fix_away_teams:
+        if fix_team in team_similarity_dict.keys():
+            continue
         extracted_league_team = process.extractOne(fix_team, available_league_teams)[0]
         team_similarity_dict[fix_team] = extracted_league_team
         available_league_teams.remove(extracted_league_team)
