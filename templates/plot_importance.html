@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<body>
+    <h1>Importance plots</h1>
+    Use "Importance Weights" method to train a classification model and plot its importance
+    scores for each feature (column). <br>
+    "Variance Analysis to plot variance scores for each feature." Features with very low variances have little
+    predictive power, since the expected value of that feature is always similar. <br>
+    Univariate test are statistical tests, which assign an
+    importance score to each feature.  <br> Finally, feature elimination process is a
+    process on which a model is trained multiple times, each time removing a
+    feature. The importance scores are computed by the model's accuracy at
+    each iteration. <br> <br>
+    <form method="POST" action="/plot_importance">
+        {{ form.hidden_tag() }}
+
+        <div>
+            {{ form.selected_method.label }}
+            {{ form.selected_method }}
+        </div>
+        <div>
+            <button type="submit">Generate</button>
+        </div>
+
+    </form>
+    {% if image_data is defined %}
+        <img src="data:image/png;base64,{{ image_data }}">
+    {% endif %}
+</body>
+{% endblock %}

@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% if image_data is defined %}
-        <img src="data:image/png;base64,{{ image_data }}" alt="Matplotlib Figure">
-    {% endif %}
     {% if context is defined %}
         <body>
             <h1>{{ context.league_name}}</h1>

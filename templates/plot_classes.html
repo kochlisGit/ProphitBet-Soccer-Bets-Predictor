@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<body>
+    <h1>Plots classes</h1>
+    Class distribution should be uniform (Equal number of classes).
+    Imbalanced classes might trick models to overestimate the majority class
+    (e.g. Predict the class that occurs more often, which is usually 1).
+    If a league contains imbalanced classes, use imbalanced-learning techniques,
+    such as calibration, weighting, over-sampling & input noise
+    {% if image_data is defined %}
+        <img src="data:image/png;base64,{{ image_data }}">
+    {% endif %}
+</body>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<body>
+    <h1>Correlation plots</h1>
+
+    <form method="POST" action="/plot_correlations">
+        {{ form.hidden_tag() }}
+
+        <div>
+            {{ form.selected_color.label }}
+            {{ form.selected_color }}
+        </div>
+        <div>
+            {{ form.selected_columns.label }}
+            {{ form.selected_columns }}
+        </div>
+        <div>
+            {{ form.top_triangle.label }}
+            {{ form.top_triangle }}
+        </div>
+        <div>
+            <button type="submit">Generate</button>
+        </div>
+
+    </form>
+    {% if image_data is defined %}
+        <img src="data:image/png;base64,{{ image_data }}">
+    {% endif %}
+</body>
+{% endblock %}

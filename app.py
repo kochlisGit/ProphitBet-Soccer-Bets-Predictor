@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, g
 from league import CreateLeagueForm, LoadLeagueForm, DeleteLeagueForm
-from plots import CorrelationPlotter
+from plots import CorrelationPlotter, ClassDistributionPlotter, ImportancePlotter
 from flask_wtf.csrf import CSRFProtect
 from database.repositories.league import LeagueRepository
 from database.repositories.model import ModelRepository
@@ -92,23 +92,41 @@ def delete_league():
     # Handle the 'Load League' action here
     return render_template('delete_league.html', form=form)
 
-@app.route('/plot_correlations')
+@app.route('/plot_correlations', methods=['GET', 'POST'])
 def plot_correlations():
     context = get_global_context()
     if context:
         loaded_df = context["matches"]
-        img = CorrelationPlotter(loaded_df).generate_image()
-        return render_template('index.html', image_data=img, context=context)
+        form = CorrelationPlotter(loaded_df)
+        if request.method == 'POST' :
+            img = form.generate_image()
+            return render_template('plot_correlation.html', image_data=img, form=form)
+        return render_template('plot_correlation.html', form=form)
+
     return render_template('index.html')
 
-@app.route('/plot_importance')
+@app.route('/plot_importance', methods=['GET', 'POST'])
 def plot_importance():
-    # Handle the 'Feature Importance' action here
-    return "Feature Importance page"
+    context = get_global_context()
+    if context:
+        loaded_df = context["matches"]
+        form = ImportancePlotter(loaded_df)
+        if request.method == 'POST' :
+            img = form.generate_image()
+            return render_template('plot_importance.html', image_data=img, form=form)
+        return render_template('plot_importance.html', form=form)
+
+    return render_template('index.html')
 
 @app.route('/plot_target_distribution')
 def plot_target_distribution():
-    return "Target Distribution page"
+    context = get_global_context()
+    if context:
+        loaded_df = context["matches"]
+        form = ClassDistributionPlotter(loaded_df)
+        img = form.generate_image()
+        return render_template('plot_classes.html', image_data=img)
+    return render_template('index.html')
 
     # Handle the 'Target Distribution' action here
 @app.route('/tune_nn')
