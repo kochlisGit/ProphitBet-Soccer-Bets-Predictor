@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<body>
+    <h1>Tuning model</h1>
+
+    <form method="POST" action="/tune_rf">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.n_trials_selected.label }}
+            {{ form.n_trials_selected }}
+        </div>
+        <div>
+            {{ form.selected_metric.label }}
+            {{ form.selected_metric }}
+        </div>
+        <div>
+            {{ form.selected_metric_target.label }}
+            {{ form.selected_metric_target }}
+        </div>
+        <div>
+            {{ form.num_eval_samples_var.label }}
+            {{ form.num_eval_samples_var }}
+        </div>
+        <div>
+            <button type="submit">Tune</button>
+        </div>
+    </form>
+        <h1>Console Output:</h1>
+        <div id="output"></div>
+
+        <script>
+            const output = document.getElementById('output');
+            const eventSource = new EventSource('/sse');
+
+            eventSource.onmessage = (event) => {
+                const data = event.data;
+                output.innerHTML += data + "<br>";
+            };
+        </script>
+</body>
+{% endblock %}

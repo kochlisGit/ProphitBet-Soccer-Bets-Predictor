@@ -1,12 +1,15 @@
-from flask import Flask, render_template, request, g
+from flask import Flask, render_template, request, g, Response
 from league import CreateLeagueForm, LoadLeagueForm, DeleteLeagueForm
 from plots import CorrelationPlotter, ClassDistributionPlotter, ImportancePlotter
+from model.tuning import TuningRFForm
 from flask_wtf.csrf import CSRFProtect
 from database.repositories.league import LeagueRepository
 from database.repositories.model import ModelRepository
 import variables
 import secrets
 import matplotlib
+import time
+
 matplotlib.use('agg')
 
 
@@ -46,6 +49,19 @@ def store_global_context(context):
     global CURRENT_CONTEXT
     CURRENT_CONTEXT = context
 
+real_time_output = []
+
+def capture_output(thread):
+    while thread.is_alive():
+        real_time_output.append("Thread is alive...")
+        time.sleep(1)
+
+def event_stream():
+    while True:
+        if real_time_output:
+            yield "data: " + real_time_output.pop(0) + "\n\n"
+        else:
+            time.sleep(1)
 
 # Define your Flask routes
 @app.route('/')
@@ -139,10 +155,20 @@ def train_custom_nn():
     # Handle the 'Neural Network (Custom)' action here
     return "Neural Network (Custom) page"
 
-@app.route('/tune_rf')
+@app.route('/tune_rf', methods=['GET', 'POST'])
 def tune_rf():
     # Handle the 'Random Forest (Auto Tuning)' action here
-    return "Random Forest (Auto Tuning) page"
+    context = get_global_context()
+    if context:
+        loaded_df = context["matches"]
+        league_name = context["league_name"]
+        form = TuningRFForm(get_model_repo(), league_name, 0, loaded_df)
+        if request.method == 'POST' :
+            img = form.submit_tuning()
+            return render_template('tuning_model.html', image_data=img, form=form)
+        return render_template('tuning_model.html', form=form)
+
+    return render_template('index.html')
 
 @app.route('/train_custom_rf')
 def train_custom_rf():
