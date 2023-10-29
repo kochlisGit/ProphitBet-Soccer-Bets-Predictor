@@ -19,8 +19,8 @@ class CorrelationAnalyzer(FeatureAnalyzer):
     def away_columns(self) -> list:
         return self._away_columns
 
-    def plot(self, columns: np.ndarray or list, color_map: str, hide_upper_triangle: bool, ax, **kwargs):
+    def plot(self, columns: np.ndarray or list, ax, color_map: str = "crest", hide_upper_triangle: bool = True, **kwargs):
         d = self._inputs[columns]
         correlations = d.corr()
         mask = np.triu(np.ones_like(correlations, dtype=bool)) if hide_upper_triangle else None
-        seaborn.heatmap(correlations, annot=True, cmap=color_map, mask=mask, ax=ax)
+        return seaborn.heatmap(correlations, annot=True, cmap=color_map, mask=mask, ax=ax)

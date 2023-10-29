@@ -1,10 +1,17 @@
 from flask import Flask, render_template, request, g
 from league import CreateLeagueForm, LoadLeagueForm, DeleteLeagueForm
+from plots import CorrelationPlotter
 from flask_wtf.csrf import CSRFProtect
 from database.repositories.league import LeagueRepository
 from database.repositories.model import ModelRepository
 import variables
 import secrets
+from flask import Response
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import io
+import matplotlib
+matplotlib.use('agg')
+
 
 app = Flask(__name__)
 secret_key = secrets.token_hex(16)
@@ -12,34 +19,54 @@ app.config['SECRET_KEY'] = secret_key
 csrf = CSRFProtect()
 csrf.init_app(app)
 
+MODEL_REPO = None
+LEAGUE_REPO = None
+CURRENT_LOADED_DF = None
+
 
 def get_model_repo():
-    if not hasattr(g, 'model_repo'):
-        g.model_repo = ModelRepository(models_checkpoint_directory=variables.models_checkpoint_directory)
-    return g.model_repo
+    global MODEL_REPO
+    if not MODEL_REPO:
+        MODEL_REPO = ModelRepository(models_checkpoint_directory=variables.models_checkpoint_directory)
+    return MODEL_REPO
 
 def get_league_repo():
-    if not hasattr(g, 'league_repo'):
-        g.league_repo = LeagueRepository(
+    global LEAGUE_REPO
+    if not LEAGUE_REPO:
+        LEAGUE_REPO = LeagueRepository(
             available_leagues_filepath=variables.available_leagues_filepath,
             saved_leagues_directory=variables.saved_leagues_directory
         )
-    return g.league_repo
+    return LEAGUE_REPO
+
+def get_global_loaded_df():
+    global CURRENT_LOADED_DF
+    if CURRENT_LOADED_DF is not None:
+        return CURRENT_LOADED_DF
+    return None
+
+def store_global_loaded_df(df):
+    global CURRENT_LOADED_DF
+    CURRENT_LOADED_DF = df
 
 
 # Define your Flask routes
 @app.route('/')
 def index():
+    if get_global_loaded_df() is not None:
+        context = {'matches': get_global_loaded_df().to_html(classes='table table-bordered', escape=False)}
+        return render_template('index.html', context=context)
     return render_template('index.html')
 
 
 @app.route('/create_league', methods=['GET', 'POST'])
 def create_league():
-    league_repo = get_league_repo()
-    form = CreateLeagueForm(league_repository=league_repo)
+    LEAGUE_REPO = get_league_repo()
+    form = CreateLeagueForm(league_repository=LEAGUE_REPO)
     if request.method == 'POST' and form.validate():
         league_name, matches_df = form.submit()
         context = {'matches': matches_df.to_html(classes='table table-bordered', escape=False), 'league_name': league_name}
+        store_global_loaded_df(matches_df)
         return render_template('index.html', context=context)
 
     return render_template('create_league.html', form=form)
@@ -47,11 +74,12 @@ def create_league():
 
 @app.route('/load_league', methods=['GET', 'POST'])
 def load_league():
-    league_repo = get_league_repo()
-    form = LoadLeagueForm(league_repository=league_repo)
+    LEAGUE_REPO = get_league_repo()
+    form = LoadLeagueForm(league_repository=LEAGUE_REPO)
     if request.method == 'POST' and form.validate():
         league_name, matches_df = form.submit()
         context = {'matches': matches_df.to_html(classes='table table-bordered', escape=False), 'league_name': league_name}
+        store_global_loaded_df(matches_df)
         return render_template('index.html', context=context)
     # Handle the 'Load League' action here
     return render_template('load_league.html', form=form)
@@ -59,8 +87,8 @@ def load_league():
 
 @app.route('/delete_league', methods=['GET', 'POST'])
 def delete_league():
-    league_repo = get_league_repo()
-    form = DeleteLeagueForm(league_repository=league_repo)
+    LEAGUE_REPO = get_league_repo()
+    form = DeleteLeagueForm(league_repository=LEAGUE_REPO)
     if request.method == 'POST' and form.validate():
         form.submit()
         return render_template('delete_league.html', form=form)
@@ -69,8 +97,12 @@ def delete_league():
 
 @app.route('/plot_correlations')
 def plot_correlations():
-    # Handle the 'Correlations' action here
-    return "Correlations page"
+    if get_global_loaded_df() is not None:
+        fig = CorrelationPlotter(get_global_loaded_df()).generate_plot()
+        output = io.BytesIO()
+        FigureCanvas(fig).print_png(output)
+        return Response(output.getvalue(), mimetype='image/png')
+    return render_template('index.html')
 
 @app.route('/plot_importance')
 def plot_importance():

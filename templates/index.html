@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    {% if image is defined %}
+        <img src="{{ url_for('index') }}">
+    {% endif %}
     {% if context is defined %}
         <body>
             <h1>{{ context.league_name}}</h1>
@@ -11,4 +14,5 @@
     {% else %}
         <h1>No data to display.</h1>
     {% endif %}
+
 {% endblock %}
