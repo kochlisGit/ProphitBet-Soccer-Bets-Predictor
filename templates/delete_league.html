@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<head>
+    <title>Delete League</title>
+</head>
+<body>
+    <h1>Delete a League</h1>
+
+    <form method="POST" action="/delete_league">
+        {{ form.hidden_tag() }}
+
+        <div>
+            {{ form.selected_league.label }}
+            {{ form.selected_league }}
+        </div>
+        <div>
+            <button type="submit">Delete</button>
+        </div>
+
+    </form>
+</body>
+{% endblock %}

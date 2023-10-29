@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, g
-from league import CreateLeagueForm
+from league import CreateLeagueForm, LoadLeagueForm, DeleteLeagueForm
 from flask_wtf.csrf import CSRFProtect
 from database.repositories.league import LeagueRepository
 from database.repositories.model import ModelRepository
@@ -30,8 +30,8 @@ def get_league_repo():
 # Define your Flask routes
 @app.route('/')
 def index():
-    league_repo = get_league_repo()
     return render_template('index.html')
+
 
 @app.route('/create_league', methods=['GET', 'POST'])
 def create_league():
@@ -42,20 +42,30 @@ def create_league():
         context = {'matches': matches_df.to_html(classes='table table-bordered', escape=False), 'league_name': league_name}
         return render_template('index.html', context=context)
 
-        # Handle form submission, e.g., save the form data to your database
-        # Access form data using form.selected_league.data, form.league_name.data, etc.
-
     return render_template('create_league.html', form=form)
 
-@app.route('/load_league')
-def load_league():
-    # Handle the 'Load League' action here
-    return "Load League page"
 
-@app.route('/delete_league')
+@app.route('/load_league', methods=['GET', 'POST'])
+def load_league():
+    league_repo = get_league_repo()
+    form = LoadLeagueForm(league_repository=league_repo)
+    if request.method == 'POST' and form.validate():
+        league_name, matches_df = form.submit()
+        context = {'matches': matches_df.to_html(classes='table table-bordered', escape=False), 'league_name': league_name}
+        return render_template('index.html', context=context)
+    # Handle the 'Load League' action here
+    return render_template('load_league.html', form=form)
+
+
+@app.route('/delete_league', methods=['GET', 'POST'])
 def delete_league():
-    # Handle the 'Delete League' action here
-    return "Delete League page"
+    league_repo = get_league_repo()
+    form = DeleteLeagueForm(league_repository=league_repo)
+    if request.method == 'POST' and form.validate():
+        form.submit()
+        return render_template('delete_league.html', form=form)
+    # Handle the 'Load League' action here
+    return render_template('delete_league.html', form=form)
 
 @app.route('/plot_correlations')
 def plot_correlations():
