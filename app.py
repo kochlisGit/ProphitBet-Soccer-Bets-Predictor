@@ -6,9 +6,6 @@ from database.repositories.league import LeagueRepository
 from database.repositories.model import ModelRepository
 import variables
 import secrets
-from flask import Response
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import io
 import matplotlib
 matplotlib.use('agg')
 
@@ -21,7 +18,7 @@ csrf.init_app(app)
 
 MODEL_REPO = None
 LEAGUE_REPO = None
-CURRENT_LOADED_DF = None
+CURRENT_CONTEXT = None
 
 
 def get_model_repo():
@@ -39,22 +36,22 @@ def get_league_repo():
         )
     return LEAGUE_REPO
 
-def get_global_loaded_df():
-    global CURRENT_LOADED_DF
-    if CURRENT_LOADED_DF is not None:
-        return CURRENT_LOADED_DF
+def get_global_context():
+    global CURRENT_CONTEXT
+    if CURRENT_CONTEXT is not None:
+        return CURRENT_CONTEXT
     return None
 
-def store_global_loaded_df(df):
-    global CURRENT_LOADED_DF
-    CURRENT_LOADED_DF = df
+def store_global_context(context):
+    global CURRENT_CONTEXT
+    CURRENT_CONTEXT = context
 
 
 # Define your Flask routes
 @app.route('/')
 def index():
-    if get_global_loaded_df() is not None:
-        context = {'matches': get_global_loaded_df().to_html(classes='table table-bordered', escape=False)}
+    context = get_global_context()
+    if context:
         return render_template('index.html', context=context)
     return render_template('index.html')
 
@@ -66,7 +63,7 @@ def create_league():
     if request.method == 'POST' and form.validate():
         league_name, matches_df = form.submit()
         context = {'matches': matches_df.to_html(classes='table table-bordered', escape=False), 'league_name': league_name}
-        store_global_loaded_df(matches_df)
+        store_global_context(context)
         return render_template('index.html', context=context)
 
     return render_template('create_league.html', form=form)
@@ -78,8 +75,8 @@ def load_league():
     form = LoadLeagueForm(league_repository=LEAGUE_REPO)
     if request.method == 'POST' and form.validate():
         league_name, matches_df = form.submit()
-        context = {'matches': matches_df.to_html(classes='table table-bordered', escape=False), 'league_name': league_name}
-        store_global_loaded_df(matches_df)
+        context = {'matches': matches_df, 'league_name': league_name}
+        store_global_context(context)
         return render_template('index.html', context=context)
     # Handle the 'Load League' action here
     return render_template('load_league.html', form=form)
@@ -97,11 +94,11 @@ def delete_league():
 
 @app.route('/plot_correlations')
 def plot_correlations():
-    if get_global_loaded_df() is not None:
-        fig = CorrelationPlotter(get_global_loaded_df()).generate_plot()
-        output = io.BytesIO()
-        FigureCanvas(fig).print_png(output)
-        return Response(output.getvalue(), mimetype='image/png')
+    context = get_global_context()
+    if context:
+        loaded_df = context["matches"]
+        img = CorrelationPlotter(loaded_df).generate_image()
+        return render_template('index.html', image_data=img, context=context)
     return render_template('index.html')
 
 @app.route('/plot_importance')

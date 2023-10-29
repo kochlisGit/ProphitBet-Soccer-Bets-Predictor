@@ -81,7 +81,7 @@ class LoadLeagueForm(FlaskForm):
         matches_df = None
         league = None
 
-        if self.update_league.data:
+        if self.update_league.raw_data:
             matches_df, league = self._league_repository.update_league(league_name=league_name)
 
         if matches_df is None:
