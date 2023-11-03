@@ -3,6 +3,8 @@ from wtforms import StringField, SelectMultipleField, SelectField, IntegerField,
 from wtforms.validators import InputRequired, NoneOf
 from database.repositories.league import LeagueRepository
 import pandas as pd
+from website import db
+from website.models import League
 
 
 class CreateLeagueForm(FlaskForm):
@@ -44,6 +46,14 @@ class CreateLeagueForm(FlaskForm):
         selected_league_split = self.selected_league.data.replace(' ', '').split('-', maxsplit=1)
         selected_home_columns = self.home_columns.raw_data
         selected_away_columns = self.away_columns.raw_data
+        breakpoint()
+        new_league = League(country=selected_league_split[0],
+                            name=league_name,
+                            last_n_matches=last_n_matches,
+                            goal_diff_margin=goal_diff_margin,
+                            statistic_columns= "::".join(selected_home_columns + selected_away_columns))
+        db.session.add(new_league)
+        db.session.commit()
         matches_df, league = self._league_repository.create_league(
             league=self._all_leagues[(selected_league_split[0], selected_league_split[1])],
             last_n_matches=last_n_matches,

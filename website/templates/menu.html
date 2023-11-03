@@ -1,0 +1,38 @@
+<ul class="nav nav-pills">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dataset</a>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="{{ url_for('views.create_league') }}">Create League</a>
+        <a class="dropdown-item" href="{{ url_for('views.load_league') }}">Load League</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="{{ url_for('views.delete_league') }}">Delete League</a>
+      </div>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Analysis</a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="{{ url_for('views.plot_correlations') }}">Correlations</a>
+          <a class="dropdown-item" href="{{ url_for('views.plot_importance') }}">Feature Importance</a>
+          <a class="dropdown-item" href="{{ url_for('views.plot_target_distribution') }}">Classes Distribution</a>
+        </div>
+      </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Train</a>
+        <div class="dropdown-menu">
+        <a class="dropdown-item" href="{{ url_for('views.tune_nn') }}">Neural Network (Auto Tuning)</a>
+        <a class="dropdown-item" href="{{ url_for('views.train_custom_nn') }}">Neural Network (Custom)</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="{{ url_for('views.tune_rf') }}">Random Forest (Auto Tuning)</a>
+        <a class="dropdown-item" href="{{ url_for('views.train_custom_rf') }}">Random Forest (Custom)</a>
+        </div>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Test</a>
+        <div class="dropdown-menu">
+        <a class="dropdown-item" href="{{ url_for('views.evaluate_models') }}">Evaluation</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="{{ url_for('views.predict_matches') }}">Predict Matches</a>
+        <a class="dropdown-item" href="{{ url_for('views.predict_fixture') }}">Predict Fixture</a>
+        </div>
+    </li>
+  </ul>
