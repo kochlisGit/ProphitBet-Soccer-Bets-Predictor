@@ -1,37 +1,38 @@
-<nav class="menu">
-    <ul>
-        <li class="menu-item">
-            <a href="#">Application</a>
-            <ul class="submenu">
-                <li><a href="{{ url_for('create_league') }}">Create League</a></li>
-                <li><a href="{{ url_for('load_league') }}">Load League</a></li>
-                <li><a href="{{ url_for('delete_league') }}">Delete League</a></li>
-            </ul>
-        </li>
-        <li class="menu-item">
-            <a>Analysis</a>
-            <ul class="submenu">
-                <li><a href="{{ url_for('plot_correlations') }}">Correlations</a></li>
-                <li><a href="{{ url_for('plot_importance') }}">Feature Importance</a></li>
-                <li><a href="{{ url_for('plot_target_distribution') }}">Classes Distribution</a></li>
-            </ul>
-        </li>
-        <li class="menu-item">
-            <a>Model</a>
-            <ul class="submenu">
-                <li><a href="#">Train</a>
-                    <ul class="submenu">
-                        <li><a href="{{ url_for('tune_nn') }}">Neural Network (Auto Tuning)</a></li>
-                        <li><a href="{{ url_for('train_custom_nn') }}">Neural Network (Custom)</a></li>
-                        <li class="separator"></li>
-                        <li><a href="{{ url_for('tune_rf') }}">Random Forest (Auto Tuning)</a></li>
-                        <li><a href="{{ url_for('train_custom_rf') }}">Random Forest (Custom)</a></li>
-                    </ul>
-                </li>
-                <li><a href="{{ url_for('evaluate_models') }}">Evaluate</a></li>
-                <li><a href="{{ url_for('predict_matches') }}">Predict Matches</a></li>
-                <li><a href="{{ url_for('predict_fixture') }}">Predict Fixture</a></li>
-            </ul>
-        </li>
-    </ul>
-</nav>
+<ul class="nav nav-pills">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dataset</a>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="{{ url_for('create_league') }}">Create League</a>
+        <a class="dropdown-item" href="{{ url_for('load_league') }}">Load League</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="{{ url_for('delete_league') }}">Delete League</a>
+      </div>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Analysis</a>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="{{ url_for('plot_correlations') }}">Correlations</a>
+          <a class="dropdown-item" href="{{ url_for('plot_importance') }}">Feature Importance</a>
+          <a class="dropdown-item" href="{{ url_for('plot_target_distribution') }}">Classes Distribution</a>
+        </div>
+      </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Train</a>
+        <div class="dropdown-menu">
+        <a class="dropdown-item" href="{{ url_for('tune_nn') }}">Neural Network (Auto Tuning)</a>
+        <a class="dropdown-item" href="{{ url_for('train_custom_nn') }}">Neural Network (Custom)</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="{{ url_for('tune_rf') }}">Random Forest (Auto Tuning)</a>
+        <a class="dropdown-item" href="{{ url_for('train_custom_rf') }}">Random Forest (Custom)</a>
+        </div>
+    </li>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Test</a>
+        <div class="dropdown-menu">
+        <a class="dropdown-item" href="{{ url_for('evaluate_models') }}">Evaluation</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="{{ url_for('predict_matches') }}">Predict Matches</a>
+        <a class="dropdown-item" href="{{ url_for('predict_fixture') }}">Predict Fixture</a>
+        </div>
+    </li>
+  </ul>

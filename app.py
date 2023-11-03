@@ -49,20 +49,6 @@ def store_global_context(context):
     global CURRENT_CONTEXT
     CURRENT_CONTEXT = context
 
-real_time_output = []
-
-def capture_output(thread):
-    while thread.is_alive():
-        real_time_output.append("Thread is alive...")
-        time.sleep(1)
-
-def event_stream():
-    while True:
-        if real_time_output:
-            yield "data: " + real_time_output.pop(0) + "\n\n"
-        else:
-            time.sleep(1)
-
 # Define your Flask routes
 @app.route('/')
 def index():
@@ -78,7 +64,7 @@ def create_league():
     form = CreateLeagueForm(league_repository=LEAGUE_REPO)
     if request.method == 'POST' and form.validate():
         league_name, matches_df = form.submit()
-        context = {'matches': matches_df.to_html(classes='table table-bordered', escape=False), 'league_name': league_name}
+        context = {'matches': matches_df, 'league_name': league_name}
         store_global_context(context)
         return render_template('index.html', context=context)
 
