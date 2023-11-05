@@ -52,7 +52,7 @@ def get_league_repo():
 # Define your Flask routes
 @views.route('/', methods=['GET', 'POST'])
 @login_required
-def index():
+def home():
     if request.method == 'POST':
         note = request.form.get('note')#Gets the note from the HTML
 
@@ -73,9 +73,8 @@ def create_league():
     form = CreateLeagueForm(league_repository=LEAGUE_REPO)
     if request.method == 'POST' and form.validate():
         league_name, matches_df = form.submit()
-        #session['matches'] = matches_df.to_json()
         session['league_name'] = league_name
-        return render_template('index.html', session=session, user=current_user)
+        return render_template('index.html', session=session, user=current_user, matches=matches_df)
 
     return render_template('create_league.html', form=form, user=current_user)
 

@@ -5,6 +5,11 @@ from database.repositories.league import LeagueRepository
 import pandas as pd
 from website import db
 from website.models import League
+from database.network.netutils import check_internet_connection
+from database.network.footballdata.extra import ExtraLeagueAPI
+from database.network.footballdata.main import MainLeagueAPI
+from preprocessing.statistics import StatisticsEngine
+
 
 
 class CreateLeagueForm(FlaskForm):
@@ -34,8 +39,12 @@ class CreateLeagueForm(FlaskForm):
 
     def submit(self) -> (str, pd.DataFrame):
         league_name = self.league_name.data
-        if not self._league_repository.league_exists(league_name=league_name):
+        if not self._league_exists(league_name):
             return self._store_league()
+        return (None, None)
+
+    def _league_exists(self, league_name):
+        return db.session.query(League.name).filter_by(name=league_name).first() is not None
 
 
     def _store_league(self) -> (str, pd.DataFrame):
@@ -46,7 +55,6 @@ class CreateLeagueForm(FlaskForm):
         selected_league_split = self.selected_league.data.replace(' ', '').split('-', maxsplit=1)
         selected_home_columns = self.home_columns.raw_data
         selected_away_columns = self.away_columns.raw_data
-        breakpoint()
         new_league = League(country=selected_league_split[0],
                             name=league_name,
                             last_n_matches=last_n_matches,
@@ -54,21 +62,34 @@ class CreateLeagueForm(FlaskForm):
                             statistic_columns= "::".join(selected_home_columns + selected_away_columns))
         db.session.add(new_league)
         db.session.commit()
-        matches_df, league = self._league_repository.create_league(
+        matches_df = self._create_dataset(
             league=self._all_leagues[(selected_league_split[0], selected_league_split[1])],
             last_n_matches=last_n_matches,
             goal_diff_margin=goal_diff_margin,
             statistic_columns=selected_home_columns + selected_away_columns,
             league_name=league_name
         )
+        matches_df.to_sql(league_name, db.engine)
 
-        if matches_df is None:
-            messagebox.showerror(
-                'Internet Connection Error',
-                'Application cannot connect to the internet. Check internet connection'
-            )
-        else:
-            return (league_name, matches_df)
+        return (league_name, matches_df)
+
+    def _create_dataset(
+            self,
+            league: League,
+            last_n_matches: int,
+            goal_diff_margin: int,
+            statistic_columns: list,
+            league_name: str
+    ) -> pd.DataFrame or None:
+        if check_internet_connection():
+            matches_df = MainLeagueAPI().download(league=league)
+
+            matches_df = StatisticsEngine(matches_df=matches_df,
+                                          last_n_matches=last_n_matches,
+                                          goal_diff_margin=goal_diff_margin
+                                          ).compute_statistics(statistic_columns=statistic_columns)
+            return matches_df
+        return None
 
 
 class LoadLeagueForm(FlaskForm):
