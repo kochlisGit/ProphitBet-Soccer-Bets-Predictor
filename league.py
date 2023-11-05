@@ -1,22 +1,27 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectMultipleField, SelectField, IntegerField, BooleanField
 from wtforms.validators import InputRequired, NoneOf
-from database.repositories.league import LeagueRepository
 import pandas as pd
 from website import db
-from website.models import League
+from website.models import League, AvailableLeague
 from database.network.netutils import check_internet_connection
-from database.network.footballdata.extra import ExtraLeagueAPI
 from database.network.footballdata.main import MainLeagueAPI
 from preprocessing.statistics import StatisticsEngine
 
-from sqlalchemy import MetaData, select, text
+from sqlalchemy import MetaData, text
 from sqlalchemy.ext.declarative import declarative_base
 
 
 class LeagueForm(FlaskForm):
+
+    def _get_all_available_leagues(self) -> dict:
+        return {(al.country, al.name): al for al in AvailableLeague.query.all()}
+
     def _get_all_saved_league_names(self):
         return [l.name for l in League.query.all()]
+
+    def _get_all_available_columns(self):
+        return StatisticsEngine.Columns
 
     def _league_exists(self):
         return db.session.query(League.name).filter_by(name=self.selected_league.data).first() is not None
@@ -64,16 +69,15 @@ class CreateLeagueForm(LeagueForm):
     home_columns = SelectMultipleField('Home Columns')
     away_columns = SelectMultipleField('Away Columns')
 
-    def __init__(self, league_repository: LeagueRepository,  *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(CreateLeagueForm, self).__init__(*args, **kwargs)
-        self._league_repository = league_repository
         self.league_name.validators=[InputRequired(),
                                      NoneOf(values=self._get_all_saved_league_names(),
                                             message="Name already exists")]
-        self._all_leagues = league_repository.get_all_available_leagues()
+        self._all_leagues = self._get_all_available_leagues()
         self.selected_league.choices = ["-".join(league) for league in self._all_leagues]
         self.selected_league.default = 10
-        all_columns = league_repository.get_all_available_columns()
+        all_columns = self._get_all_available_columns()
         self._home_columns = [col for col in all_columns if col[0] =='H']
         self._away_columns = [col for col in all_columns if col[0] == 'A']
         self.home_columns.choices = [(col, col) for col in self._home_columns]

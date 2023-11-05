@@ -9,7 +9,6 @@ from flask import render_template, request, session
 from league import CreateLeagueForm, LoadLeagueForm, DeleteLeagueForm
 from plots import CorrelationPlotter, ClassDistributionPlotter, ImportancePlotter
 from model.tuning import TuningRFForm
-from database.repositories.league import LeagueRepository
 from database.repositories.model import ModelRepository
 import variables
 from pandas import DataFrame
@@ -17,7 +16,6 @@ import matplotlib
 matplotlib.use('agg')
 
 views = Blueprint('views', __name__)
-
 
 @views.route('/delete-note', methods=['POST'])
 def delete_note():  
@@ -46,29 +44,23 @@ def get_model_repo():
         MODEL_REPO = ModelRepository(models_checkpoint_directory=variables.models_checkpoint_directory)
     return MODEL_REPO
 
-def get_league_repo():
-    global LEAGUE_REPO
-    if not LEAGUE_REPO:
-        LEAGUE_REPO = LeagueRepository(
-            available_leagues_filepath=variables.available_leagues_filepath,
-            saved_leagues_directory=variables.saved_leagues_directory
-        )
-    return LEAGUE_REPO
 
 # Define your Flask routes
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
     if session:
-        matches = get_league_matches(session['league_name'])
-
+        try:
+            matches = get_league_matches(session['league_name'])
+        except KeyError:
+            flash("Load league please", "error")
+            return render_template("home.html", user=current_user)
     return render_template("home.html", user=current_user, matches=matches)
 
 
 @views.route('/create_league', methods=['GET', 'POST'])
 def create_league():
-    LEAGUE_REPO = get_league_repo()
-    form = CreateLeagueForm(league_repository=LEAGUE_REPO)
+    form = CreateLeagueForm()
     if request.method == 'POST' and form.validate():
         league_name, matches_df = form.submit()
         session['league_name'] = league_name
@@ -89,8 +81,7 @@ def load_league():
 
 @views.route('/delete_league', methods=['GET', 'POST'])
 def delete_league():
-    LEAGUE_REPO = get_league_repo()
-    form = DeleteLeagueForm(league_repository=LEAGUE_REPO)
+    form = DeleteLeagueForm()
     if request.method == 'POST' and form.validate():
         form.submit()
         return render_template('delete_league.html', form=form, user=current_user)

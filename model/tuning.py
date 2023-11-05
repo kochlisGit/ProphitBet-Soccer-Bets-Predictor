@@ -9,9 +9,7 @@ from abc import abstractmethod
 from typing import Callable
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from database.repositories.model import ModelRepository
-from gui.dialogs.dialog import Dialog
 from gui.dialogs.model.utils import display_eval_metrics
-from gui.widgets.utils import create_tooltip_btn, validate_float_positive_entry
 from models.model import Model
 from models.scikit.rf import RandomForest
 from models.tf.nn import FCNet
