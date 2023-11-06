@@ -18,6 +18,11 @@ class User(db.Model, UserMixin):
     notes = db.relationship('Note')
     league = db.relationship('League')
 
+class mlModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    league = db.relationship('League')
+
 
 class League(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -27,6 +32,8 @@ class League(db.Model):
     goal_diff_margin = db.Column(db.Integer)
     statistic_columns = db.Column(db.String(1000))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    model_id = db.Column(db.Integer, db.ForeignKey('model.id'))
+
 
 class AvailableLeague(db.Model):
     id = db.Column(db.Integer, primary_key=True)

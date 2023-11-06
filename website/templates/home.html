@@ -2,9 +2,8 @@
 
 {% block content %}
     {% if session is defined %}
-        <body>
-            <h1>{{ session.league_name}}</h1>
             {% if matches is defined %}
+                <h1>{{ session.league_name}}</h1>
                 <table class="table table-dark">
                     {{ matches.to_html(classes='table table-bordered', escape=False) | safe }}
                 </table>
@@ -12,5 +11,4 @@
                 <h1>No data to display.</h1>
             {% endif %}
     {% endif %}
-
 {% endblock %}

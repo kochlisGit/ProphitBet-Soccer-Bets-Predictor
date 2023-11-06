@@ -2,18 +2,16 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SelectMultipleField, SelectField, IntegerField, BooleanField
 from wtforms.validators import InputRequired, NoneOf
 import pandas as pd
-from website import db
+from website.dbwrapper import DBWrapper
 from website.models import League, AvailableLeague
 from database.network.netutils import check_internet_connection
 from database.network.footballdata.main import MainLeagueAPI
 from preprocessing.statistics import StatisticsEngine
 
-from sqlalchemy import MetaData, text
-from sqlalchemy.ext.declarative import declarative_base
 
 
 class LeagueForm(FlaskForm):
-
+    db = DBWrapper()
     def _get_all_available_leagues(self) -> dict:
         return {(al.country, al.name): al for al in AvailableLeague.query.all()}
 
@@ -24,23 +22,7 @@ class LeagueForm(FlaskForm):
         return StatisticsEngine.Columns
 
     def _league_exists(self):
-        return db.session.query(League.name).filter_by(name=self.selected_league.data).first() is not None
-
-    def _delete_league(self):
-        league_name = self.selected_league.data
-        db.session.delete(League.query.filter_by(name=league_name).first())
-        db.session.commit()
-        self._drop_league_table()
-        self.selected_league.choices.remove(league_name)
-
-    def _drop_league_table(self):
-        table_name = self.selected_league.data
-        Base = declarative_base()
-        metadata = MetaData()
-        metadata.reflect(bind=db.engine)
-        table = metadata.tables[table_name]
-        if table is not None:
-            Base.metadata.drop_all(db.engine, [table], checkfirst=True)
+        return self.db.league_exists(self.selected_league.data)
 
     def _create_dataset(
             self,
@@ -55,7 +37,7 @@ class LeagueForm(FlaskForm):
                                           last_n_matches=last_n_matches,
                                           goal_diff_margin=goal_diff_margin
                                           ).compute_statistics(statistic_columns=statistic_columns)
-            matches_df.to_sql(self.league_name.data, db.engine)
+            self.db.create_table_from_dataframe(matches_df, self.league_name.data)
             return matches_df
         return None
 
@@ -103,8 +85,7 @@ class CreateLeagueForm(LeagueForm):
                             last_n_matches=last_n_matches,
                             goal_diff_margin=goal_diff_margin,
                             statistic_columns= "::".join(selected_home_columns + selected_away_columns))
-        db.session.add(new_league)
-        db.session.commit()
+        self.db.insert_league(new_league)
         matches_df = self._create_dataset(
             league=self._all_leagues[(selected_league_split[0], selected_league_split[1])],
             last_n_matches=last_n_matches,
@@ -113,23 +94,6 @@ class CreateLeagueForm(LeagueForm):
         )
 
         return (league_name, matches_df)
-
-    def _create_dataset(
-            self,
-            league: League,
-            last_n_matches: int,
-            goal_diff_margin: int,
-            statistic_columns: list) -> pd.DataFrame or None:
-        if check_internet_connection():
-            matches_df = MainLeagueAPI().download(league=league)
-
-            matches_df = StatisticsEngine(matches_df=matches_df,
-                                          last_n_matches=last_n_matches,
-                                          goal_diff_margin=goal_diff_margin
-                                          ).compute_statistics(statistic_columns=statistic_columns)
-            matches_df.to_sql(self.league_name.data, db.engine)
-            return matches_df
-        return None
 
 
 class LoadLeagueForm(LeagueForm):
@@ -146,10 +110,7 @@ class LoadLeagueForm(LeagueForm):
 
     def _load_league(self) -> pd.DataFrame or None:
         if self._league_exists():
-            query = text(f"SELECT * FROM '{self.selected_league.data}'")
-            result = db.session.execute(query).fetchall()
-            matches_df = pd.DataFrame(list(result))
-            return matches_df
+            return self.db.create_dataframe_from_table(self.selected_league.data)
         else:
             return None
 
@@ -164,3 +125,9 @@ class DeleteLeagueForm(LeagueForm):
 
     def submit(self):
         self._delete_league()
+
+    def _delete_league(self):
+        league_name = self.selected_league.data
+        self.db.delete_league(league_name)
+        self.db.drop_table(league_name)
+        self.selected_league.choices.remove(league_name)

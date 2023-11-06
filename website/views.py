@@ -1,39 +1,19 @@
-from flask import Blueprint, render_template, request, flash, jsonify
+from flask import Blueprint, render_template, request, flash
 from flask_login import login_required, current_user
-from .models import Note
-from . import db
-import json
 
-from sqlalchemy import text
 from flask import render_template, request, session
 from league import CreateLeagueForm, LoadLeagueForm, DeleteLeagueForm
 from plots import CorrelationPlotter, ClassDistributionPlotter, ImportancePlotter
 from model.tuning import TuningRFForm
 from database.repositories.model import ModelRepository
 import variables
-from pandas import DataFrame
+from .dbwrapper import DBWrapper
 import matplotlib
 matplotlib.use('agg')
 
 views = Blueprint('views', __name__)
 
-@views.route('/delete-note', methods=['POST'])
-def delete_note():  
-    note = json.loads(request.data) # this function expects a JSON from the INDEX.js file 
-    noteId = note['noteId']
-    note = Note.query.get(noteId)
-    if note:
-        if note.user_id == current_user.id:
-            db.session.delete(note)
-            db.session.commit()
-
-    return jsonify({})
-
-def get_league_matches(league_name):
-    query = text(f"SELECT * FROM '{league_name}'")
-    result = db.session.execute(query).fetchall()
-    return DataFrame(list(result))
-
+db = DBWrapper()
 MODEL_REPO = None
 LEAGUE_REPO = None
 
@@ -49,13 +29,11 @@ def get_model_repo():
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
-    if session:
-        try:
-            matches = get_league_matches(session['league_name'])
-        except KeyError:
-            flash("Load league please", "error")
-            return render_template("home.html", user=current_user)
-    return render_template("home.html", user=current_user, matches=matches)
+    if session and db.league_exists(session.get('league_name', None)):
+        matches = db.get_league_matches(session['league_name'])
+        return render_template("home.html", user=current_user, matches=matches)
+    flash("Load or create league please", "error")
+    return render_template("home.html", user=current_user)
 
 
 @views.route('/create_league', methods=['GET', 'POST'])
@@ -84,13 +62,14 @@ def delete_league():
     form = DeleteLeagueForm()
     if request.method == 'POST' and form.validate():
         form.submit()
+        session['league_name'] = None
         return render_template('delete_league.html', form=form, user=current_user)
     return render_template('delete_league.html', form=form, user=current_user)
 
 @views.route('/plot_correlations', methods=['GET', 'POST'])
 def plot_correlations():
     if session:
-        matches = get_league_matches(session['league_name'])
+        matches = db.get_league_matches(session['league_name'])
         form = CorrelationPlotter(matches)
         if request.method == 'POST' :
             img = form.generate_image()
@@ -102,7 +81,7 @@ def plot_correlations():
 @views.route('/plot_importance', methods=['GET', 'POST'])
 def plot_importance():
     if session:
-        matches = get_league_matches(session['league_name'])
+        matches = db.get_league_matches(session['league_name'])
         form = ImportancePlotter(matches)
         if request.method == 'POST' :
             img = form.generate_image()
@@ -114,7 +93,7 @@ def plot_importance():
 @views.route('/plot_target_distribution')
 def plot_target_distribution():
     if session:
-        matches = get_league_matches(session['league_name'])
+        matches = db.get_league_matches(session['league_name'])
         form = ClassDistributionPlotter(matches)
         img = form.generate_image()
         return render_template('plot_classes.html', image_data=img, user=current_user)
@@ -135,7 +114,7 @@ def train_custom_nn():
 def tune_rf():
     # Handle the 'Random Forest (Auto Tuning)' action here
     if session:
-        matches = get_league_matches(session['league_name'])
+        matches = db.get_league_matches(session['league_name'])
         league_name = session["league_name"]
         form = TuningRFForm(get_model_repo(), league_name, 0, matches)
         if request.method == 'POST' :
