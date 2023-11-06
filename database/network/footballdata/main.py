@@ -1,11 +1,10 @@
 import pandas as pd
 from datetime import date
-from database.entities.league import League
 from database.network.footballdata.api import FootballDataAPI
-
+from website.models import AvailableLeague
 
 class MainLeagueAPI(FootballDataAPI):
-    def _download(self, league: League) -> pd.DataFrame:
+    def _download(self, league: AvailableLeague) -> pd.DataFrame:
         url_list = self._generate_url_list(league=league)
         league_matches_dfs = []
 
@@ -38,7 +37,7 @@ class MainLeagueAPI(FootballDataAPI):
     def _get_url_year_format(year: int):
         return f'{str(year)[2:]}{str(year + 1)[2:]}'
 
-    def _generate_url_list(self, league: League):
+    def _generate_url_list(self, league: AvailableLeague):
         return [
             league.url.format(self._get_url_year_format(year=year))
             for year in range(league.year_start, date.today().year + 1)

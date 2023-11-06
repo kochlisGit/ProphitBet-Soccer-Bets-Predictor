@@ -1,11 +1,11 @@
 import pandas as pd
 from abc import ABC, abstractmethod
 from datetime import date
-from database.entities.league import League
+from website.models import AvailableLeague
 
 
 class FootballDataAPI(ABC):
-    def download(self, league: League) -> pd.DataFrame:
+    def download(self, league: AvailableLeague) -> pd.DataFrame:
         matches_df = self._download(league=league)
         matches_df = self._process_features(matches_df=matches_df)
         matches_df = matches_df.drop_duplicates()
@@ -13,7 +13,7 @@ class FootballDataAPI(ABC):
         return matches_df
 
     @abstractmethod
-    def _download(self, league: League) -> pd.DataFrame:
+    def _download(self, league: AvailableLeague) -> pd.DataFrame:
         pass
 
     @abstractmethod

@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectMultipleField, SelectField, IntegerField, BooleanField
 from wtforms.validators import InputRequired, NoneOf
+from flask_login import current_user
 import pandas as pd
 from website.dbwrapper import DBWrapper
 from website.models import League, AvailableLeague
@@ -84,7 +85,8 @@ class CreateLeagueForm(LeagueForm):
                             name=league_name,
                             last_n_matches=last_n_matches,
                             goal_diff_margin=goal_diff_margin,
-                            statistic_columns= "::".join(selected_home_columns + selected_away_columns))
+                            statistic_columns= "::".join(selected_home_columns + selected_away_columns),
+                            user_id=current_user.id)
         self.db.insert_league(new_league)
         matches_df = self._create_dataset(
             league=self._all_leagues[(selected_league_split[0], selected_league_split[1])],

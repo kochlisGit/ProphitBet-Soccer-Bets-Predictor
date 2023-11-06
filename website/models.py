@@ -18,10 +18,10 @@ class User(db.Model, UserMixin):
     notes = db.relationship('Note')
     league = db.relationship('League')
 
+
 class mlModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
-    league = db.relationship('League')
+    league_id = db.Column(db.Integer, db.ForeignKey('league.id'))
 
 
 class League(db.Model):
@@ -31,8 +31,8 @@ class League(db.Model):
     last_n_matches = db.Column(db.Integer)
     goal_diff_margin = db.Column(db.Integer)
     statistic_columns = db.Column(db.String(1000))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    model_id = db.Column(db.Integer, db.ForeignKey('model.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    ml_model = db.relationship('mlModel')
 
 
 class AvailableLeague(db.Model):
@@ -43,6 +43,7 @@ class AvailableLeague(db.Model):
     year_start = db.Column(db.Integer)
     url = db.Column(db.String(300))
     fixtures_url = db.Column(db.String(300))
+
 
 @event.listens_for(User.__table__, 'after_create')
 def create_users(*args, **kwargs):

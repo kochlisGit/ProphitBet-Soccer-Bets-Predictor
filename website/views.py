@@ -2,9 +2,9 @@ from flask import Blueprint, render_template, request, flash
 from flask_login import login_required, current_user
 
 from flask import render_template, request, session
-from league import CreateLeagueForm, LoadLeagueForm, DeleteLeagueForm
-from plots import CorrelationPlotter, ClassDistributionPlotter, ImportancePlotter
-from model.tuning import TuningRFForm
+from website.league import CreateLeagueForm, LoadLeagueForm, DeleteLeagueForm
+from website.plots import CorrelationPlotter, ClassDistributionPlotter, ImportancePlotter
+from website.tuning import TuningRFForm
 from database.repositories.model import ModelRepository
 import variables
 from .dbwrapper import DBWrapper

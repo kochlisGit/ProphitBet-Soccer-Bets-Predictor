@@ -12,10 +12,8 @@ from database.repositories.model import ModelRepository
 from gui.dialogs.model.utils import display_eval_metrics
 from models.model import Model
 from models.scikit.rf import RandomForest
-from models.tf.nn import FCNet
 from tuners.tuner import Tuner
 from tuners.scikit.rf import RandomForestTuner
-from tuners.tf.nn import FCNetTuner
 from wtforms import SelectField, IntegerField
 
 
