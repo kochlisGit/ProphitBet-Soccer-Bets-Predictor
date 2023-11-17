@@ -9,4 +9,4 @@ class ClassDistributionAnalyzer(FeatureAnalyzer):
 
     def plot(self, ax, **kwargs):
         targets = self.targets
-        seaborn.barplot(x=['H', 'D', 'A'], y=targets.value_counts(), color=None, ax=ax)
+        seaborn.barplot(x=["H", "D", "A"], y=targets.value_counts(), color=None, ax=ax)

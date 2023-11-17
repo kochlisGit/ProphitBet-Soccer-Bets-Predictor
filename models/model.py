@@ -46,18 +46,18 @@ class Model(ABC):
         pass
 
     def train(
-            self,
-            x_train: np.ndarray,
-            y_train: np.ndarray,
-            x_test: np.ndarray,
-            y_test: np.ndarray,
-            use_over_sampling: bool
+        self,
+        x_train: np.ndarray,
+        y_train: np.ndarray,
+        x_test: np.ndarray,
+        y_test: np.ndarray,
+        use_over_sampling: bool,
     ) -> dict:
         if use_over_sampling:
             x_train, y_train = SVMSMOTE(
                 n_jobs=-1,
                 random_state=self.random_seed,
-                svm_estimator=SVC(random_state=self.random_seed)
+                svm_estimator=SVC(random_state=self.random_seed),
             ).fit_resample(x_train, y_train)
 
         self._train(x_train=x_train, y_train=y_train, x_test=x_test, y_test=y_test)
@@ -65,11 +65,11 @@ class Model(ABC):
 
     @abstractmethod
     def _train(
-            self,
-            x_train: np.ndarray,
-            y_train: np.ndarray,
-            x_test: np.ndarray,
-            y_test: np.ndarray
+        self,
+        x_train: np.ndarray,
+        y_train: np.ndarray,
+        x_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         pass
 
@@ -81,17 +81,25 @@ class Model(ABC):
         y_actual = np.argmax(y_true, axis=1) if y_true.ndim != 1 else y_true
         y_pred, _ = self.predict(x=x_test)
 
-        acc = round(accuracy_score(y_true=y_actual, y_pred=y_pred)*100, 2)
+        acc = round(accuracy_score(y_true=y_actual, y_pred=y_pred) * 100, 2)
         f1 = {
-            target: round(score*100, 2)
-            for target, score in zip(['H', 'D', 'A'], f1_score(y_true=y_actual, y_pred=y_pred, average=None))
+            target: round(score * 100, 2)
+            for target, score in zip(
+                ["H", "D", "A"], f1_score(y_true=y_actual, y_pred=y_pred, average=None)
+            )
         }
         precision = {
-            target: round(score*100, 2)
-            for target, score in zip(['H', 'D', 'A'], precision_score(y_true=y_actual, y_pred=y_pred, average=None))
+            target: round(score * 100, 2)
+            for target, score in zip(
+                ["H", "D", "A"],
+                precision_score(y_true=y_actual, y_pred=y_pred, average=None),
+            )
         }
         recall = {
-            target: round(score*100, 2)
-            for target, score in zip(['H', 'D', 'A'], recall_score(y_true=y_actual, y_pred=y_pred, average=None))
+            target: round(score * 100, 2)
+            for target, score in zip(
+                ["H", "D", "A"],
+                recall_score(y_true=y_actual, y_pred=y_pred, average=None),
+            )
         }
-        return {'Accuracy': acc, 'F1': f1, 'Precision': precision, 'Recall': recall}
+        return {"Accuracy": acc, "F1": f1, "Precision": precision, "Recall": recall}

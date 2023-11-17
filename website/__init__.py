@@ -10,15 +10,15 @@ MODELS_DIR = "models"
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    app.config["SECRET_KEY"] = "hjshjhdjah kjshkjdhjs"
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
     db.init_app(app)
 
     from .views import views
     from .auth import auth
 
-    app.register_blueprint(views, url_prefix='/')
-    app.register_blueprint(auth, url_prefix='/')
+    app.register_blueprint(views, url_prefix="/")
+    app.register_blueprint(auth, url_prefix="/")
 
     from .models import User
 
@@ -28,7 +28,7 @@ def create_app():
     create_storage_folders()
 
     login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = "auth.login"
     login_manager.init_app(app)
 
     @login_manager.user_loader
@@ -39,5 +39,5 @@ def create_app():
 
 
 def create_storage_folders():
-    if not path.exists('instance/' + MODELS_DIR):
-        mkdir('instance/' + MODELS_DIR)
+    if not path.exists("instance/" + MODELS_DIR):
+        mkdir("instance/" + MODELS_DIR)

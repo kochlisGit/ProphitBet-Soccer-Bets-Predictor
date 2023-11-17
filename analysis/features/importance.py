@@ -21,14 +21,15 @@ class ImportanceAnalyzer(FeatureAnalyzer):
             self._class_weights_model = XGBRFClassifier(random_state=0, n_jobs=-1)
             self._class_weights_model.fit(self.inputs, self.targets)
 
-        weights = self._class_weights_model.get_booster().get_score(importance_type='weight')
+        weights = self._class_weights_model.get_booster().get_score(
+            importance_type="weight"
+        )
         self.plot(x=list(weights.values()), y=list(weights.keys()), ax=ax)
 
     def plot_feature_elimination_importance(self, ax):
         if self._rfe_model is None:
             self._rfe_model = RFE(
-                estimator=XGBRFClassifier(random_state=0, n_jobs=-1),
-                step=1
+                estimator=XGBRFClassifier(random_state=0, n_jobs=-1), step=1
             )
             self._rfe_model.fit(self._inputs, self.targets)
 
@@ -43,7 +44,7 @@ class ImportanceAnalyzer(FeatureAnalyzer):
 
     def plot_univariate_test_importance(self, ax):
         if self._best_model is None:
-            self._best_model = SelectKBest(score_func=f_classif, k='all')
+            self._best_model = SelectKBest(score_func=f_classif, k="all")
             self._best_model.fit(self._inputs, self.targets)
 
         self.plot(x=self._best_model.scores_, y=self.columns, ax=ax)

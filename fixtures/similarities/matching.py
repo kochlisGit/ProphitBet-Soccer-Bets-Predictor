@@ -1,7 +1,9 @@
 from fuzzywuzzy import process
 
 
-def match_fixture_teams(fix_home_teams: list, fix_away_teams: list, unique_league_teams: set) -> (list, list):
+def match_fixture_teams(
+    fix_home_teams: list, fix_away_teams: list, unique_league_teams: set
+) -> (list, list):
     available_league_teams = unique_league_teams.copy()
     team_similarity_dict = {}
 

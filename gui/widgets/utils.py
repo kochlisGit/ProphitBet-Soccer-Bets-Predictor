@@ -4,7 +4,7 @@ from gui.widgets.tooltip import ToolTip
 
 
 def validate_float_entry(new_value: str) -> bool:
-    if new_value == '':
+    if new_value == "":
         return True
     else:
         try:
@@ -15,7 +15,7 @@ def validate_float_entry(new_value: str) -> bool:
 
 
 def validate_float_positive_entry(new_value: str) -> bool:
-    if new_value == '':
+    if new_value == "":
         return True
     else:
         try:
@@ -25,9 +25,8 @@ def validate_float_positive_entry(new_value: str) -> bool:
             return False
 
 
-
 def validate_int_entry(new_value: str) -> bool:
-    if new_value == '':
+    if new_value == "":
         return True
     else:
         try:
@@ -38,7 +37,7 @@ def validate_int_entry(new_value: str) -> bool:
 
 
 def validate_int_positive_entry(new_value: str) -> bool:
-    if new_value == '':
+    if new_value == "":
         return True
     else:
         try:
@@ -49,9 +48,9 @@ def validate_int_positive_entry(new_value: str) -> bool:
 
 
 def create_tooltip_btn(root, x: int, y: int, text: str):
-    button = Button(root, text='?', width=2, takefocus=False)
+    button = Button(root, text="?", width=2, takefocus=False)
     button.place(x=x, y=y)
 
     tooltip = ToolTip(widget=button)
-    button.bind('<Enter>', lambda event: tooltip.showtip(text))
-    button.bind('<Leave>', lambda event: tooltip.hidetip())
+    button.bind("<Enter>", lambda event: tooltip.showtip(text))
+    button.bind("<Leave>", lambda event: tooltip.hidetip())

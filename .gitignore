@@ -161,5 +161,6 @@ cython_debug/
 
 # General
 .DS_Store
+.vscode
 database/storage/
 !database/storage/leagues/available_leagues.csv

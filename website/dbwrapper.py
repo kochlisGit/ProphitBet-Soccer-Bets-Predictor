@@ -6,6 +6,7 @@ from .models import League
 from sqlalchemy import MetaData, text
 from sqlalchemy.ext.declarative import declarative_base
 
+
 class DBWrapper:
     def get_league_matches(self, league_name: str):
         query = text(f"SELECT * FROM '{league_name}'")
@@ -13,7 +14,10 @@ class DBWrapper:
         return DataFrame(list(result))
 
     def league_exists(self, league_name: str):
-        return db.session.query(League.name).filter_by(name=league_name).first() is not None
+        return (
+            db.session.query(League.name).filter_by(name=league_name).first()
+            is not None
+        )
 
     def insert_league(self, league: League):
         db.session.add(league)
