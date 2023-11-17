@@ -81,6 +81,16 @@ class CreateLeagueForm(LeagueForm):
         selected_league_split = self.selected_league.data.replace(' ', '').split('-', maxsplit=1)
         selected_home_columns = self.home_columns.raw_data
         selected_away_columns = self.away_columns.raw_data
+
+        matches_df = self._create_dataset(
+            league=self._all_leagues[(selected_league_split[0], selected_league_split[1])],
+            last_n_matches=last_n_matches,
+            goal_diff_margin=goal_diff_margin,
+            statistic_columns=selected_home_columns + selected_away_columns,
+        )
+        if not isinstance(matches_df, pd.DataFrame):
+            return (league_name, None)
+
         new_league = League(country=selected_league_split[0],
                             name=league_name,
                             last_n_matches=last_n_matches,
@@ -88,12 +98,6 @@ class CreateLeagueForm(LeagueForm):
                             statistic_columns= "::".join(selected_home_columns + selected_away_columns),
                             user_id=current_user.id)
         self.db.insert_league(new_league)
-        matches_df = self._create_dataset(
-            league=self._all_leagues[(selected_league_split[0], selected_league_split[1])],
-            last_n_matches=last_n_matches,
-            goal_diff_margin=goal_diff_margin,
-            statistic_columns=selected_home_columns + selected_away_columns,
-        )
 
         return (league_name, matches_df)
 

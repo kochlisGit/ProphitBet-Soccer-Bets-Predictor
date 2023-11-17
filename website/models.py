@@ -2,6 +2,7 @@ from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
 from sqlalchemy import event
+from werkzeug.security import generate_password_hash
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,7 +48,7 @@ class AvailableLeague(db.Model):
 
 @event.listens_for(User.__table__, 'after_create')
 def create_users(*args, **kwargs):
-    db.session.add(User(first_name='maci', email='abc@lol.com', password='1234567'))
+    db.session.add(User(first_name='maci', email='abc@lol.com', password=generate_password_hash('1234567')))
     db.session.commit()
 
 

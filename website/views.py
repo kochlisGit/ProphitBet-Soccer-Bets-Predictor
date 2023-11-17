@@ -42,8 +42,10 @@ def create_league():
     if request.method == 'POST' and form.validate():
         league_name, matches_df = form.submit()
         session['league_name'] = league_name
-        return render_template('home.html', session=session, user=current_user, matches=matches_df)
-
+        if matches_df is not None:
+            return render_template('home.html', session=session, user=current_user, matches=matches_df)
+        else:
+            flash("Dataset not created, no connection to internet")
     return render_template('create_league.html', form=form, user=current_user)
 
 
