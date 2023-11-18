@@ -1,18 +1,19 @@
-from flask import Blueprint, render_template, request, flash
-from flask_login import login_required, current_user
+import matplotlib
+from flask import Blueprint, flash, render_template, request, session
+from flask_login import current_user, login_required
 
-from flask import render_template, request, session
-from website.league import CreateLeagueForm, LoadLeagueForm, DeleteLeagueForm
+import variables
+from database.repositories.model import ModelRepository
+from website.league import CreateLeagueForm, DeleteLeagueForm, LoadLeagueForm
 from website.plots import (
-    CorrelationPlotter,
     ClassDistributionPlotter,
+    CorrelationPlotter,
     ImportancePlotter,
 )
-from website.tuning import TuningRFForm
-from database.repositories.model import ModelRepository
-import variables
+from website.training import CustomTrainNNForm, CustomTrainRFForm
+from website.tuning import TuningNNForm, TuningRFForm
+
 from .dbwrapper import DBWrapper
-import matplotlib
 
 matplotlib.use("agg")
 
@@ -122,21 +123,41 @@ def plot_target_distribution():
     # Handle the 'Target Distribution' action here
 
 
-@views.route("/tune_nn")
+@views.route("/tune_nn", methods=["GET", "POST"])
 def tune_nn():
-    return "Neural Network (Auto Tuning) page"
-    # Handle the 'Neural Network (Auto Tuning)' action here
+    if session:
+        matches = db.get_league_matches(session["league_name"])
+        league_name = session["league_name"]
+        form = TuningNNForm(get_model_repo(), league_name, 0, matches)
+        if request.method == "POST":
+            img = form.submit_tuning()
+            return render_template(
+                "tuning_model.html", image_data=img, form=form, user=current_user
+            )
+        return render_template("tuning_model.html", form=form, user=current_user)
+
+    return render_template("home.html")
 
 
-@views.route("/train_custom_nn")
+@views.route("/train_custom_nn", methods=["GET", "POST"])
 def train_custom_nn():
-    # Handle the 'Neural Network (Custom)' action here
-    return "Neural Network (Custom) page"
+    if session:
+        matches = db.get_league_matches(session["league_name"])
+        league_name = session["league_name"]
+        form = CustomTrainNNForm(get_model_repo(), league_name, matches, 0)
+        if request.method == "POST":
+            form_validation = form.submit_training()
+            flash(form_validation)
+            return render_template(
+                "training_model.html", form_validation=form_validation, form=form, user=current_user
+            )
+        return render_template("training_model.html", form=form, user=current_user)
+
+    return render_template("home.html")
 
 
 @views.route("/tune_rf", methods=["GET", "POST"])
 def tune_rf():
-    # Handle the 'Random Forest (Auto Tuning)' action here
     if session:
         matches = db.get_league_matches(session["league_name"])
         league_name = session["league_name"]

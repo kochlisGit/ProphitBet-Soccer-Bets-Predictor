@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<body>
+    <h1>Training model</h1>
+
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {% for field in form %}
+        <div>
+            {{ field.label }}
+            {{ field }}
+        </div>
+        {% endfor %}
+
+        <div>
+            <button type="submit">Tune</button>
+        </div>
+    </form>
+
+</body>
+{% endblock %}

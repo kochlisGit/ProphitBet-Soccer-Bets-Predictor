@@ -1,20 +1,20 @@
-from wtforms import SelectField
-from wtforms.validators import InputRequired
-from flask_wtf import FlaskForm
-
 import threading
-import numpy as np
-import pandas as pd
 from abc import abstractmethod
 from typing import Callable
+
+import numpy as np
+import pandas as pd
+from flask_wtf import FlaskForm
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from wtforms import FloatField, IntegerField, SelectField
+from wtforms.validators import InputRequired
+
 from database.repositories.model import ModelRepository
 from gui.dialogs.model.utils import display_eval_metrics
 from models.model import Model
 from models.scikit.rf import RandomForest
-from tuners.tuner import Tuner
 from tuners.scikit.rf import RandomForestTuner
-from wtforms import SelectField, IntegerField
+from tuners.tuner import Tuner
 
 
 class TuningForm(FlaskForm):
@@ -168,10 +168,6 @@ class TuningRFForm(TuningForm):
             one_hot=False,
         )
 
-        self._text = None
-
-    def _initialize(self):
-        pass
 
     def _construct_tuner(
         self,
@@ -202,6 +198,104 @@ class TuningRFForm(TuningForm):
             bootstrap=best_params["bootstrap"],
             class_weight=best_params["class_weight"],
             is_calibrated=best_params["is_calibrated"],
+        )
+
+    def _display_best_params(self, best_params: dict):
+        s = "{"
+        for param_name, param_value in best_params.items():
+            s += f"\n\tParameter: {param_name} = {param_value}"
+        s += "\n}"
+
+        self._text["state"] = "normal"
+        self._text.delete(1.0, END)
+        self._text.insert(INSERT, s)
+        self._text["state"] = "disabled"
+
+
+class TuningNNForm(TuningForm):
+    n_epochs = IntegerField("Number of epochs", validators=[InputRequired()], default=80)
+    early_stop_epochs = IntegerField("Early stopping epochs", validators=[InputRequired()], default=35)
+    lr_decay = FloatField("Learning rate decay factor", validators=[InputRequired()], default=0.2)
+    lr_decay_epochs = IntegerField("Learning rate decay epochs", validators=[InputRequired()], default=10)
+    min_layers = IntegerField("Min layers", validators=[InputRequired()],default=3)
+    max_layers = IntegerField("Max layers", validators=[InputRequired()],default=5)
+    min_neurons = IntegerField("Min neurons", validators=[InputRequired()],default=32)
+    max_neurons = IntegerField("Max neurons", validators=[InputRequired()],default=128)
+    neuron_increment = IntegerField("Neuron increment", validators=[InputRequired()],default=16)
+
+    def __init__(
+        self,
+        model_repository: ModelRepository,
+        league_name: str,
+        random_seed: int,
+        matches_df: pd.DataFrame,
+    ):
+        super().__init__(
+            model_repository=model_repository,
+            league_name=league_name,
+            random_seed=random_seed,
+            matches_df=matches_df,
+            one_hot=True,
+        )
+
+    def _construct_tuner(
+        self,
+        n_trials: int,
+        metric: Callable,
+        matches_df: pd.DataFrame,
+        num_eval_samples: int,
+        random_seed: int = 0,
+    ) -> Tuner:
+        return FCNetTuner(
+            n_trials=n_trials,
+            metric=metric,
+            matches_df=matches_df,
+            num_eval_samples=num_eval_samples,
+            epochs=self._epochs_var.get(),
+            early_stopping_epochs=self._early_stopping_epochs_var.get(),
+            learning_rate_decay_factor=float(
+                self._learning_rate_decay_factor_var.get()
+            ),
+            learning_rate_decay_epochs=self._learning_rate_decay_epochs_var.get(),
+            min_layers=self._min_layers_var.get(),
+            max_layers=self._max_layers_var.get(),
+            min_units=self._min_units_var.get(),
+            max_units=self._max_units_var.get(),
+            units_increment=self._units_increment_var.get(),
+            random_seed=random_seed,
+        )
+
+    def _construct_model(self, input_shape: tuple, random_seed: int) -> Model:
+        return FCNet(input_shape=input_shape, random_seed=random_seed)
+
+    def _build_model(self, model: Model, best_params: dict):
+        num_hidden_layers = best_params["num_hidden_layers"]
+        hidden_layers = [best_params[f"layer_{i}"] for i in range(num_hidden_layers)]
+        activations = [best_params[f"activation_{i}"] for i in range(num_hidden_layers)]
+        batch_normalizations = [
+            best_params[f"bn_{i}"] for i in range(num_hidden_layers)
+        ]
+        regularizations = [
+            best_params[f"regularization_{i}"] for i in range(num_hidden_layers)
+        ]
+        dropouts = [best_params[f"dropout_{i}"] for i in range(num_hidden_layers)]
+
+        model.build_model(
+            epochs=self._epochs_var.get(),
+            batch_size=best_params["batch_size"],
+            early_stopping_epochs=self._early_stopping_epochs_var.get(),
+            learning_rate_decay_factor=float(
+                self._learning_rate_decay_factor_var.get()
+            ),
+            learning_rate_decay_epochs=self._learning_rate_decay_epochs_var.get(),
+            learning_rate=best_params["learning_rate"],
+            noise_range=best_params["noise_range"],
+            hidden_layers=hidden_layers,
+            batch_normalizations=batch_normalizations,
+            activations=activations,
+            regularizations=regularizations,
+            dropouts=dropouts,
+            optimizer=best_params["optimizer"],
         )
 
     def _display_best_params(self, best_params: dict):
