@@ -4,6 +4,7 @@ from flask_login import current_user, login_required
 
 import variables
 from database.repositories.model import ModelRepository
+from website.evaluation import EvaluationForm
 from website.league import CreateLeagueForm, DeleteLeagueForm, LoadLeagueForm
 from website.plots import (
     ClassDistributionPlotter,
@@ -174,11 +175,20 @@ def tune_nn():
     return tune(TuningNNForm)
 
 
-@views.route("/evaluate_models")
+@views.route("/evaluate_models", methods=["GET", "POST"])
 def evaluate_models():
-    # Handle the 'Evaluate' action here
+    if session:
+        matches = db.get_league_matches(session["league_name"])
+        league_name = session["league_name"]
+        form = EvaluationForm(get_model_repo(), league_name, matches)
+        if request.method == "POST":
+            form.submit_evaluation_task()
+            return render_template(
+                "evaluation.html", form=form, user=current_user
+            )
+        return render_template("evaluation.html", form=form, user=current_user)
 
-    return "Evaluate Models page"
+    return render_template("home.html")
 
 
 @views.route("/predict_matches")

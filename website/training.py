@@ -1,17 +1,13 @@
 import ast
 import threading
 from abc import abstractmethod
-from typing import Callable
 
-import numpy as np
 import pandas as pd
 from flask_wtf import FlaskForm
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from wtforms import BooleanField, FloatField, IntegerField, SelectField, StringField
 from wtforms.validators import InputRequired
 
 from database.repositories.model import ModelRepository
-from gui.dialogs.model.utils import display_eval_metrics
 from models.model import Model
 from models.scikit.rf import RandomForest
 from models.tf.nn import FCNet
