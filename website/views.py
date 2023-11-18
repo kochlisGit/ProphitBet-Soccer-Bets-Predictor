@@ -123,28 +123,11 @@ def plot_target_distribution():
     # Handle the 'Target Distribution' action here
 
 
-@views.route("/tune_nn", methods=["GET", "POST"])
-def tune_nn():
+def train_custom(form):
     if session:
         matches = db.get_league_matches(session["league_name"])
         league_name = session["league_name"]
-        form = TuningNNForm(get_model_repo(), league_name, 0, matches)
-        if request.method == "POST":
-            img = form.submit_tuning()
-            return render_template(
-                "tuning_model.html", image_data=img, form=form, user=current_user
-            )
-        return render_template("tuning_model.html", form=form, user=current_user)
-
-    return render_template("home.html")
-
-
-@views.route("/train_custom_nn", methods=["GET", "POST"])
-def train_custom_nn():
-    if session:
-        matches = db.get_league_matches(session["league_name"])
-        league_name = session["league_name"]
-        form = CustomTrainNNForm(get_model_repo(), league_name, matches, 0)
+        form = form(get_model_repo(), league_name, matches, 0)
         if request.method == "POST":
             form_validation = form.submit_training()
             flash(form_validation)
@@ -156,26 +139,39 @@ def train_custom_nn():
     return render_template("home.html")
 
 
-@views.route("/tune_rf", methods=["GET", "POST"])
-def tune_rf():
+@views.route("/train_custom_nn", methods=["GET", "POST"])
+def train_custom_nn():
+    return train_custom(CustomTrainNNForm)
+
+
+@views.route("/train_custom_rf", methods=["GET", "POST"])
+def train_custom_rf():
+    return train_custom(CustomTrainRFForm)
+
+
+def tune(form):
     if session:
         matches = db.get_league_matches(session["league_name"])
         league_name = session["league_name"]
-        form = TuningRFForm(get_model_repo(), league_name, 0, matches)
+        form = form(get_model_repo(), league_name, 0, matches)
         if request.method == "POST":
-            img = form.submit_tuning()
+            form.submit_tuning()
             return render_template(
-                "tuning_model.html", image_data=img, form=form, user=current_user
+                "tuning_model.html", form=form, user=current_user
             )
         return render_template("tuning_model.html", form=form, user=current_user)
 
     return render_template("home.html")
 
 
-@views.route("/train_custom_rf")
-def train_custom_rf():
-    # Handle the 'Random Forest (Custom)' action here
-    return "Random Forest (Custom) page"
+@views.route("/tune_rf", methods=["GET", "POST"])
+def tune_rf():
+    return tune(TuningRFForm)
+
+
+@views.route("/tune_nn", methods=["GET", "POST"])
+def tune_nn():
+    return tune(TuningNNForm)
 
 
 @views.route("/evaluate_models")

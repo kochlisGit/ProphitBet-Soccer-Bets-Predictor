@@ -419,6 +419,17 @@ class CustomTrainNNForm(CustomTrainForm):
 
 
 class CustomTrainRFForm(CustomTrainForm):
+    n_estimators = IntegerField("Number of estimators", validators=[InputRequired()], default=100)
+    max_features = SelectField("Max features", validators=[InputRequired()])
+    max_depth = SelectField("Max depth", validators=[InputRequired()])
+    min_samples_leaf = IntegerField("Min sample leaf", validators=[InputRequired()], default=1)
+    min_samples_split = IntegerField("Min sample split", validators=[InputRequired()], default=2)
+    bootstrap = BooleanField("Bootstrap")
+    class_weight = SelectField("Class weight", validators=[InputRequired()])
+    calibrate = BooleanField("Calibrate")
+    use_oversampling = BooleanField("Use oversampling")
+    evaluation_samples = IntegerField("N evaluation samples", validators=[InputRequired()], default=50)
+
     def __init__(
         self,
         model_repository: ModelRepository,
@@ -433,41 +444,44 @@ class CustomTrainRFForm(CustomTrainForm):
             one_hot=False,
             random_seed=random_seed,
         )
+        self.class_weight.choices = ["None", "balanced", "balanced_subsample"]
+        self.max_features.choices = ["sqrt", "log2"]
+        self.max_depth.choices = ["None"] + [str(i) for i in range(10, 101, 10)]
 
     def _validate_form(self) -> str:
         try:
-            estimators = self._n_estimators_var.get()
+            estimators = self.n_estimators.data
             if estimators <= 0:
                 return f'"n_estimators" is expected to be a positive integer e > 0, got {estimators}'
         except ValueError:
-            return f'"n_estimators" is expected to be a positive integer, got {self._n_estimators_var.get()}'
+            return f'"n_estimators" is expected to be a positive integer, got {self.n_estimators.data}'
 
-        max_features = self._max_features_var.get()
+        max_features = self.max_features.data
         if not (max_features == "sqrt" or max_features == "log2"):
             return f"Expected max_features to equal sqrt or log2, got {max_features}"
 
         try:
-            max_depth = self._max_depth_var.get()
+            max_depth = self.max_depth.data
             if max_depth != "None" and int(max_depth) <= 0:
                 return f'"max_depth" is expected to be None or a positive integer, got {max_depth}'
         except ValueError:
-            return f'"max_depth" is expected to be None or a positive integer, got {self._max_depth_var.get()}'
+            return f'"max_depth" is expected to be None or a positive integer, got {self.max_depth.data}'
 
         try:
-            min_samples_leaf = int(self._min_samples_leaf_var.get())
+            min_samples_leaf = int(self.min_samples_leaf.data)
             if min_samples_leaf <= 0:
                 return f'"min_samples_leaf" is expected to be a positive integer, got {min_samples_leaf}'
         except ValueError:
-            return f'"min_samples_leaf" is expected to be a positive integer, got {self._min_samples_leaf_var.get()}'
+            return f'"min_samples_leaf" is expected to be a positive integer, got {self.min_samples_leaf.data}'
 
         try:
-            min_samples_split = int(self._min_samples_split_var.get())
+            min_samples_split = int(self.min_samples_split.data)
             if min_samples_split <= 0:
                 return f'"min_samples_split" is expected to be a positive integer, got {min_samples_split}'
         except ValueError:
-            return f'"min_samples_split" is expected to be a positive integer, got {self._min_samples_split_var.get()}'
+            return f'"min_samples_split" is expected to be a positive integer, got {self.min_samples_split.data}'
 
-        class_weight = self._class_weight_var.get()
+        class_weight = self.class_weight.data
         if not (
             class_weight == "None"
             or class_weight == "balanced"
@@ -481,20 +495,20 @@ class CustomTrainRFForm(CustomTrainForm):
         return RandomForest(input_shape=input_shape, random_seed=random_seed)
 
     def _build_model(self):
-        max_depth = self._max_depth_var.get()
+        max_depth = self.max_depth.data
         max_depth = None if max_depth == "None" else int(max_depth)
 
-        class_weight = self._class_weight_var.get()
+        class_weight = self.class_weight.data
         if class_weight == "None":
             class_weight = None
 
         self._model.build_model(
-            n_estimators=self._n_estimators_var.get(),
-            max_features=self._max_features_var.get(),
+            n_estimators=self.n_estimators.data,
+            max_features=self.max_features.data,
             max_depth=max_depth,
-            min_samples_leaf=self._min_samples_leaf_var.get(),
-            min_samples_split=self._min_samples_split_var.get(),
-            bootstrap=self._bootstrap_var.get(),
+            min_samples_leaf=self.min_samples_leaf.data,
+            min_samples_split=self.min_samples_split.data,
+            bootstrap=self.bootstrap.data,
             class_weight=class_weight,
-            is_calibrated=self._is_calibrated_var.get(),
+            is_calibrated=self.calibrate.data,
         )
