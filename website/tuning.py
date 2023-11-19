@@ -10,19 +10,20 @@ from wtforms import FloatField, IntegerField, SelectField
 from wtforms.validators import InputRequired
 
 from database.repositories.model import ModelRepository
-from gui.dialogs.model.utils import display_eval_metrics
 from models.model import Model
 from models.scikit.rf import RandomForest
+from models.tf.nn import FCNet
 from tuners.scikit.rf import RandomForestTuner
+from tuners.tf.nn import FCNetTuner
 from tuners.tuner import Tuner
 
 
 class TuningForm(FlaskForm):
-    n_trials_selected = IntegerField("Number of trials", validators=[InputRequired()])
+    n_trials_selected = IntegerField("Number of trials", validators=[InputRequired()], default=20)
     selected_metric = SelectField("Metric", validators=[InputRequired()])
     selected_metric_target = SelectField("Metric target", validators=[InputRequired()])
     num_eval_samples_var = IntegerField(
-        "Number of evaluation samples", validators=[InputRequired()]
+        "Number of evaluation samples", validators=[InputRequired()], default=200
     )
 
     def __init__(
@@ -48,8 +49,6 @@ class TuningForm(FlaskForm):
 
         self.selected_metric.choices = self._metrics
         self.selected_metric_target.choices = [k for k in self._metric_targets.keys()]
-        self.n_trials_selected.data = 20
-        self.num_eval_samples_var.data = 200
 
     def _tune_fn(self):
         task_thread = threading.Thread(target=self._tune)
@@ -121,7 +120,6 @@ class TuningForm(FlaskForm):
         self._tune_fn()
         if self._eval_metrics is not None and self._best_params is not None:
             self._display_best_params(best_params=self._best_params)
-            display_eval_metrics(self._eval_metrics)
             self._eval_metrics = None
             self._best_params = None
 
@@ -251,17 +249,17 @@ class TuningNNForm(TuningForm):
             metric=metric,
             matches_df=matches_df,
             num_eval_samples=num_eval_samples,
-            epochs=self._epochs_var.get(),
-            early_stopping_epochs=self._early_stopping_epochs_var.get(),
+            epochs=self.n_epochs.data,
+            early_stopping_epochs=self.early_stop_epochs.data,
             learning_rate_decay_factor=float(
-                self._learning_rate_decay_factor_var.get()
+                self.lr_decay.data
             ),
-            learning_rate_decay_epochs=self._learning_rate_decay_epochs_var.get(),
-            min_layers=self._min_layers_var.get(),
-            max_layers=self._max_layers_var.get(),
-            min_units=self._min_units_var.get(),
-            max_units=self._max_units_var.get(),
-            units_increment=self._units_increment_var.get(),
+            learning_rate_decay_epochs=self.lr_decay_epochs.data,
+            min_layers=self.min_layers.data,
+            max_layers=self.max_layers.data,
+            min_units=self.min_neurons.data,
+            max_units=self.max_neurons.data,
+            units_increment=self.neuron_increment.data,
             random_seed=random_seed,
         )
 
@@ -281,13 +279,13 @@ class TuningNNForm(TuningForm):
         dropouts = [best_params[f"dropout_{i}"] for i in range(num_hidden_layers)]
 
         model.build_model(
-            epochs=self._epochs_var.get(),
+            epochs=self.n_epochs.data,
             batch_size=best_params["batch_size"],
-            early_stopping_epochs=self._early_stopping_epochs_var.get(),
+            early_stopping_epochs=self.early_stop_epochs.data,
             learning_rate_decay_factor=float(
-                self._learning_rate_decay_factor_var.get()
+                self.lr_decay.data
             ),
-            learning_rate_decay_epochs=self._learning_rate_decay_epochs_var.get(),
+            learning_rate_decay_epochs=self.lr_decay_epochs.data,
             learning_rate=best_params["learning_rate"],
             noise_range=best_params["noise_range"],
             hidden_layers=hidden_layers,

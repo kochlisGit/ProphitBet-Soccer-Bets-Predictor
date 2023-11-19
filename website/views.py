@@ -23,8 +23,6 @@ views = Blueprint("views", __name__)
 
 db = DBWrapper()
 MODEL_REPO = None
-LEAGUE_REPO = None
-
 
 def get_model_repo():
     global MODEL_REPO
@@ -35,7 +33,6 @@ def get_model_repo():
     return MODEL_REPO
 
 
-# Define your Flask routes
 @views.route("/", methods=["GET", "POST"])
 @login_required
 def home():
@@ -122,8 +119,6 @@ def plot_target_distribution():
         return render_template("plot_classes.html", image_data=img, user=current_user)
     return render_template("home.html", user=current_user)
 
-    # Handle the 'Target Distribution' action here
-
 
 def train_custom(form):
     if session:
@@ -158,6 +153,7 @@ def tune(form):
         form = form(get_model_repo(), league_name, 0, matches)
         if request.method == "POST":
             form.submit_tuning()
+            flash("Check terminal")
             return render_template(
                 "tuning_model.html", form=form, user=current_user
             )
@@ -190,12 +186,6 @@ def evaluate_models():
         return render_template("evaluation.html", form=form, user=current_user)
 
     return render_template("home.html")
-
-
-@views.route("/predict_matches")
-def predict_matches():
-    # Handle the 'Predict Matches' action here
-    return "Predict Matches page"
 
 
 @views.route("/predict_fixture", methods=["GET", "POST"])
