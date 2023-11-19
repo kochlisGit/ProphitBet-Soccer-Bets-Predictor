@@ -3,6 +3,7 @@
 {% block content %}
 <body>
     <h1>Fixture prediction</h1>
+    <h3>Fixtures downloaded from <a href={{fixture_url}}>footystats</a></h3>
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         {% for field in form %}
@@ -12,8 +13,14 @@
         </div>
         {% endfor %}
         <div>
-            <button type="submit">Predict</button>
+            <button type="submit" name="button" value="Import">Import fixture</button>
         </div>
+        {% if matches is defined %}
+            <div>
+                <button type="submit" name="button" value="Predict">Predict fixture</button>
+            </div>
+        {% endif %}
+
     </form>
     {% if matches is defined %}
         <table class="table table-dark">

@@ -92,6 +92,7 @@ class CreateLeagueForm(LeagueForm):
 
     def _store_league(self) -> (str, pd.DataFrame):
         league_name = self.league_name.data
+        avl_league_id = self.selected_league.choices.index(self.selected_league.data) + 1
         last_n_matches = int(self.last_n_matches.data)
         goal_diff_margin = int(self.goal_diff_margin.data)
 
@@ -113,12 +114,12 @@ class CreateLeagueForm(LeagueForm):
             return (league_name, None)
 
         new_league = League(
-            country=selected_league_split[0],
             name=league_name,
             last_n_matches=last_n_matches,
             goal_diff_margin=goal_diff_margin,
             statistic_columns="::".join(selected_home_columns + selected_away_columns),
             user_id=current_user.id,
+            available_league_id=avl_league_id,
         )
         self.db.insert_league(new_league)
 

@@ -1,4 +1,7 @@
+import re
+
 import pandas as pd
+
 from fixtures.similarities.matching import match_fixture_teams
 
 
@@ -7,6 +10,12 @@ class FootyStatsFixtureParser:
         self._team_id = "data-comp-id"
         self._odds_id = " hover-modal-parent"
         self._num_teams = 20
+
+    def get_available_match_tables(self, fixture_filepath):
+        with open(fixture_filepath, "r", encoding="utf-8") as htmlfile:
+            fixture_str = htmlfile.read()
+        regex = r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d+\s~'
+        return re.findall(regex, fixture_str)
 
     def _get_match_table(self, fixture_str, fixture_date: str) -> str or None:
         tables = fixture_str.split(fixture_date)
@@ -56,11 +65,9 @@ class FootyStatsFixtureParser:
     def parse_fixture(
         self,
         fixture_filepath: str,
-        fixtures_month: str,
-        fixtures_day: str,
+        fixture_date: str,
         unique_league_teams: set,
     ) -> pd.DataFrame or str:
-        fixture_date = f"{fixtures_month} {fixtures_day} ~"
 
         with open(fixture_filepath, "r", encoding="utf-8") as htmlfile:
             fixture_str = htmlfile.read()

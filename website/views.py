@@ -198,18 +198,21 @@ def predict_matches():
     return "Predict Matches page"
 
 
-@views.route("/predict_fixture")
-
+@views.route("/predict_fixture", methods=["GET", "POST"])
 def predict_fixture():
     if session:
-        matches = db.get_league_matches(session["league_name"])
+        matches_df = db.get_league_matches(session["league_name"])
+        fixture_url = db.get_fixture_url_from_league_name(session["league_name"])
         league_name = session["league_name"]
-        form = FixturesForm(get_model_repo(), league_name, matches)
+        form = FixturesForm(matches_df, get_model_repo(), league_name, fixture_url)
         if request.method == "POST":
-            matches_df, metrics = form.submit_evaluation_task()
+            button_pressed = request.form['button']
+            matches = form.import_fixture()
+            if button_pressed == 'Predict':
+                matches = form.predict_fixture(matches)
             return render_template(
-                "fixtures.html", matches=matches_df, metrics=metrics, form=form, user=current_user
+                "fixtures.html", matches=matches, fixture_url=fixture_url, form=form, user=current_user
             )
-        return render_template("fixtures.html", form=form, user=current_user)
+        return render_template("fixtures.html", form=form, fixture_url=fixture_url, user=current_user)
 
     return render_template("home.html")
