@@ -5,6 +5,7 @@ from flask_login import current_user, login_required
 import variables
 from database.repositories.model import ModelRepository
 from website.evaluation import EvaluationForm
+from website.fixtures import FixturesForm
 from website.league import CreateLeagueForm, DeleteLeagueForm, LoadLeagueForm
 from website.plots import (
     ClassDistributionPlotter,
@@ -198,6 +199,17 @@ def predict_matches():
 
 
 @views.route("/predict_fixture")
+
 def predict_fixture():
-    # Handle the 'Predict Fixture' action here
-    return "Predict Fixture page"
+    if session:
+        matches = db.get_league_matches(session["league_name"])
+        league_name = session["league_name"]
+        form = FixturesForm(get_model_repo(), league_name, matches)
+        if request.method == "POST":
+            matches_df, metrics = form.submit_evaluation_task()
+            return render_template(
+                "fixtures.html", matches=matches_df, metrics=metrics, form=form, user=current_user
+            )
+        return render_template("fixtures.html", form=form, user=current_user)
+
+    return render_template("home.html")
