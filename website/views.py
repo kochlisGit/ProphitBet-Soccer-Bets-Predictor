@@ -182,9 +182,9 @@ def evaluate_models():
         league_name = session["league_name"]
         form = EvaluationForm(get_model_repo(), league_name, matches)
         if request.method == "POST":
-            form.submit_evaluation_task()
+            matches_df, metrics = form.submit_evaluation_task()
             return render_template(
-                "evaluation.html", form=form, user=current_user
+                "evaluation.html", matches=matches_df, metrics=metrics, form=form, user=current_user
             )
         return render_template("evaluation.html", form=form, user=current_user)
 

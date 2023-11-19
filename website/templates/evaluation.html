@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<body>
+    <h1>Evaluation</h1>
+
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {% for field in form %}
+        <div>
+            {{ field.label }}
+            {{ field }}
+        </div>
+        {% endfor %}
+
+        <div>
+            <button type="submit">Evaluate</button>
+        </div>
+    </form>
+    {% if metrics is defined %}
+        <ul>
+            {% for key, value in metrics.items() %}
+                {% if key == "Accuracy" %}
+                    <li><strong>{{ key }}</strong>: {{ value }}</li>
+                {% else %}
+                    <li><strong>{{ key }}</strong>:
+                        <ul>
+                            {% for k, v in value.items() %}
+                                <li><strong>{{ k }}</strong>: {{ v }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% if matches is defined %}
+        <table class="table table-dark">
+            {{ matches.to_html(classes='table table-bordered', escape=False) | safe }}
+        </table>
+    {% endif %}
+
+</body>
+{% endblock %}
