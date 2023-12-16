@@ -6,7 +6,7 @@ Hello, due to health issues, i was unable to work on the project, but I am now b
 * The fixture parsed is fixed.
 * The fixture parser will no longer require you to download the html file. It will automatically open a browser and parse the file for you. It requires (Chrome, Firefox or Edge and Selenium Library).
 * ProphitBet will now support additional Machine Learning models.
-* Supports all leagues by default. No more manually adding a league will be required.
+* Supports all leagues (provided by football-data.co.uk) by default. No more manually adding a league will be required.
 * Help Menu + User guide will be updated.
 
 # ProphitBet - Soccer Bets Predictor
