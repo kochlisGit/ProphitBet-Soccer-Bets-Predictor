@@ -6,6 +6,7 @@ Hello, due to health issues, i was unable to work on the project, but I am now b
 * The fixture parsed is fixed.
 * The fixture parser will no longer require you to download the html file. It will automatically open a browser and parse the file for you. It requires (Chrome, Firefox or Edge and Selenium Library).
 * ProphitBet will now support additional Machine Learning models.
+* Help Menu + User guide will be updated.
 
 # ProphitBet - Soccer Bets Predictor
 ProphitBet is a Machine Learning Soccer Bet prediction application. The name is a combination of "Profit" & "Prophet". It analyzes the form of teams with stunning visualizations, computes statistics from previous matches of a selected league and predicts the outcomes of a match using Advanced Machine Learning (ML) methods. The supported algorithms in this application are Neural Networks, Random Forests & Ensemble models. Additionally, the users may analyze the features of the models and adjust the models accordingly. The model extracts soccer data for multiple leagues from *football-data*(https://www.football-data.co.uk/). Additionally, the application can parse upcoming fixtures from *Footystats*(https://footystats.org/) and predict the upcoming matches for a league. There is also an auto-save feature, which saves the training of the models, so that users can re-load them on the next run. Finally, the application requires **Internet Connection**, in order to download the league data.
