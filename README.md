@@ -306,7 +306,7 @@ or via QR-Code:
 
 # Citation
 
-If you are writing an academic paper, please cite as!
+If you are writing an academic paper, please cite us!
 
 ```
 @software{prophitBet2024,
