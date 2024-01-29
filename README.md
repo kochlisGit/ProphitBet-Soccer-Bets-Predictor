@@ -1,16 +1,5 @@
-# Announement (2023-10-16) 
-
-Hello, due to health issues, i was unable to work on the project, but I am now back in action! This week i am releasing the following updates:
-
-* The leagues will now be updated up to now.
-* The fixture parsed is fixed.
-* The fixture parser will no longer require you to download the html file. It will automatically open a browser and parse the file for you. It requires (Chrome, Firefox or Edge and Selenium Library).
-* ProphitBet will now support additional Machine Learning models.
-* Supports all leagues (provided by football-data.co.uk) by default. No more manually adding a league will be required.
-* Help Menu + User guide will be updated.
-
 # ProphitBet - Soccer Bets Predictor
-ProphitBet is a Machine Learning Soccer Bet prediction application. The name is a combination of "Profit" & "Prophet". It analyzes the form of teams with stunning visualizations, computes statistics from previous matches of a selected league and predicts the outcomes of a match using Advanced Machine Learning (ML) methods. The supported algorithms in this application are Neural Networks, Random Forests & Ensemble models. Additionally, the users may analyze the features of the models and adjust the models accordingly. The model extracts soccer data for multiple leagues from *football-data*(https://www.football-data.co.uk/). Additionally, the application can parse upcoming fixtures from *Footystats*(https://footystats.org/) and predict the upcoming matches for a league. There is also an auto-save feature, which saves the training of the models, so that users can re-load them on the next run. Finally, the application requires **Internet Connection**, in order to download the league data.
+ProphitBet is an **Open Source** Machine Learning (ML) Soccer Bet prediction application. The name comes from a combination of "Profit" & "Prophet". With profitbet, You can analyze the form of teams using advanced machine learning methods and stunning visualizations techniques, compute several statistics from previous matches of a selected league and predict the outcomes of a matches. The supported algorithms in this application are Deep Neural Networks, Random Forests, XG-Boost, KNN, SVM, Decision Tree, Logistic Regression, Naive Bayes & Ensemble models. Several feature prrprocessing method are also included, such as Data Normalization and Imbalanced-Learning techniques, which further boost the performance of ML models. The app extracts soccer data for **every** league included in *football-data*(https://www.football-data.co.uk/). Additionally, the application can parse upcoming fixtures from *Footystats*(https://footystats.org/) and predict the upcoming matches of a league. Moreover, advanced validation techniques, such as Cross-Validation and Holdout are automatically employed during the model's training, to ensure smaller chances of the trained models being over-fitted. Finally, the application requires **Internet Connection**, in order to download the league data.
 
 # Stunning Graphical Interface
 
@@ -59,47 +48,58 @@ Each column can be added or removed from a league during the creating phase.
 # Leagues
 
 ProphitBet provides 11 main soccer leagues and 2 extras, which are downloaded by https://www.football-data.co.uk/. More specifically, these leagues are:
-* Premier League (England)
-* Premiership (Scotland)
-* Bundesliga I (Germany)
-* Serie A (Italy)
-* La Liga (Spain)
-* Ligue I (Franch)
-* Eredivisie (Netherlands)
-* Jupiler Pro League (Belgium)
-* Liga I (Portugal)
-* Super Lig (Turkey)
-* Super League (Greece)
-* Serie A (Brazil)
-* Allsvenskan (Sweden)
+* 'Argentina': [PrimeraDivision]
+* 'Belgium': [JupilerLeague]
+* 'Brazil': [BrazilSerieA]
+* 'China': [ChinaSuperLeague]
+* 'Denmark': [SuperLiga]
+* 'England': [PremierLeague, Championshio, League1, League2]
+* 'Finland': [VeikkausLiiga]
+* 'France': [Ligue1, Ligue2]
+* 'Germany': [Bundesliga1, Bundesliga2]
+* 'Greece': [SuperLeague]
+* 'Ireland': [IrelandPremierDivision]
+* 'Italy': [SerieA, SerieB]
+* 'Japan': [J1]
+* 'Mexico': [LigaMX]
+* 'Netherlands': [Eredivisie]
+* 'Norgway': [Eliteserien]
+* 'Poland': [Ekstraklasa]
+* 'Portugal': [Liga1]
+* 'Romania': [RomaniaLiga1]
+* 'Russia': [RussiaPremierLeague]
+* 'Scotland': [Premiership]
+* 'Spain': [LaLiga, SegundaDivision]
+* 'Sweden': [Allsvenskan]
+* 'Switzerland': [SwitzerlandSuperLeague]
+* 'USA': [MLS]
+* 'Turkey': [SuperLig]
+
 
 You can add additional leagues by modifying the `database/leagues.csv` configuration file. In order to add a new league, you need to specify:
 1. Country (The country of the league, e.g. Russia)
 2. League Name (The name of the league e.g. Premier League)
-3. Base Url (The link to the .csv file from *football-data*, e.g. https://www.football-data.co.uk/new/RUS.csv)
-4. Year Start (The year that ProphitBet will stop collecting data, e.g. 2015)
-5. League Type (Since it's an extra league, it always has to be "`extra`")
-6. Fixtures Url (The fixture's url from *footystats, which will be used to parse upcoming matches*, e.g. https://footystats.org/russia/russian-premier-league)
+3. League ID: You can create multiple leagues, but with different ID.
+4. The statistical odds that will be used to train the models.
 
 # Feature Correlation Analysis
 
-This is particulary useful, when analyzing the quality of the training data). ProphitBet provides a headmap for the computed stats, which shows the correlations 
-between the columns. The correlation is described by an arithmetic value ${r \in[-1.0, 1.0]}$. The closer $r$ is to zero, the weaker the correlation is between 2 columns. The closer to 1.0 or -1.0, the stronger the correlation will be. Ideally, a feature is good if the correlation with other features is close to zero ($r=0$).
+This is particulary useful, when analyzing the quality of the training data. ProphitBet provides a headmap for the correlation matrix between the features, which shows the correlations 
+between 2 features (columns). The correlation is described by an arithmetic value ${r \in[-1.0, 1.0]}$. The closer $r$ is to zero, the weaker the correlation is between 2 columns. The closer to 1.0 or -1.0, the stronger the correlation will be. Ideally, a feature is good if its correlation with the rest of the features is close to zero ($r=0$).
 
 ![correlation heatmap analysis](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/correlations.png)
 
 # Feature Importance Analysis
 
-ProphitBet also comes with a built-in module for "**interpretability**". In case you are wondering which stats are the most important, there are 4 methods provided:
+ProphitBet also comes with a built-in module for "**interpretability**". In case you are wondering which stats are the most important, there are 3 methods included:
 
-1. Ensemble Learning (https://www.knowledgehut.com/blog/data-science/bagging-and-random-forest-in-machine-learning)
 2. Variance Analysis (https://corporatefinanceinstitute.com/resources/knowledge/accounting/variance-analysis/)
-3. Univariate Analysis (https://link.springer.com/referenceworkentry/10.1007/978-94-007-0753-5_3110)
-4. Recursive Feature Elimination (https://bookdown.org/max/FES/recursive-feature-elimination.html)
+3. Recursive Feature Elimination (https://bookdown.org/max/FES/recursive-feature-elimination.html)
+4. Random Forest importance scores
 
 ![feature-importance-analysis](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/importance.png)
 
-# Class Distribution Analysis
+# Class (Target) Distribution Analysis
 
 It is noticed that the training dataset of several leagues contains imbalanced classes, which means that the number of matches that ended in a win for the home team 
 is a lot larger than the number of the matches that ended in a win for the away team. This often leads models to overestimate their prediction probabilities and tend to have a bias towards the home team. ProphitBet provides a plot to detect such leagues, using the **Target Distrubution Plot**, as well as several tools to deal with 
@@ -107,6 +107,7 @@ that, including:
 
 1. Noise Injection (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2771718/)
 2. Output Probability Calibration (https://davidrosenberg.github.io/ttml2021/calibration/2.calibration.pdf)
+3. Resampling techniques (SMOTE, SMOTE-NN, SVM-SMOTE, NearMiss, Radnom Resampling)
 
 ![class distribution](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/targets.png)
 
@@ -117,6 +118,17 @@ https://www.investopedia.com/terms/n/neuralnetwork.asp
 
 ![deep neural networks](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/neuralnetwork.png)
 
+# Machihe Learning Models
+
+1. K-Nearest Neighbors (KNN)
+2. Logistic Regression
+3. Naive Bayes
+4. Decision Tree
+5. Random Forest
+6. XG-Boost
+7. Support Vector Machine (SVM)
+8. Deep Neural Networks
+
 # Training Random Forests
 
 A detailed description of random forests can be found in the link below:
@@ -126,7 +138,7 @@ https://www.section.io/engineering-education/introduction-to-random-forest-in-ma
 
 # The Ensemble Model
 
-This type of combines the predictions of a Neural Network & Random Forest. Typically, a well tuned Random Forest makes similar predictions with a Neural Network. However, there are some cases where these 2 model output different output probabilities (e.g. Random Forest might give higher probability that an outcome is Home). In that case, the ensemble model can be used which averages the output probabilities of both models and decides on the predicted outcome.
+This type of combines the predictions of several machine learning models. Typically, a well tuned Random Forest could generate similar predictions with a Neural Network or any other ML model. However, there are some cases where 2 models could output different output probabilities (e.g. Random Forest might give higher probability that an outcome is Home). In that case, the ensemble model (Voting Model) can be used, which averages the output probabilities of several models and decides on the predicted outcome. The idea is that each model makes unique predictions, so their predictions are combined to form a stronger model.
 
 # Evaluating Models
 
@@ -136,15 +148,16 @@ Before using a trained model, it is wise to first evaluate the model on unseen m
 
 # Outcome Predictions
 
-In order to request a prediction for a match, You need to select the home/away team, as well as the book odds. You should use both models to make a prediction. If both models agree, then the prediction should probably be good. If the models disagree, then it's best to avoid betting on that match.
+In order to request a prediction for a match, You need to select the home/away team, as well as the book odds. You should use both models to make a prediction. If both models agree, then the prediction should probably be good. If the models disagree, then it's best to avoid betting on that match. The outcome prediction includes:
+
+1. Home, Draw or Away
+2. Under (2.5) or Over (2.5)
 
 ![match predictions](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/predictions.png)
 
 # Fixture Parsing
 
-An alternative way to predict multiple matches at once is to use the "**Fixture Parsing**" option. When you click on that option, it will open the browser and ask you
-to download the specified fixture from *footystats.org*. This can be done by pressing *Ctrl + S* or right click and "Save As" option. Then, You will need to specify the filepath of the downloaded fixture and the application will automatically parse and predict the upcoming matches for you. You may also choose to export these predictions to a csv file, which you can open with Microsoft Excel.
-
+An alternative way to predict multiple matches at once is to use the "**Fixture Parsing**" option. You may now automatically parse the fixtures using your browser. Once the fixture window pops-up, select your **browser and the fixture date** and the application will automatically download the page & parse the upcoming fixtures of the specified data. This is a new feature, so please report any bugs in the issues page.
 ![fixture parsing & upcoming match prediction](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/fixtures.png)
 
 # Requirements
@@ -167,12 +180,12 @@ A `requirements.txt` file has been added to the project directory. However, the 
 | Optuna | https://optuna.org/ | `pip install optuna` |
 | Fuzzy-Wuzzy | https://pypi.org/project/py-stringmatching (https://pypi.org/project/fuzzywuzzy/) | `pip install fuzzywuzzy` |
 
-To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd on the search. In linux, You can use the linux terminal.
+To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd on the search. In linux, You can use the linux terminal. You can also install multiple libraries at once (e.g. `pip install numpy==1.22.4 pandas==1.4.3 ...`
 
 # Instructions (How to Run)
 
-1. Download & Install python. During the installation, you should choose  **add to "Path"** It is recommended to download python 3.9.
-2. After you download & install python, you can Download the above libraries using pip module (e.g. `pip install numpy`). These modules can be installed via the cmd (in windows) or terminal (in linux). **IMPORTANT**: To download the correct versions, just add "==" after pip install to specify version, as described on requirements.txt file. For example, to install `tensorlfow 2.9.1`, you can use: `pip install tensorflow==2.9.1`.
+1. Download & Install python. During the installation, you should choose  **add to "Path"**. It is recommended to download **python 3.9.** or higher version.
+2. After you download & install python, you can Download the above libraries using pip module (e.g. `pip install numpy==VERSION`). The version can be found in *requirements.txt* file. These modules can be installed via the cmd (in windows) or terminal (in linux). **IMPORTANT**: To download the correct versions, just add "==" after pip install to specify version, as described on requirements.txt file. For example, to install `tensorlfow 2.9.1`, you can use: `pip install tensorflow==2.9.1`.
 3. On windows, you can double click the main.py file. Alternatively (Both Windows & Linux), You can open the cmd on the project directory and run: `python main.py`. 
 
 # Common Errors
@@ -195,6 +208,20 @@ In case there is an error with the application, open a Github Issue so that I ca
 1. **Neural Network's Training Dialog Height is too large and as a result, "Train" button cannot be displayed.**
 
 Solution: You can press "ENTER" button to start training. The same applies to Random Forest Training Dialog, as well as the tuning dialogs.
+
+# Release (2024/01/29)
+
+* Fixed Download/Update bugs. All leagues should now be properly downloaded and updated.
+* Added several url links in the help menu about the Machine Learning methods.
+* Added every league from football-data website. There is no more need to manually add a new league.
+* Added 2 Prediction tasks: H/D/A and U/0 (2.5).
+* Added 9 Machine Learning models, including KNN, Naive Bayes, Logistic Regression, Decision Tree, Random Forest, XG-Boost, Deep Neural Networks, SVM, Voting Model.
+* Several parameters are now provided for each model during the training process.
+* Cross-Validation is now employed during training, which enchances the model's reliability.
+* Tuning process is now more simple. You can automatically select which parameters you wish to search and manually select the rest of them.
+* Fixed fixture parser bugs.
+* Fixtures can now be automatically parsed from Footystats by selecting a browser and the fixture date.
+* Updated documentation and menus.
 
 # Release (2023/01/19)
 
