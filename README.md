@@ -308,6 +308,7 @@ or via QR-Code:
 
 If you are writing an academic paper, please cite as!
 
+```
 @software{prophitBet2024,
   author = {Vasileos Kochliaridis},
   orcid = {0000-0001-9431-6679},
@@ -317,3 +318,4 @@ If you are writing an academic paper, please cite as!
   version = {2.0.0},
   year = {2024}
 }
+```
