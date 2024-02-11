@@ -24,7 +24,7 @@ class NeuralNetworkTrainDialog(TrainingDialog):
         self._activations_list = ['sigmoid', 'tanh', 'relu', 'elu', 'gelu']
         self._weight_regularizations_list = ['None', 'l1', 'l2', 'l1_l2']
         self._batch_normalization_list = [False, True]
-        self._dropout_rate_range = (0.0, 1.0, 0.1)
+        self._dropout_rate_range = (0.0, 0.9, 0.1)
         self._batch_size_range = (8, 64, 8)
         self._epochs_range = (20, 200, 10)
         self._early_stopping_patience_range = (0, 50, 10)
