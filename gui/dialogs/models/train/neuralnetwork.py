@@ -270,7 +270,7 @@ class NeuralNetworkTrainDialog(TrainingDialog):
         if fc_hiddens_str != '':
             try:
                 fc_hiddens_list = fc_hiddens_str.strip().split(',')
-                fc_hidden_units = [int(units) for units in fc_hiddens_list]
+                fc_hidden_units = [int(units.strip()) for units in fc_hiddens_list]
 
                 num_hiddens = len(fc_hidden_units)
 
