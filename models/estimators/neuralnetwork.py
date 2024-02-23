@@ -122,11 +122,7 @@ class NeuralNetwork(ScikitModel):
 
         assert epochs > 0, f'Epochs is expected to be positive integer, got {epochs}'
         assert batch_size > 0, f'Batch size is expected to be positive integer, got {batch_size}'
-        assert 0 <= early_stopping_patience < epochs, \
-            f'early_stopping_patience should be positive and less than epochs, got {early_stopping_patience}'
         assert 0 < learning_rate < 1, f'learning rate is expected to be between 0 and 1.0, got {learning_rate}'
-        assert 0 <= learning_rate_patience < epochs, \
-            f'learning rate patience is expected to be between 0 and 1.0, got {learning_rate_patience}'
         assert not calibrate_probabilities, 'Probability calibration is not supported'
 
         self._fc_hiddens = fc_hiddens
