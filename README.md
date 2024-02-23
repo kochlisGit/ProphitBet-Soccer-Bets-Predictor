@@ -301,7 +301,7 @@ or via QR-Code:
 
 # Currently Donated Money
 
-80€€ (Next Goal: 100€)
+80€ **(Next Goal: 100€)**
 
 # Citation
 
