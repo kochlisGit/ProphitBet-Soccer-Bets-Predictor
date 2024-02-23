@@ -10,14 +10,17 @@ class FootyStatsScraper:
         if browser == 'chrome':
             options = ChromeOptions()
             options.add_argument('--incognito')
+            options.add_argument("--lang=en-US")
             self._web_driver = Chrome(options=options)
         elif browser == 'firefox':
             options = FirefoxOptions()
             options.add_argument('--incognito')
+            options.set_preference("intl.accept_languages", "en-US, en")
             self._web_driver = Firefox(options=options)
         elif browser == 'edge':
             options = EdgeOptions()
             options.add_argument('--incognito')
+            options.add_argument("--lang=en-US")
             self._web_driver = Edge(options=options)
         else:
             raise NotImplementedError(f'Not Implemented Browser: "{browser}"')
