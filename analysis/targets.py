@@ -12,19 +12,20 @@ class TargetAnalyzer(FeatureAnalyzer):
             ClassificationTask.Result: ['Home (1)', 'Draw (x)', 'Away (2)'],
             ClassificationTask.Over: ['Under (2.5)', 'Over (2.5)']
         }
-        self._targets = {}
+        self._target_counts = {}
 
-    def _get_targets(self, task: ClassificationTask) -> (pd.Series, list[str]):
-        if task not in self._targets:
+    def _get_target_counts(self, task: ClassificationTask) -> (pd.Series, list[str]):
+        if task not in self._target_counts:
             if task == ClassificationTask.Result:
-                self._targets[task] = self._input_df['Result'].replace({'H': 0, 'D': 1, 'A': 2})
+                self._target_counts[task] = self._input_df['Result'].value_counts().values
             elif task == ClassificationTask.Over:
-                self._targets[task] = ((self._input_df['HG'] + self._input_df['AG']) > 2.5).astype(int)
+                self._target_counts[task] = ((self._input_df['HG'] + self._input_df['AG']) > 2.5).value_counts().values
             else:
                 raise NotImplementedError(f'Not implemented target: {task.name}')
 
-        return self._targets[task], self._target_names[task]
+        return self._target_counts[task]
 
     def plot(self, ax, task: ClassificationTask = ClassificationTask.Result, **kwargs):
-        targets, columns = self._get_targets(task=task)
-        sns.barplot(x=columns, y=targets.value_counts(), ax=ax)
+        target_counts = self._get_target_counts(task=task)
+        columns = self._target_names[task]
+        sns.barplot(x=columns, y=target_counts, ax=ax)
