@@ -7,7 +7,7 @@ class FeatureAnalyzer(ABC):
         input_df = df.dropna()
 
         if preprocess:
-            self._input_df = input_df.dropna().drop(columns=['Date', 'Season', 'Home Team', 'Away Team']).reset_index(drop=True)
+            self._input_df = input_df.drop(columns=['Date', 'Season', 'Home Team', 'Away Team']).reset_index(drop=True)
         else:
             self._input_df = input_df
 
