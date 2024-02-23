@@ -301,7 +301,7 @@ or via QR-Code:
 
 # Currently Donated Money
 
-30€/100€
+80€/100€
 
 # Citation
 
