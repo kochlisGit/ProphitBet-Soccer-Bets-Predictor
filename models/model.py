@@ -40,7 +40,7 @@ class ScikitModel(ABC):
         estimator = self._build_estimator(input_size=input_size, num_classes=num_classes)
 
         if self.calibrate_probabilities:
-            self._model = CalibratedClassifierCV(estimator=estimator, n_jobs=-1)
+            self._model = CalibratedClassifierCV(estimator, n_jobs=-1)
         else:
             self._model = estimator
 
