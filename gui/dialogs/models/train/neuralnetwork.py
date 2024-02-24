@@ -12,7 +12,7 @@ class NeuralNetworkTrainDialog(TrainingDialog):
     def __init__(self, root, matches_df: pd.DataFrame, league_config: LeagueConfig, model_repository: ModelRepository):
         super().__init__(
             root=root,
-            title='Decision Tree Trainer',
+            title='Neural Network Trainer',
             matches_df=matches_df,
             league_config=league_config,
             model_repository=model_repository
@@ -24,7 +24,7 @@ class NeuralNetworkTrainDialog(TrainingDialog):
         self._activations_list = ['sigmoid', 'tanh', 'relu', 'elu', 'gelu']
         self._weight_regularizations_list = ['None', 'l1', 'l2', 'l1_l2']
         self._batch_normalization_list = [False, True]
-        self._dropout_rate_range = (0.0, 0.9, 0.1)
+        self._dropout_rate_range = (0.0, 0.8, 0.1)
         self._batch_size_range = (8, 64, 8)
         self._epochs_range = (20, 200, 10)
         self._early_stopping_patience_range = (0, 50, 10)
@@ -115,7 +115,7 @@ class NeuralNetworkTrainDialog(TrainingDialog):
 
         dropout_var = DoubleVar(value=0.0)
         widget_params = {
-            'master': self.window, 'from_': self._dropout_rate_range[0], 'to': self._dropout_rate_range[1], 'tickinterval': 0.25, 'resolution': 0.1, 'orient': 'horizontal', 'length': 150, 'variable': dropout_var
+            'master': self.window, 'from_': self._dropout_rate_range[0], 'to': self._dropout_rate_range[1], 'tickinterval': 0.2, 'resolution': 0.1, 'orient': 'horizontal', 'length': 150, 'variable': dropout_var
         }
         self._add_tunable_widget(
             key='dropout_rate',
@@ -270,7 +270,7 @@ class NeuralNetworkTrainDialog(TrainingDialog):
         if fc_hiddens_str != '':
             try:
                 fc_hiddens_list = fc_hiddens_str.strip().split(',')
-                fc_hidden_units = [int(units.strip()) for units in fc_hiddens_list]
+                fc_hidden_units = [int(units) for units in fc_hiddens_list]
 
                 num_hiddens = len(fc_hidden_units)
 
@@ -316,6 +316,9 @@ class NeuralNetworkTrainDialog(TrainingDialog):
     def _tune_model(self, tune_params: dict, model_params: dict) -> (dict, bool):
         model_params['verbose'] = False
         model_params['summary'] = False
+
+        if 'fc_hiddens' in model_params:
+            model_params['fc_hiddens'] = self._get_fc_hiddens(fc_hiddens_str=model_params['fc_hiddens'])
 
         best_params, proceed_result = super()._tune_model(tune_params=tune_params, model_params=model_params)
 
