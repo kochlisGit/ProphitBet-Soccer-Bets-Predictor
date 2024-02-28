@@ -17,7 +17,7 @@ class TargetAnalyzer(FeatureAnalyzer):
     def _get_target_counts(self, task: ClassificationTask) -> (pd.Series, list[str]):
         if task not in self._target_counts:
             if task == ClassificationTask.Result:
-                self._target_counts[task] = self._input_df['Result'].value_counts().values
+                self._target_counts[task] = self._input_df['Result'].value_counts()[['H', 'D', 'A']].values
             elif task == ClassificationTask.Over:
                 self._target_counts[task] = ((self._input_df['HG'] + self._input_df['AG']) > 2.5).value_counts().values
             else:
