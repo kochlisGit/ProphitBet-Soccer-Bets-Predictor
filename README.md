@@ -162,7 +162,7 @@ An alternative way to predict multiple matches at once is to use the "**Fixture 
 
 # Requirements
 
-A `requirements.txt` file has been added to the project directory. However, the following table also presents the required libraries. Check the `requirements.txt` file for library versions.
+**A `requirements.txt` file has been added to the project directory. The table below presents the required libraries, however, you should check the `requirements.txt` file for the required library versions.**
 
 | Library/Module  | Download Url | Installation |
 | ------------- | ------------- | -------------
