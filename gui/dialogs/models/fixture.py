@@ -12,6 +12,7 @@ from fixtures.utils import match_fixture_teams
 from gui.dialogs.dialog import Dialog
 from gui.task import TaskDialog
 from gui.widgets.utils import validate_odd_entry
+from models.model import ModelConfig
 from models.tasks import ClassificationTask
 from preprocessing.dataset import DatasetPreprocessor
 
@@ -159,27 +160,45 @@ class PredictFixturesDialog(Dialog):
             self._highlight_items(matches_df=matches_df)
 
     def _highlight_items(self, matches_df: pd.DataFrame):
+        def get_percentile_mask(model_config: ModelConfig, task: ClassificationTask) -> np.ndarray:
+            if task == 'Result':
+                _, home_percent_prob = model_config.home_fixture_percentile
+                _, draw_percent_prob = model_config.draw_fixture_percentile
+                _, away_percent_prob = model_config.away_fixture_percentile
+
+                home_ids = matches_df['Prob-H'].astype(float) >= home_percent_prob
+                draw_ids = matches_df['Prob-D'].astype(float) >= draw_percent_prob
+                away_ids = matches_df['Prob-A'].astype(float) >= away_percent_prob
+                return (home_ids | draw_ids) | away_ids
+            elif task == 'Over':
+                _, under_percent_prob = model_config.under_fixture_percentile
+                _, over_percent_prob = model_config.over_fixture_percentile
+
+                under_ids = matches_df['Prob-U(2.5)'].astype(float) >= under_percent_prob
+                over_ids = matches_df['Prob-O(2.5)'].astype(float) >= over_percent_prob
+                return (under_ids | over_ids)
+            else:
+                raise NotImplementedError(f'Undefined task: "{task}"')
+
+        def get_odds_mask(model_config: ModelConfig) -> np.ndarray:
+            odds_filter = model_config.odds_filter
+
+            if odds_filter is None:
+                return np.array([True]*matches_df.shape[0])
+            else:
+                odd, cond = odds_filter.split(':')
+                odds = matches_df[odd].astype(float)
+                if cond[0] == '>':
+                    return odds > float(cond[1:])
+                else:
+                    cond_min, cond_max = cond[1: -1].split('-')
+                    return (odds >= float(cond_min)) & (odds <= float(cond_max))
+
         task = self._task_var.get()
         model_config = self._model_configs[task][self._model_id_var.get()]
-
-        if task == 'Result':
-            _, home_percent_prob = model_config.home_fixture_percentile
-            _, draw_percent_prob = model_config.draw_fixture_percentile
-            _, away_percent_prob = model_config.away_fixture_percentile
-
-            home_ids = matches_df['Prob-H'].astype(float) >= home_percent_prob
-            draw_ids = matches_df['Prob-D'].astype(float) >= draw_percent_prob
-            away_ids = matches_df['Prob-A'].astype(float) >= away_percent_prob
-            mask = (home_ids | draw_ids) | away_ids
-        elif task == 'Over':
-            _, under_percent_prob = model_config.under_fixture_percentile
-            _, over_percent_prob = model_config.over_fixture_percentile
-
-            under_ids = matches_df['Prob-U(2.5)'].astype(float) >= under_percent_prob
-            over_ids = matches_df['Prob-O(2.5)'].astype(float) >= over_percent_prob
-            mask = (under_ids | over_ids)
-        else:
-            raise NotImplementedError(f'Undefined task: "{task}"')
+        percentile_mask = get_percentile_mask(model_config=model_config, task=task)
+        filters_mask = get_odds_mask(model_config=model_config)
+        mask = percentile_mask & filters_mask
 
         if mask.sum() == 0:
             return
@@ -281,6 +300,13 @@ class PredictFixturesDialog(Dialog):
                 )
                 for row in tree_rows
             ])
+
+            # Normalizing inputs before making predictions
+            normalizer = model_config.normalizer
+
+            if normalizer is not None:
+                x = normalizer.transform(x)
+
             y_prob = model.predict_proba(x)
             y_pred = y_prob.argmax(axis=1)
 

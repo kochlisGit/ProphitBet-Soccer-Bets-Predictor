@@ -132,7 +132,7 @@ class PredictMatchesDialog(Dialog):
             return
 
         x = self._dataset_preprocessor.construct_input(
-            matches_df= self._matches_df,
+            matches_df=self._matches_df,
             home_team=home_team,
             away_team=away_team,
             odd_1=odd_1,
@@ -142,6 +142,13 @@ class PredictMatchesDialog(Dialog):
         task = self._task_var.get()
         model_config = self._model_configs[task][model_id]
         model = self._model_repository.load_model(model_config=model_config)
+
+        # Normalizing inputs before making predictions
+        normalizer = model_config.normalizer
+
+        if normalizer is not None:
+            x = normalizer.transform(x)
+
         y_proba = model.predict_proba(x=x)
         y_pred = y_proba.argmax(axis=1)
 

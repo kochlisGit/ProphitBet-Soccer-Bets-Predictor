@@ -69,6 +69,7 @@ class EvaluationDialog(Dialog):
         self._under_percentile_slider = None
         self._over_percentile_slider = None
         self._percentiles_btn = None
+        self._odds_btn = None
 
     def _create_widgets(self):
         Label(self.window, text='Evaluation Samples:', font=('Arial', 11)).place(x=25, y=20)
@@ -112,7 +113,10 @@ class EvaluationDialog(Dialog):
         Label(self.window, font=('bold', 11), textvariable=self._rec_var).place(x=200, y=665)
 
         self._percentiles_btn = Button(self.window, text='Store Percent', state='disabled', command=self._store_percentiles_to_model_config)
-        self._percentiles_btn.place(x=800, y=640)
+        self._percentiles_btn.place(x=800, y=620)
+
+        self._odds_btn = Button(self.window, text='Store Filters', state='disabled', command=self._store_filters_to_model_config)
+        self._odds_btn.place(x=800, y=660)
 
     def _reset_metrics(self):
         self._acc_var.set(value=0.0)
@@ -164,6 +168,7 @@ class EvaluationDialog(Dialog):
         adjust_models(task=task)
         adjust_treeview(task=task)
         self._percentiles_btn['state'] = 'disabled'
+        self._odds_btn['state'] = 'disabled'
 
     def _adjust_filters_and_metrics(self, task: str, model_id: str):
         self._odd_filter_var.set(value='None')
@@ -196,6 +201,7 @@ class EvaluationDialog(Dialog):
             self._over_percentile_slider = PercentileSlider(master=self.window, name='Over(2.5)', initial_value=model_config.under_fixture_percentile[0], x=400, y=655)
 
         self._percentiles_btn['state'] = 'normal'
+        self._odds_btn['state'] = 'normal'
 
     def _store_percentiles_to_model_config(self):
         task = self._task_var.get()
@@ -212,6 +218,15 @@ class EvaluationDialog(Dialog):
             model_config.under_fixture_percentile = (self._under_percentile_slider.get_value(), self._under_percent_prob)
             model_config.over_fixture_percentile = (self._over_percentile_slider.get_value(), self._over_percent_prob)
 
+        self._model_repository.update_model_config(model_config=model_config)
+
+    def _store_filters_to_model_config(self):
+        task = self._task_var.get()
+        model_id = self._model_id_var.get()
+        model_config = self._model_configs[task][model_id]
+
+        filter_val = self._odd_filter_var.get()
+        model_config.odds_filter = None if filter_val == 'None' else filter_val
         self._model_repository.update_model_config(model_config=model_config)
 
     def _clear_matches(self):
