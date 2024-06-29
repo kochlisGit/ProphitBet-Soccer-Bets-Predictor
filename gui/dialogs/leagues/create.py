@@ -117,6 +117,7 @@ class CreateLeagueDialog(Dialog):
             self.window,
             text='Odd-1',
             onvalue=True,
+            state='disabled',
             offvalue=False,
             variable=self._odd_vars['1']
         ).place(x=70, y=340)
@@ -124,6 +125,7 @@ class CreateLeagueDialog(Dialog):
             self.window,
             text='Odd-X',
             onvalue=True,
+            state='disabled',
             offvalue=False,
             variable=self._odd_vars['X']
         ).place(x=170, y=340)
@@ -131,6 +133,7 @@ class CreateLeagueDialog(Dialog):
             self.window,
             text='Odd-2',
             onvalue=True,
+            state='disabled',
             offvalue=False,
             variable=self._odd_vars['2']
         ).place(x=270, y=340)
