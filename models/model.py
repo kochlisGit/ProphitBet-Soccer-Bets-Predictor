@@ -122,6 +122,7 @@ class ModelConfig:
         self.calibrate_probabilities = False
         self.sampler = None
         self.normalizer = None
+        self.odds_filter = None
         self.home_fixture_percentile = (0, 0.0)
         self.draw_fixture_percentile = (0, 0.0)
         self.away_fixture_percentile = (0, 0.0)
