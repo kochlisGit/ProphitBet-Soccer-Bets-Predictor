@@ -211,6 +211,11 @@ In case there is an error with the application, open a Github Issue so that I ca
 
 Solution: You can press "ENTER" button to start training. The same applies to Random Forest Training Dialog, as well as the tuning dialogs.
 
+# Release (2024/09/18)
+* Updated documentation: installation instructions and common errors.
+* Simplified filters and fixed a bug in percentiles.
+* Fixed a bug where no normalization was applied after loading a pre-trained model. 
+
 # Release (2024/01/29)
 
 * Fixed Download/Update bugs. All leagues should now be properly downloaded and updated.
