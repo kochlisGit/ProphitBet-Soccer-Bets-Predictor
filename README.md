@@ -217,7 +217,9 @@ Solution: You can press "ENTER" button to start training. The same applies to Ra
 # Release (2024/09/18)
 * Updated documentation: installation instructions and common errors.
 * Simplified filters and fixed a bug in percentiles.
-* Fixed a bug where no normalization was applied after loading a pre-trained model. 
+* Deleted deprecated directory "network".
+* Fixed a bug where no normalization was applied after loading a pre-trained model.
+* Fixed a bug where several leagues could not be loaded. This is because football-data website changed the column names".
 
 # Release (2024/01/29)
 
