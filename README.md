@@ -184,9 +184,11 @@ Below are the steps of installing this application to your machine. First, downl
 | Tensorflow-Addons  | https://www.tensorflow.org/addons | `pip install tensorflow_addons` |
 | TKinter  | https://docs.python.org/3/library/tkinter.html | `pip install tk ` |
 | Optuna | https://optuna.org/ | `pip install optuna` |
-| Fuzzy-Wuzzy | https://pypi.org/project/py-stringmatching (https://pypi.org/project/fuzzywuzzy/) | `pip install fuzzywuzzy` |
+| Fuzzy-Wuzzy | https://pypi.org/project/py-stringmatching | `pip install fuzzywuzzy` |
+| Python-Levenshtein | https://pypi.org/project/python-Levenshtein/ | `pip install python-Levenshtein` |
 | Tabulate | https://pypi.org/project/tabulate/ | `pip install tabulate` |
-| Selenium | https://pypi.org/project/tabulate/ | `pip install selenium` |
+| Selenium | https://pypi.org/project/selenium/ | `pip install selenium` |
+| LXML | https://pypi.org/project/lxml/ | `pip install lxml` |
 
 To run `pip` commands, open CMD (windows) using Window Key + R or by typing cmd on the search. In linux, You can use the linux terminal. You can also install multiple libraries at once (e.g. `pip install numpy==1.22.4 pandas==1.4.3 ...`
 
