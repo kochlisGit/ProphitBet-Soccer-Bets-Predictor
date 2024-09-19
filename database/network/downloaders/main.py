@@ -27,13 +27,10 @@ class MainLeagueDownloader(FootballDataDownloader):
         return matches_df if matches_df.shape[0] > 0 else None
 
     def _preprocess_csv_data(self, matches_df: pd.DataFrame, league: League) -> pd.DataFrame:
-        columns = ['Date', 'Season', 'HomeTeam', 'AwayTeam', 'AvgCH', 'AvgCD', 'AvgCA', 'FTHG', 'FTAG', 'FTR']
+        columns = ['Date', 'Season', 'HomeTeam', 'AwayTeam', 'FTHG', 'FTAG', 'FTR']
         columns_mapper = {
             'HomeTeam': 'Home Team',
             'AwayTeam': 'Away Team',
-            'AvgCH': '1',
-            'AvgCD': 'X',
-            'AvgCA': '2',
             'FTHG': 'HG',
             'FTAG': 'AG',
             'FTR': 'Result'

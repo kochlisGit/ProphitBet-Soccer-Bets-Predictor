@@ -24,13 +24,10 @@ class ExtraLeagueDownloader(FootballDataDownloader):
             else:
                 raise NotImplementedError(f'Invalid season: {season}')
 
-        columns = ['Date', 'Season', 'Home', 'Away', 'AvgCH', 'AvgCD', 'AvgCA', 'HG', 'AG', 'Res']
+        columns = ['Date', 'Season', 'Home', 'Away', 'HG', 'AG', 'Res']
         columns_mapper = {
             'Home': 'Home Team',
             'Away': 'Away Team',
-            'AvgCH': '1',
-            'AvgCD': 'X',
-            'AvgCA': '2',
             'Res': 'Result'
         }
         matches_df['Season'] = matches_df['Season'].apply(set_season)
