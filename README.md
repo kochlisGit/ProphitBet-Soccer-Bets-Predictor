@@ -216,12 +216,13 @@ Solution: You can press "ENTER" button to start training. The same applies to Ra
 
 # Release (2024/09/18)
 * Updated statistics: The average odds (1,X,2) are not replaced with "close" average odds, which are the average odds at the time that a match starts.
-* Fixed a bug where some of the odds would be missing. 
 * Updated documentation: installation instructions and common errors.
 * Simplified filters and fixed a bug in percentiles.
 * Deleted deprecated directory "network".
 * Fixed a bug where no normalization was applied after loading a pre-trained model.
 * Fixed a bug where several leagues could not be loaded. This is because football-data website changed the column names".
+* Fixed a bug where some of the odds would be missing.
+* Fixed a bug where Under/Over percentile filters were missing.
 
 # Release (2024/01/29)
 
