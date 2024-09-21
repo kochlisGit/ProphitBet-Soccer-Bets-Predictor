@@ -122,12 +122,7 @@ class ModelConfig:
         self.calibrate_probabilities = False
         self.sampler = None
         self.normalizer = None
-        self.odds_filter = None
-        self.home_fixture_percentile = (0, 0.0)
-        self.draw_fixture_percentile = (0, 0.0)
-        self.away_fixture_percentile = (0, 0.0)
-        self.under_fixture_percentile = (0, 0.0)
-        self.over_fixture_percentile = (0, 0.0)
+        self.odds_filter = {'None': {'home': (0, 0), 'draw': (0, 0), 'away': (0, 0), 'under': (0, 0), 'over': (0, 0)}}
 
     @property
     def league_id(self) -> str:
