@@ -14,7 +14,7 @@ class PercentileSlider:
         self._slider = LabeledScale(
             master,
             from_=0,
-            to=100,
+            to=101,
             variable=self._variable,
             compound='bottom'
         )
