@@ -365,7 +365,7 @@ class PredictFixturesDialog(Dialog):
 
             mask = get_odds_mask(filter_id=filters[0]) & get_percentile_mask(model_config=model_config, task=task, filter_id=filters[0])
             for filter_id in filters[1:]:
-                mask |= get_odds_mask(filter_id=filter_id) & get_percentile_mask(model_config=model_config, task=task, filter_id=filter_id)
+                mask |= (get_odds_mask(filter_id=filter_id) & get_percentile_mask(model_config=model_config, task=task, filter_id=filter_id))
             return mask
 
         task = self._task_var.get()

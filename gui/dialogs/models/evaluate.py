@@ -401,7 +401,7 @@ class EvaluationDialog(Dialog):
                 for i, values in enumerate(matches_df.values.tolist()):
                     self._treeview.insert(parent='', index=i, values=values)
 
-                highlight_mask = mask & self._predicted_targets == self._targets
+                highlight_mask = mask & (self._predicted_targets == self._targets)
                 self._highlight_treeview_items(mask=highlight_mask)
 
         if self._targets is None or not self._model_id_var.get():
