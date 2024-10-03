@@ -294,6 +294,10 @@ class EvaluationDialog(Dialog):
             self._over_percent_prob_filter = percentiles['over'][1]
 
     def _display_matches_and_metrics(self):
+        def clear_treeview_items():
+            for item in self._treeview.get_children():
+                self._treeview.delete(item)
+
         def get_odd_mask() -> np.ndarray:
             filter_str = self._odd_filter_var.get()
 
@@ -338,11 +342,7 @@ class EvaluationDialog(Dialog):
             else:
                 raise NotImplementedError(f'Undefined task: "{task}"')
 
-        def clear_treeview_items():
-            for item in self._treeview.get_children():
-                self._treeview.delete(item)
-
-        def display_metrics(mask: np.ndarray):
+        def display_metrics(targets: np.ndarray, predictions: np.ndarray):
             if mask.sum() == 0:
                 self._acc_var.set(value=0.0)
                 self._f1_var.set(value=0.0)
@@ -358,50 +358,43 @@ class EvaluationDialog(Dialog):
 
                     average = 'binary'
 
-                targets = self._targets[mask]
-                predictions = self._predicted_targets[mask]
                 self._acc_var.set(value=round(accuracy_score(y_true=targets, y_pred=predictions), 2))
                 self._f1_var.set(value=round(f1_score(y_true=targets, y_pred=predictions, average=average, zero_division=0.0), 2))
                 self._prec_var.set(value=round(precision_score(y_true=targets, y_pred=predictions, average=average, zero_division=0.0), 2))
                 self._rec_var.set(value=round(recall_score(y_true=targets, y_pred=predictions, average=average, zero_division=0.0), 2))
 
-        def display_matches(mask: np.ndarray):
-            match_columns = ['Date', 'Home Team', 'Away Team'] + [col for col in ['1', 'X', '2'] if col in self._matches_df.columns]
-            matches_df = self._matches_df[mask][match_columns]
-
+        def display_matches(matches_df: pd.DataFrame, targets: np.ndarray, predictions: np.ndarray, predicted_probabilities: np.ndarray):
             if matches_df.shape[0] > 0:
-                targets = self._targets[mask]
-                predictions = self._predicted_targets[mask]
-                predicted_probabilities = self._predicted_probabilities[mask]
-
-                matches_df.insert(loc=0, column='Index', value=np.arange(1, matches_df.shape[0] + 1))
-                matches_df['Result'] = targets
-                matches_df['Predicted'] = predictions
+                match_columns = ['Date', 'Home Team', 'Away Team'] + [col for col in ['1', 'X', '2'] if col in self._matches_df.columns]
+                selected_matches = matches_df[match_columns]
+                selected_matches.insert(loc=0, column='Index', value=np.arange(1, selected_matches.shape[0] + 1))
+                selected_matches['Result'] = targets
+                selected_matches['Predicted'] = predictions
 
                 task = self._task_var.get()
 
                 if task == 'Result':
                     assert self._predicted_probabilities.shape[1] == 3, 'Incorrect probabilities passed into _add_matches function'
 
-                    matches_df['Result'] = matches_df['Result'].replace({0: 'H', 1: 'D', 2: 'A'})
-                    matches_df['Predicted'] = matches_df['Predicted'].replace({0: 'H', 1: 'D', 2: 'A'})
-                    matches_df['Prob-H'] = predicted_probabilities[:, 0]
-                    matches_df['Prob-D'] = predicted_probabilities[:, 1]
-                    matches_df['Prob-A'] = predicted_probabilities[:, 2]
+                    selected_matches['Result'] = selected_matches['Result'].replace({0: 'H', 1: 'D', 2: 'A'})
+                    selected_matches['Predicted'] = selected_matches['Predicted'].replace({0: 'H', 1: 'D', 2: 'A'})
+                    selected_matches['Prob-H'] = predicted_probabilities[:, 0]
+                    selected_matches['Prob-D'] = predicted_probabilities[:, 1]
+                    selected_matches['Prob-A'] = predicted_probabilities[:, 2]
                 elif task == 'Over':
                     assert self._predicted_probabilities.shape[1] == 2, 'Incorrect probabilities passed into _add_matches function'
 
-                    matches_df['Result'] = matches_df['Result'].replace({0: 'U(2.5)', 1: 'O(2.5)'})
-                    matches_df['Predicted'] = matches_df['Predicted'].replace({0: 'U(2.5)', 1: 'O(2.5)'})
-                    matches_df['Prob-U(2.5)'] = predicted_probabilities[:, 0]
-                    matches_df['ProbO(2.5)'] = predicted_probabilities[:, 1]
+                    selected_matches['Result'] = selected_matches['Result'].replace({0: 'U(2.5)', 1: 'O(2.5)'})
+                    selected_matches['Predicted'] = selected_matches['Predicted'].replace({0: 'U(2.5)', 1: 'O(2.5)'})
+                    selected_matches['Prob-U(2.5)'] = predicted_probabilities[:, 0]
+                    selected_matches['ProbO(2.5)'] = predicted_probabilities[:, 1]
                 else:
                     raise NotImplementedError(f'Not implemented task: {task}')
 
-                for i, values in enumerate(matches_df.values.tolist()):
+                for i, values in enumerate(selected_matches.values.tolist()):
                     self._treeview.insert(parent='', index=i, values=values)
 
-                highlight_mask = mask & (self._predicted_targets == self._targets)
+                highlight_mask = predictions == targets
                 self._highlight_treeview_items(mask=highlight_mask)
 
         if self._targets is None or not self._model_id_var.get():
@@ -411,9 +404,14 @@ class EvaluationDialog(Dialog):
 
         assert mask.shape[0] == self._targets.shape[0], f'Mask size does not equal targets size: {mask.shape[0]} vs {self._targets.shape[0]}'
 
+        matches_df = self._matches_df[mask]
+        targets = self._targets[mask]
+        predictions = self._predicted_targets[mask]
+        predicted_probabilities = self._predicted_probabilities[mask]
+
         clear_treeview_items()
-        display_metrics(mask=mask)
-        display_matches(mask=mask)
+        display_metrics(targets=targets, predictions=predictions)
+        display_matches(matches_df=matches_df, targets=targets, predictions=predictions, predicted_probabilities=predicted_probabilities)
 
     def _highlight_treeview_items(self, mask: np.ndarray):
         selected_items = self._treeview.selection()
@@ -421,13 +419,15 @@ class EvaluationDialog(Dialog):
         if len(selected_items) > 0:
             self._treeview.selection_remove(selected_items)
 
-        assert mask.shape[0] == self._targets.shape[0], f'Mask size does not equal targets size: {mask.shape[0]} vs {self._targets.shape[0]}'
+        if len(mask) > 0:
+            items = self._treeview.get_children()
 
-        items = self._treeview.get_children()
-        selections = [item for item, is_correct in zip(items, mask) if is_correct]
+            assert len(items) == mask.shape[0], f'Mask size does not equal number of matches: {mask.shape[0]} vs {len(items)}'
 
-        if selections:
-            self._treeview.selection_set(selections)
+            selections = [item for item, is_correct in zip(items, mask) if is_correct]
+
+            if selections:
+                self._treeview.selection_set(selections)
 
     def _init_dialog(self):
         messagebox.showinfo(
