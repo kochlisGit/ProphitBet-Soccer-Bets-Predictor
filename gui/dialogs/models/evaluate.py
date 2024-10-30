@@ -331,13 +331,13 @@ class EvaluationDialog(Dialog):
             task = self._task_var.get()
 
             if task == 'Result':
-                home_mask, self._home_percent_prob = get_mask_and_prob(correct_ids=correct_ids, target_col=0, percentile=self._home_percentile_slider.get_value())
-                draw_mask, self._draw_percent_prob = get_mask_and_prob(correct_ids=correct_ids, target_col=1, percentile=self._draw_percentile_slider.get_value())
-                away_mask, self._away_percent_prob = get_mask_and_prob(correct_ids=correct_ids, target_col=2, percentile=self._away_percentile_slider.get_value())
+                home_mask, self._home_percent_prob_filter = get_mask_and_prob(correct_ids=correct_ids, target_col=0, percentile=self._home_percentile_slider.get_value())
+                draw_mask, self._draw_percent_prob_filter = get_mask_and_prob(correct_ids=correct_ids, target_col=1, percentile=self._draw_percentile_slider.get_value())
+                away_mask, self._away_percent_prob_filter = get_mask_and_prob(correct_ids=correct_ids, target_col=2, percentile=self._away_percentile_slider.get_value())
                 return (home_mask | draw_mask) | away_mask
             elif task == 'Over':
-                under_mask, self._under_percent_prob = get_mask_and_prob(correct_ids=correct_ids, target_col=0, percentile=self._under_percentile_slider.get_value())
-                over_mask, self._over_percent_prob = get_mask_and_prob(correct_ids=correct_ids, target_col=1, percentile=self._over_percentile_slider.get_value())
+                under_mask, self._under_percent_prob_filter = get_mask_and_prob(correct_ids=correct_ids, target_col=0, percentile=self._under_percentile_slider.get_value())
+                over_mask, self._over_percent_prob_filter = get_mask_and_prob(correct_ids=correct_ids, target_col=1, percentile=self._over_percentile_slider.get_value())
                 return under_mask | over_mask
             else:
                 raise NotImplementedError(f'Undefined task: "{task}"')

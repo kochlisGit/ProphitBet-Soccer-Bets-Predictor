@@ -346,7 +346,7 @@ class PredictFixturesDialog(Dialog):
                 raise NotImplementedError(f'Undefined task: "{task}"')
 
         def get_odds_mask(filter_id: str) -> np.ndarray:
-            if filter_id is None:
+            if filter_id == 'None':
                 return np.array([True]*matches_df.shape[0])
 
             odd, cond = filter_id.split(':')
