@@ -16,13 +16,16 @@ class StatisticsEngine:
             'AGF': self.compute_away_goals_forward,
             'AGA': self.compute_away_goals_against,
             'HWGD': self.compute_home_wins_margin_goal_diff,
+            'HGD': self.compute_home_goal_diff,
             'HLGD': self.compute_home_losses_margin_goal_diff,
             'AWGD': self.compute_away_wins_margin_goal_diff,
             'ALGD': self.compute_away_losses_margin_goal_diff,
             'HW%': self.compute_total_home_win_rate,
             'HL%': self.compute_total_home_loss_rate,
             'AW%': self.compute_total_away_win_rate,
-            'AL%': self.compute_total_away_loss_rate
+            'AL%': self.compute_total_away_loss_rate,
+            'AGD': self.compute_away_goal_diff,
+            'HAGD': self.compute_home_away_goal_diff
         }
 
     def _compute_last_results(self, matches_df: pd.DataFrame, team_column: str, result: str) -> pd.Series:
@@ -110,20 +113,38 @@ class StatisticsEngine:
 
         return matches_df.groupby(['Season', team_column], sort=False)['Result'].apply(compute_results)
 
-    def compute_total_home_win_rate(self, matches_df: pd.DataFrame):
+    def compute_total_home_win_rate(self, matches_df: pd.DataFrame) -> pd.DataFrame:
         matches_df['HW%'] = self._compute_total_result_rate(matches_df=matches_df, team_column='Home Team', result='H')
         return matches_df
 
-    def compute_total_home_loss_rate(self, matches_df: pd.DataFrame):
+    def compute_total_home_loss_rate(self, matches_df: pd.DataFrame) -> pd.DataFrame:
         matches_df['HL%'] = self._compute_total_result_rate(matches_df=matches_df, team_column='Home Team', result='A')
         return matches_df
 
-    def compute_total_away_win_rate(self, matches_df: pd.DataFrame):
+    def compute_total_away_win_rate(self, matches_df: pd.DataFrame) -> pd.DataFrame:
         matches_df['AW%'] = self._compute_total_result_rate(matches_df=matches_df, team_column='Away Team', result='A')
         return matches_df
 
-    def compute_total_away_loss_rate(self, matches_df: pd.DataFrame):
+    def compute_total_away_loss_rate(self, matches_df: pd.DataFrame) -> pd.DataFrame:
         matches_df['AL%'] = self._compute_total_result_rate(matches_df=matches_df, team_column='Away Team', result='H')
+        return matches_df
+
+    def compute_home_goal_diff(self, matches_df: pd.DataFrame) -> pd.DataFrame:
+        hgf = matches_df['HGF'] if 'HGF' in matches_df else self._compute_last_goals(matches_df=matches_df, team_column='Home Team', forward=True)
+        hga = matches_df['HGA'] if 'HGA' in matches_df else self._compute_last_goals(matches_df=matches_df, team_column='Home Team', forward=False)
+        matches_df['HGD'] = hgf - hga
+        return matches_df
+
+    def compute_away_goal_diff(self, matches_df: pd.DataFrame) -> pd.DataFrame:
+        agf = matches_df['AGF'] if 'AGF' in matches_df else self._compute_last_goals(matches_df=matches_df, team_column='Away Team', forward=True)
+        aga = matches_df['AGA'] if 'AGA' in matches_df else self._compute_last_goals(matches_df=matches_df, team_column='Away Team', forward=False)
+        matches_df['AGD'] = agf - aga
+        return matches_df
+
+    def compute_home_away_goal_diff(self, matches_df: pd.DataFrame) -> pd.DataFrame:
+        hgd = matches_df['HGD'] if 'HGD' in matches_df else self.compute_home_goal_diff(matches_df=matches_df)
+        agd = matches_df['AGD'] if 'AGD' in matches_df else self.compute_away_goal_diff(matches_df=matches_df)
+        matches_df['HAGD'] = hgd - agd
         return matches_df
 
     def compute_statistics(self, matches_df: pd.DataFrame, features: list[str]) -> pd.DataFrame:
