@@ -1,4 +1,6 @@
+import requests
 import pandas as pd
+from io import StringIO
 from datetime import date
 from database.entities.leagues.league import League
 from database.network.downloaders.downloader import FootballDataDownloader
@@ -10,7 +12,9 @@ class MainLeagueDownloader(FootballDataDownloader):
             url = league.data_url.format(f'{str(year)[-2:]}{str(year + 1)[-2:]}')
 
             try:
-                matches_df = pd.read_csv(url)
+                response = requests.get(url, verify=False)
+                response.raise_for_status()
+                matches_df = pd.read_csv(StringIO(response.text))
                 matches_df['Season'] = year
                 return matches_df
             except Exception as e:

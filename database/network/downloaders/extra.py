@@ -1,4 +1,6 @@
+import requests
 import pandas as pd
+from io import StringIO
 from database.entities.leagues.league import League
 from database.network.downloaders.downloader import FootballDataDownloader
 
@@ -6,7 +8,9 @@ from database.network.downloaders.downloader import FootballDataDownloader
 class ExtraLeagueDownloader(FootballDataDownloader):
     def _download_csv_data(self, league: League, year_start: int) -> pd.DataFrame or None:
         try:
-            matches_df = pd.read_csv(league.data_url)
+            response = requests.get(league.data_url, verify=False)
+            response.raise_for_status()
+            matches_df = pd.read_csv(StringIO(response.text))
         except Exception as e:
             print(e)
 
