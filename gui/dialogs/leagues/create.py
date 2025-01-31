@@ -19,8 +19,8 @@ class CreateLeagueDialog(Dialog):
             self._cb_country_values[i] += f' ({config_list[0].category})'
 
         self._odd_features = ['1', 'X', '2']
-        self._home_features = ['HW', 'HL', 'HGF', 'HGA', 'HWGD', 'HLGD', 'HW%', 'HL%']
-        self._away_features = ['AW', 'AL', 'AGF', 'AGA', 'AWGD', 'ALGD', 'AW%', 'AL%']
+        self._home_features = ['HW', 'HL', 'HGF', 'HGA', 'HWGD', 'HLGD', 'HW%', 'HL%', 'HGD']
+        self._away_features = ['AW', 'AL', 'AGF', 'AGA', 'AWGD', 'ALGD', 'AW%', 'AL%', 'AGD', 'HAGD']
         self._matches_df = None
         self._league_config = None
 
@@ -30,7 +30,7 @@ class CreateLeagueDialog(Dialog):
         self._selected_country_var = StringVar()
         self._league_id_var = StringVar()
         self._match_history_window_var = IntVar(value=3)
-        self._goal_diff_margin_var = IntVar(value=3)
+        self._goal_diff_margin_var = IntVar(value=2)
         self._odd_vars = {col: BooleanVar(value=True) for col in self._odd_features}
         self._home_vars = {col: BooleanVar(value=True) for col in self._home_features}
         self._away_vars = {col: BooleanVar(value=True) for col in self._away_features}
@@ -41,13 +41,13 @@ class CreateLeagueDialog(Dialog):
 
     def _compute_required_window_size(self) -> dict[str, int]:
         x = 400
-        y = len(self._home_features)*60 + 220
+        y = len(self._home_features)*60 + 170
         return {'width': x, 'height': y}
 
     def _create_widgets(self):
-        Label(self.window, text='--- League Settings ---', font=('Arial', 14)).place(x=100, y=10)
+        Label(self.window, text='--- League Settings ---', font=('Arial', 14)).place(x=100, y=5)
 
-        Label(self.window, text='Select Country:', font=('Arial', 14)).place(x=15, y=45)
+        Label(self.window, text='Select Country:', font=('Arial', 14)).place(x=15, y=40)
         country_cb = Combobox(
             self.window,
             values=self._cb_country_values,
@@ -58,9 +58,9 @@ class CreateLeagueDialog(Dialog):
         )
         country_cb.current(0)
         country_cb.bind('<<ComboboxSelected>>', self._adjust_league_settings)
-        country_cb.place(x=165, y=50)
+        country_cb.place(x=165, y=45)
 
-        Label(self.window, text='Select League:', font=('Arial', 14)).place(x=15, y=85)
+        Label(self.window, text='Select League:', font=('Arial', 14)).place(x=15, y=80)
         self._selected_league_cb = Combobox(
             self.window,
             width=21,
@@ -68,24 +68,24 @@ class CreateLeagueDialog(Dialog):
             state='readonly'
         )
         self._selected_league_cb.bind('<<ComboboxSelected>>', self._adjust_stats_settings)
-        self._selected_league_cb.place(x=165, y=90)
+        self._selected_league_cb.place(x=165, y=85)
 
-        Label(self.window, text='League ID:', font=('Arial', 14)).place(x=15, y=125)
+        Label(self.window, text='League ID:', font=('Arial', 14)).place(x=15, y=120)
         self._league_id_entry = Entry(
             self.window,
             width=28,
             font=('Arial', 10),
             textvariable=self._league_id_var
         )
-        self._league_id_entry.place(x=135, y=130)
+        self._league_id_entry.place(x=135, y=125)
         create_tooltip_btn(
             root=self.window,
             text='Identifier (ID) of this league. Each league should have unique ID.'
-        ).place(x=350, y=130)
+        ).place(x=350, y=125)
 
-        Label(self.window, text='--- Stats Settings ---', font=('Arial', 14)).place(x=110, y=175)
+        Label(self.window, text='--- Stats Settings ---', font=('Arial', 14)).place(x=110, y=160)
 
-        Label(self.window, text='Match History Window:', font=('Arial', 14)).place(x=15, y=215)
+        Label(self.window, text='Match History Window:', font=('Arial', 14)).place(x=15, y=200)
         IntSlider(
 
             self.window,
@@ -93,26 +93,26 @@ class CreateLeagueDialog(Dialog):
             to=5,
             variable=self._match_history_window_var,
             compound='bottom'
-        ).place(x=220, y=215)
+        ).place(x=220, y=200)
         create_tooltip_btn(
             root=self.window,
             text='Number of past matches to examine to compute team stats'
-        ).place(x=330, y=215)
+        ).place(x=330, y=200)
 
-        Label(self.window, text='Goal Margin Diff:', font=('Arial', 14)).place(x=15, y=255)
+        Label(self.window, text='Goal Margin Diff:', font=('Arial', 14)).place(x=15, y=250)
         IntSlider(
             self.window,
             from_=2,
             to=3,
             variable=self._goal_diff_margin_var,
             compound='bottom'
-        ).place(x=180, y=255)
+        ).place(x=180, y=250)
         create_tooltip_btn(
             root=self.window,
             text='Goal Difference Margin to compute HGD, HGA, AGD, AGA stats'
-        ).place(x=290, y=255)
+        ).place(x=290, y=250)
 
-        Label(self.window, text='--- Stats Columns ---', font=('Arial', 14)).place(x=100, y=300)
+        Label(self.window, text='--- Stats Columns ---', font=('Arial', 14)).place(x=100, y=292)
         Checkbutton(
             self.window,
             text='Odd-1',
@@ -120,7 +120,7 @@ class CreateLeagueDialog(Dialog):
             state='disabled',
             offvalue=False,
             variable=self._odd_vars['1']
-        ).place(x=70, y=340)
+        ).place(x=70, y=325)
         Checkbutton(
             self.window,
             text='Odd-X',
@@ -128,7 +128,7 @@ class CreateLeagueDialog(Dialog):
             state='disabled',
             offvalue=False,
             variable=self._odd_vars['X']
-        ).place(x=170, y=340)
+        ).place(x=170, y=325)
         Checkbutton(
             self.window,
             text='Odd-2',
@@ -136,7 +136,7 @@ class CreateLeagueDialog(Dialog):
             state='disabled',
             offvalue=False,
             variable=self._odd_vars['2']
-        ).place(x=270, y=340)
+        ).place(x=270, y=325)
 
         for i, col in enumerate(self._home_features):
             Checkbutton(
@@ -145,18 +145,28 @@ class CreateLeagueDialog(Dialog):
                 onvalue=True,
                 offvalue=False,
                 variable=self._home_vars[col]
-            ).place(x=90, y=370 + i*30)
+            ).place(x=90, y=355 + i*30)
 
+        num_away_features = len(self._away_features)
         for i, col in enumerate(self._away_features):
-            Checkbutton(
-                self.window,
-                text=col,
-                onvalue=True,
-                offvalue=False,
-                variable=self._away_vars[col]
-            ).place(x=240, y=370 + i*30)
+            if i == num_away_features - 1:
+                Checkbutton(
+                    self.window,
+                    text=col,
+                    onvalue=True,
+                    offvalue=False,
+                    variable=self._away_vars[col]
+                ).place(x=155, y=355 + (i-1)*30)
+            else:
+                Checkbutton(
+                    self.window,
+                    text=col,
+                    onvalue=True,
+                    offvalue=False,
+                    variable=self._away_vars[col]
+                ).place(x=240, y=355 + i*30)
 
-        Label(self.window, text='Start Year:', font=('Arial', 14)).place(x=80, y=self.window_size['height'] - 85)
+        Label(self.window, text='Start Year:', font=('Arial', 14)).place(x=80, y=self.window_size['height'] - 72)
         self._year_star_cb = Combobox(
             self.window,
             width=10,
@@ -164,13 +174,13 @@ class CreateLeagueDialog(Dialog):
             state='readonly',
             textvariable=self._year_start_var
         )
-        self._year_star_cb.place(x=190, y=self.window_size['height'] - 80)
+        self._year_star_cb.place(x=190, y=self.window_size['height'] - 72)
 
         Button(
             self.window,
             text='Create League',
             command=self._create_league
-        ).place(x=150, y=self.window_size['height'] - 40)
+        ).place(x=150, y=self.window_size['height'] - 35)
 
     def _adjust_league_settings(self, event):
         country = self._selected_country_var.get().split(' ')[0]
