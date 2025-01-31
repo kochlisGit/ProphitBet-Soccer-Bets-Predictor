@@ -214,6 +214,12 @@ In case there is an error with the application, open a Github Issue so that I ca
 
 Solution: You can press "ENTER" button to start training. The same applies to Random Forest Training Dialog, as well as the tuning dialogs.
 
+# Release (2025/01/31)
+* Fixed a bug where historical league data was unable to be download, due to an SSL certification error.
+* Added French Fixture Parser.
+* Added 3 new statistical features.
+* The create league dialog window has become smaller, to properly fit into a small-sized laptop screen/monitor.
+
 # Release (2024/10/30)
 * Fixed a bug where percentiles were not properly saved.
 
