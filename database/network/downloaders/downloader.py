@@ -20,7 +20,7 @@ class FootballDataDownloader(ABC):
         matches_df.insert(loc=6, column='2', value=odds_df['2'])
         matches_df.drop_duplicates(inplace=True)
         matches_df['Date'] = matches_df['Date'].interpolate(method='nearest')
-        matches_df.dropna(subset='Date', inplace=True)
+        matches_df.dropna(subset=['Date', 'Result'], inplace=True)
         matches_df.fillna(value=-1, inplace=True)
         matches_df = matches_df.iloc[::-1].reset_index(drop=True)
         return matches_df
