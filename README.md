@@ -5,6 +5,7 @@ The old version of ProphitBet is deprecated. The new version, ProphitBet2 is abo
 * Easier/Faster Installation.
 * New, Prettier User Interface (UI).
 * Better Documentation.
+* Cleaner & Faster Code.
 * More Statistics.
 * More Analysis Tools.
 * More Training/Evaluation Tools.
