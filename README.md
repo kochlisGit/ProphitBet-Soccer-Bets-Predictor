@@ -1,6 +1,14 @@
 # New Version
 
-The old version of ProphitBet is deprecated. The new version, ProphitBet2 is about to be released! Stay Tuned!
+The old version of ProphitBet is deprecated. The new version, ProphitBet2 is about to be released! Stay Tuned! The new version features:
+
+* Easier/Faster Installation.
+* New, Prettier User Interface (UI)
+* More Statistics.
+* More Analysis Tools.
+* More Training/Evaluation Tools.
+* More Training Options
+* Explainable Models.
 
 # ProphitBet - Soccer Bets Predictor
 ProphitBet is an **Open Source** Machine Learning (ML) Soccer Bet prediction application. The name comes from a combination of "Profit" & "Prophet". With profitbet, You can analyze the form of teams using advanced machine learning methods and stunning visualizations techniques, compute several statistics from previous matches of a selected league and predict the outcomes of a matches. The supported algorithms in this application are Deep Neural Networks, Random Forests, XG-Boost, KNN, SVM, Decision Tree, Logistic Regression, Naive Bayes & Ensemble models. Several feature prrprocessing method are also included, such as Data Normalization and Imbalanced-Learning techniques, which further boost the performance of ML models. The app extracts soccer data for **every** league included in *football-data*(https://www.football-data.co.uk/). Additionally, the application can parse upcoming fixtures from *Footystats*(https://footystats.org/) and predict the upcoming matches of a league. Moreover, advanced validation techniques, such as Cross-Validation and Holdout are automatically employed during the model's training, to ensure smaller chances of the trained models being over-fitted. Finally, the application requires **Internet Connection**, in order to download the league data.
