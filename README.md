@@ -19,20 +19,13 @@ review the changes and accept them or reply to you if there is something wrong.
 
 # Donation
 
-A lot of people request more football training data (e.g. corners, shots, cards, injuries, etc.). I found a football API that does provide such data https://footystats.org/api/ . However, such data are not available for free. I would like your help to improve the quality of the training data that the algorithms use. Higher quality data should increase the performance of the algorithms and get better predictions in every league. Addiotioanlly, more options could be supported (e.g. Under 2.5 or Over 2.5, Num Corners, etc.). I made it available for everyone who liked to app and would like to contribute to donate any amount. The money will be spent on monthly subscription on footystats API, where I will be able to download a whole more data. 
-
-If you liked the app, earned some prophits (profits) and want to contribute to more advanced betting-helper app, you can donate using the following link:
+If you liked the app, you can buy me a coffee via Paypal:
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=AK3SEFDGVAWFE)
 
-or via QR-Code:
+or you can scan the QR-Code below:
 
-![Donation](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/QR%20Code.png)
-
-# Currently Donated Money
-
-80€ **(Next Goal: 100€)**
-
+![Donation](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/QR%20Code.png)
 # Citation
 
 If you are writing an academic paper, please cite us!
