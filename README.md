@@ -32,9 +32,9 @@ Also, 4 custom themes have been added and can be selected via "Theme" menu. The 
 1. Forest-Light
 1. Forest-Dark
 
-![gui](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/create_league.png)
+![gui](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/create_league.png)
 
-![gui](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/loaded_league.png)
+![gui](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/loaded_league.png)
 
 # League Statistics
 
@@ -101,7 +101,7 @@ You can add additional leagues by modifying the `database/leagues.csv` configura
 This is particulary useful, when analyzing the quality of the training data. ProphitBet provides a headmap for the correlation matrix between the features, which shows the correlations 
 between 2 features (columns). The correlation is described by an arithmetic value ${r \in[-1.0, 1.0]}$. The closer $r$ is to zero, the weaker the correlation is between 2 columns. The closer to 1.0 or -1.0, the stronger the correlation will be. Ideally, a feature is good if its correlation with the rest of the features is close to zero ($r=0$).
 
-![correlation heatmap analysis](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/correlations.png)
+![correlation heatmap analysis](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/correlations.png)
 
 # Feature Importance Analysis
 
@@ -111,7 +111,7 @@ ProphitBet also comes with a built-in module for "**interpretability**". In case
 3. Recursive Feature Elimination (https://bookdown.org/max/FES/recursive-feature-elimination.html)
 4. Random Forest importance scores
 
-![feature-importance-analysis](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/importance.png)
+![feature-importance-analysis](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/importance.png)
 
 # Class (Target) Distribution Analysis
 
@@ -123,14 +123,14 @@ that, including:
 2. Output Probability Calibration (https://davidrosenberg.github.io/ttml2021/calibration/2.calibration.pdf)
 3. Resampling techniques (SMOTE, SMOTE-NN, SVM-SMOTE, NearMiss, Radnom Resampling)
 
-![class distribution](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/targets.png)
+![class distribution](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/targets.png)
 
 # Training Deep Neural Networks
 
 A detailed description of neural networks can be found in the link below:
 https://www.investopedia.com/terms/n/neuralnetwork.asp
 
-![deep neural networks](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/neuralnetwork.png)
+![deep neural networks](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/neuralnetwork.png)
 
 # Machihe Learning Models
 
@@ -148,7 +148,7 @@ https://www.investopedia.com/terms/n/neuralnetwork.asp
 A detailed description of random forests can be found in the link below:
 https://www.section.io/engineering-education/introduction-to-random-forest-in-machine-learning/
 
-![random forests](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/randomforest.png)
+![random forests](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/randomforest.png)
 
 # The Ensemble Model
 
@@ -158,7 +158,7 @@ This type of combines the predictions of several machine learning models. Typica
 
 Before using a trained model, it is wise to first evaluate the model on unseen matches. This should reveal the quality of the model training, as well as its output probabilities. You can compare the probabilities of random forest with the neural network's probabilities and choose the most confident and well-trained model. Additionally, you can request an analytical report of the accuracy of the classifiers for specific odd intervals (e.g. the accuracy between 1.0 and 1.3, 1.3, and 1.6, etc., for the home or away team).
 
-![model evaluation](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/evaluate.png)
+![model evaluation](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/evaluate.png)
 
 # Outcome Predictions
 
@@ -167,12 +167,12 @@ In order to request a prediction for a match, You need to select the home/away t
 1. Home, Draw or Away
 2. Under (2.5) or Over (2.5)
 
-![match predictions](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/predictions.png)
+![match predictions](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/predictions.png)
 
 # Fixture Parsing
 
 An alternative way to predict multiple matches at once is to use the "**Fixture Parsing**" option. You may now automatically parse the fixtures using your browser. Once the fixture window pops-up, select your **browser and the fixture date** and the application will automatically download the page & parse the upcoming fixtures of the specified data. This is a new feature, so please report any bugs in the issues page.
-![fixture parsing & upcoming match prediction](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/fixtures.png)
+![fixture parsing & upcoming match prediction](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/fixtures.png)
 
 # Requirements & Installation
 
@@ -298,7 +298,7 @@ Solution: You can press "ENTER" button to start training. The same applies to Ra
 * Added option to automatically search for best parameters, using OPTUNA package (Requires the installation of optuna, see instructions)
 * Updated Documentation: Added more detailed instruction + common errors and how they are dealt
 
-![Training Parameters](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/parameters.png)
+![Training Parameters](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/parameters.png)
 
 # Release (2022/11/12)
 
@@ -334,7 +334,7 @@ If you liked the app, earned some prophits (profits) and want to contribute to m
 
 or via QR-Code:
 
-![Donation](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/QR%20Code.png)
+![Donation](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/ProphitBet-v1/screenshots/QR%20Code.png)
 
 # Currently Donated Money
 
