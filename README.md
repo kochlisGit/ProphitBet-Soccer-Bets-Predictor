@@ -1,6 +1,6 @@
 # New Version (Release 13-11-2025)
 
-The old version of ProphitBet is deprecated and has been moved to branch `ProphitBet-v1`. The new version, ProphitBet2 has now been released! The new version features:
+The old version of ProphitBet is deprecated and has been moved to branch `ProphitBet-v1`. The new version, ProphitBet-v2 has now been released! The new version features:
 
 * Easier/Faster Installation.
 * New, Prettier User Interface (UI).
@@ -11,6 +11,10 @@ The old version of ProphitBet is deprecated and has been moved to branch `Prophi
 * More Training/Evaluation Tools.
 * More Training Options
 * Explainable Models.
+
+# ProphitBet-v2
+
+ProphitBet (Prophet/Profit + Bet) is an **Open Source** Machine Learning (ML) Soccer Bet prediction application, which allows you to download historical soccer data, analyze the form of teams using advanced ML methods, compute several team statistics, create statistical graph visualizations, and predict the outcomes of a matches. This app extracts soccer data (requires Internet Connection) for **every** league included in *football-data*(https://www.football-data.co.uk/). Additionally, it can parse upcoming fixtures from *Footystats*(https://footystats.org/) and predict the upcoming matches of a league, which can be organized and saved into an Excel file. Finally, it utilizes advanced model training & validation techniques, such as Cross-Validation and Holdout, which are automatically employed during the model's training, to ensure robust training of the models with low probability of generating over-fitted models. 
 
 # Contribution
 
