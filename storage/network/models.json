@@ -1,0 +1,4 @@
+{
+  "models_directory": "storage/leagues",
+  "models_index_filepath": "storage/leagues/model_index.pkl"
+}
