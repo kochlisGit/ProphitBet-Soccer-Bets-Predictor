@@ -204,7 +204,7 @@ Then, you can select a model and generate the predictions. By default, all predi
 # Contribution
 
 If you liked the app and would like to contribute, You are allowed to make changes to the code and make a pull request! Usually, it takes 1-3 days for me to
-review the changes and accept them or reply to you if there is something wrong.
+review the changes and accept them or reply to you if there is something wrong. Keep in mind that i am only a single person working on my free time on this project, so please be patient!
 
 # Donation
 
