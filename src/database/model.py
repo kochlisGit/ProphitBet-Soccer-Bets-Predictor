@@ -126,7 +126,7 @@ class ModelDatabase:
                 validated_index[league_id] = {}
 
                 for model_id, model_config in index[league_id].items():
-                    if os.path.exists(path=self._build_model_directory(model_id=model_id)):
+                    if os.path.exists(path=self._build_model_directory(model_id=model_id, league_id=league_id)):
                         validated_index[league_id][model_id] = model_config
 
                 if len(validated_index[league_id]) == 0:
@@ -139,7 +139,10 @@ class ModelDatabase:
         with open(self._models_index_filepath, 'wb') as pklfile:
             pickle.dump(self._index, pklfile)
 
-    def _build_model_directory(self, model_id: str) -> str:
+    def _build_model_directory(self, model_id: str, league_id: Optional[str] = None) -> str:
         """ Builds the directory of a model using its league id and model id (user-defined names). """
 
-        return f'{self._models_directory}/{self._league_id}/models/{model_id}'
+        if league_id is None:
+            league_id = self._league_id
+
+        return f'{self._models_directory}/{league_id}/models/{model_id}'
