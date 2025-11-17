@@ -201,6 +201,18 @@ Then, you can select a model and generate the predictions. By default, all predi
 
 ![https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/fixtures.png](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/fixtures.png)
 
+# How to Submit Issue
+
+You can use the issue tab to submit a new issue (or open the url via the app). When submitting an issue, please describe clearly the following:
+
+1. What the issue is.
+2. What the application is expected to do
+3. What the application does instead.
+4. Any error/crash messages appeared in the command line.
+5. Reproduction step.
+
+An example of submitted issues that enabled me to quickly detect and resolve the issue can be found here: https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/issues/111
+
 # Contribution
 
 If you liked the app and would like to contribute, You are allowed to make changes to the code and make a pull request! Usually, it takes 1-3 days for me to
