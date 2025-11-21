@@ -33,18 +33,28 @@ During installation, make sure the *"Add Python to Path"* is selected. If you ar
 
 [![YouTube Video](https://img.youtube.com/vi/yivyNCtVVDk/0.jpg)](https://www.youtube.com/watch?v=yivyNCtVVDk)
 
-## Step 2 - Download Code
+## Step 2 - Installation of Microsoft Visual C++ Redistributable (Windows Only)
+
+If you are a **Windows** user, you need to install the Microsoft Visual C++ Redistributable (x64 or x86), which can be found here: https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version
+
+![https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/mvsredistributable.png](https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/blob/main/screenshots/mvsredistributable.png)
+
+If you need help for the installation, watch this 3-minute guide: 
+
+[![YouTube Video](https://img.youtube.com/vi/vDpT_CCSNP8/0.jpg)](https://www.youtube.com/watch?v=vDpT_CCSNP8)
+
+## Step 3 - Download Code
 
 Download the code from the github repository other by clicking on the green "Code" button above selecting Download zip or by copying this address: https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor/archive/refs/heads/main.zip
 After the download, unzip the files into your preferred directory (e.g. *Downloads/ProphitBet*)
 
-## Step 3 - Install Python Libraries
+## Step 4 - Install Python Libraries
 
 ProphitBet requires several Python libraries **(with specific versions)** to run, which are analytically described in `requirements.txt` file. If you are a new Python user, skip ignore the following instruction. If you are an advanced Python user, you can use this file to manually install the requirements in whichever environment you like or by typing `pip install -r requirements.txt`.
 
 If you are a new user, you can use the `install.py` script to automatically download the required libraries. Open the Command Line (CMD) (or Trminal in Linux). In windows, you can open the cmd by typing *cmd* or *Command Prompt* in the windows search bar or by pressing the keys *Win+R* and typing *cmd* there. Then, nagivate on the created folder (e.g., *cd Downloads/ProphitBet*. Finally, type: `python install.py` and press ENTER to initiate the installation. These libraries will be automatically installed to the default Python version. If you are an advanced user and would like to install the libraries in a specific envrionment, you can also use *python install.py --venv "C:\Users\You\python\envs\myenv"*. If everything runs perfectly, you will notice an *Installation complete!* message and the installation details below, otherwise it will display an error.
 
-## Step 4 - Run Application
+## Step 5 - Run Application
 
 To open ProphitBet, you can navigate the CMD to the folder and type `python app.py`. You can also run the application by double-clicking the *app.bat* file (In linux, you can use the *app.sh* respectively). If you have an anti-virus enabled, it is possible that it slows down the initialization of the app.
 
