@@ -41,7 +41,7 @@ class MainLeagueDownloader(FootballDataDownloader):
         def download_fn(year: int):
             url = league.url.format(f'{str(year)[-2:]}{str(year + 1)[-2:]}')
             try:
-                df = pd.read_csv(url)
+                df = pd.read_csv(url, on_bad_lines='skip')
             except HTTPError as http_error:
                 if year < date.today().year:
                     logging.info(
@@ -51,7 +51,6 @@ class MainLeagueDownloader(FootballDataDownloader):
                 return None
             except UnicodeDecodeError as _:
                 df = pd.read_csv(url, encoding='latin1')
-
             df['Season'] = year
             return df
 

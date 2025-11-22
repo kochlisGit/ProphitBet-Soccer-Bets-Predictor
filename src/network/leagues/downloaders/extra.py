@@ -32,7 +32,7 @@ class ExtraLeagueDownloader(FootballDataDownloader):
         """ Downloads and returns csv data for all seasons. """
 
         try:
-            return pd.read_csv(league.url)
+            return pd.read_csv(league.url, on_bad_lines='skip')
         except URLError as e:
             logging.info(f'{e}\nFailed to download from: {league.url} from league: {str(league)}.')
             return None
