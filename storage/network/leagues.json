@@ -12,6 +12,7 @@
     {"country": "England", "name": "League-1", "start_year": 2005, "category": "main", "url": "https://www.football-data.co.uk/mmz4281/{}/E2.csv", "fixture": "https://footystats.org/england/efl-league-one/fixtures"},
     {"country": "England", "name": "League-2", "start_year": 2004, "category": "main", "url": "https://www.football-data.co.uk/mmz4281/{}/E3.csv", "fixture": "https://footystats.org/england/efl-league-two/fixtures"},
     {"country": "Finland", "name": "Veikkausliiga", "start_year": 2012, "category": "extra", "url": "https://www.football-data.co.uk/new/FIN.csv", "fixture": "https://footystats.org/finland/veikkausliiga/fixtures"},
+    {"country": "France", "name": "Ligue-1", "start_year": 2005, "category": "main", "url": "https://www.football-data.co.uk/mmz4281/{}/F1.csv", "fixture": "https://footystats.org/france/ligue-1/fixtures"},
     {"country": "France", "name": "Ligue-2", "start_year": 2005, "category": "main", "url": "https://www.football-data.co.uk/mmz4281/{}/F2.csv", "fixture": "https://footystats.org/france/ligue-2/fixtures"},
     {"country": "Germany", "name": "Bundesliga-1", "start_year": 2005, "category": "main", "url": "https://www.football-data.co.uk/mmz4281/{}/D1.csv", "fixture": "https://footystats.org/germany/bundesliga/fixtures"},
     {"country": "Germany", "name": "Bundesliga-2", "start_year": 2005, "category": "main", "url": "https://www.football-data.co.uk/mmz4281/{}/D2.csv", "fixture": "https://footystats.org/germany/2-bundesliga/fixtures"},
