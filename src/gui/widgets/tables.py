@@ -582,6 +582,6 @@ class SimpleTableDialog(QDialog):
             else:
                 self._df.to_csv(path, mode='a', header=False, index=False)
 
-            QMessageBox.information(self, 'Export Complete')
+            QMessageBox.information(self, 'Export Complete', '')
         except Exception as e:
             QMessageBox.critical(self, 'Export Failed', f'Could not export data.\n\nError:\n{e}')
