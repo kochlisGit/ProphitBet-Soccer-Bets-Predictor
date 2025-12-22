@@ -585,4 +585,3 @@ class SimpleTableDialog(QDialog):
             QMessageBox.information(self, 'Success', 'Export Completed!')
         except Exception as e:
             QMessageBox.critical(self, 'Export Failed', f'Could not export data.\n\nError:\n{e}')
-
