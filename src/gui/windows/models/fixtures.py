@@ -421,7 +421,7 @@ class FixturesDialog(QDialog):
             for filter_id in selected_filters:
                 # Filter odds.
                 if filter_id != 'None':
-                    odd, low, high = filter_id
+                    odd, low, high = ast.literal_eval(filter_id)
                     odd_df = self._odds[odd]
                     mask = mask & ((low <= odd_df) & (odd_df <= high))
 
