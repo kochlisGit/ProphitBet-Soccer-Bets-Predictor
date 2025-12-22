@@ -38,7 +38,6 @@ class FixturesDialog(QDialog):
         self._odds = None
         self._odd_mask = None
         self._index = None
-        self._highlight_ids = None
 
         self._target_types = {'Result (1/X/2)': TargetType.RESULT, 'U/O-2.5': TargetType.OVER_UNDER}
         self._home_teams = sorted(df['Home'].unique().tolist())
@@ -436,19 +435,24 @@ class FixturesDialog(QDialog):
                 percentile_mask = np.all(self._y_prob >= thresholds, axis=1)
                 mask = mask & percentile_mask
 
-        self._highlight_ids = self._index[mask].tolist()
+        highlight_ids = self._index[mask].tolist()
 
-        if len(self._highlight_ids) > 0:
-            self._table.highlight_rows(row_ids=self._highlight_ids)
+        if len(highlight_ids) > 0:
+            self._table.highlight_rows(row_ids=highlight_ids)
 
     def _export(self):
-        if self._highlight_ids is None or len(self._highlight_ids) == 0:
+        # Fetch the selected items.
+        highlight_ids = sorted({index.row() for index in self._table.selectedIndexes()})
+
+        if len(highlight_ids) == 0:
             QMessageBox.information(self, 'None Selected', 'Select the matches (rows) you want to export.')
             return
 
+        # Export the selected items.
         data = []
+        target_type = self._target_types[self._combo_target.currentText()]
         for row in range(10):
-            if row in self._highlight_ids:
+            if row in highlight_ids:
                 home_item = self._table.item(row, 0)
                 home = home_item.text().strip() if home_item else ""
                 away_item = self._table.item(row, 1)
@@ -456,7 +460,27 @@ class FixturesDialog(QDialog):
                 odd_1 = self._table.item(row, 2).text().strip()
                 odd_x = self._table.item(row, 3).text().strip()
                 odd_2 = self._table.item(row, 4).text().strip()
-                data.append([home, away, odd_1, odd_x, odd_2])
+                predicted = self._table.item(row, 5).text().strip()
+                data_row = [home, away, odd_1, odd_x, odd_2, predicted]
+
+                if target_type == TargetType.RESULT:
+                    data_row.extend([
+                        float(self._table.item(row, 6).text().strip()),
+                        float(self._table.item(row, 7).text().strip()),
+                        float(self._table.item(row, 8).text().strip())
+                    ])
+                else:
+                    data_row.extend([
+                        float(self._table.item(row, 6).text().strip()),
+                        float(self._table.item(row, 7).text().strip())
+                    ])
+
+                data.append(data_row)
+
+        if target_type == TargetType.RESULT:
+            df = pd.DataFrame(data=data, columns=['Home Team', 'Away Team', '1', 'X', '2', 'Predicted', 'Prob(1)', 'Prob(X)', 'Prob(2)'])
+        else:
+            df = pd.DataFrame(data=data, columns=['Home Team', 'Away Team', '1', 'X', '2', 'Predicted', 'Prob(U)', 'Prob(O)'])
 
         default_filepath = f'{self._league.league_id}-fixures.csv'
         path, _ = QFileDialog.getSaveFileName(self, 'Export to CSV', default_filepath, 'CSV Files (*.csv)')
@@ -469,9 +493,9 @@ class FixturesDialog(QDialog):
         file_exists = os.path.exists(path)
         try:
             if not file_exists:
-                self._df.to_csv(path, mode='w', header=True, index=False)
+                df.to_csv(path, mode='w', header=True, index=False)
             else:
-                self._df.to_csv(path, mode='a', header=False, index=False)
+                df.to_csv(path, mode='a', header=False, index=False)
 
             QMessageBox.information(self, 'Success', 'Export Completed!')
         except Exception as e:
