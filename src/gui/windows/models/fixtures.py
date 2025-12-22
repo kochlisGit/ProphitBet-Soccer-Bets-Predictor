@@ -125,7 +125,7 @@ class FixturesDialog(QDialog):
         self._combo_filters = CheckableComboBox()
         self._combo_filters.setFixedWidth(180)
         self._combo_filters.setEnabled(False)
-        self._combo_filters.currentIndexChanged.connect(self._on_filters_change)
+        self._combo_filters.checkedItemsChanged.connect(self._on_filters_change)
         filters_hbox.addWidget(QLabel('Filters: '))
         filters_hbox.addWidget(self._combo_filters)
         filters_hbox.addStretch(1)
@@ -413,9 +413,19 @@ class FixturesDialog(QDialog):
         selected_filters = self._combo_filters.getSelectedTexts()
 
         if selected_filters:
+            if selected_filters[0] == '--- Select Filters ---':
+                selected_filters = selected_filters[1:]
+
             target_type = self._target_types[self._combo_target.currentText()]
 
             for filter_id in selected_filters:
+                # Filter odds.
+                if filter_id != 'None':
+                    odd, low, high = filter_id
+                    odd_df = self._odds[odd]
+                    mask = mask & ((low <= odd_df) & (odd_df <= high))
+
+                # Filter Percentiles.
                 prob_percentiles = self._percentiles[filter_id] if filter_id == 'None' else self._percentiles[ast.literal_eval(filter_id)]
 
                 if target_type == TargetType.RESULT:
@@ -463,6 +473,6 @@ class FixturesDialog(QDialog):
             else:
                 self._df.to_csv(path, mode='a', header=False, index=False)
 
-            QMessageBox.information(self, 'Export Complete')
+            QMessageBox.information(self, 'Success', 'Export Completed!')
         except Exception as e:
             QMessageBox.critical(self, 'Export Failed', f'Could not export data.\n\nError:\n{e}')
