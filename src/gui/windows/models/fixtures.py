@@ -411,20 +411,21 @@ class FixturesDialog(QDialog):
         mask = self._odd_mask
         selected_filters = self._combo_filters.getSelectedTexts()
 
+        if selected_filters and selected_filters[0] == '--- Select Filters ---':
+            selected_filters = selected_filters[1:]
         if selected_filters:
-            if selected_filters[0] == '--- Select Filters ---':
-                selected_filters = selected_filters[1:]
-
             target_type = self._target_types[self._combo_target.currentText()]
-
+            all_filter_mask = np.zeros(shape=(mask.shape[0],), dtype=bool)
             for filter_id in selected_filters:
                 # Filter odds.
                 if filter_id != 'None':
                     odd, low, high = ast.literal_eval(filter_id)
                     odd_df = self._odds[odd]
-                    mask = mask & ((low <= odd_df) & (odd_df <= high))
+                    odd_mask = (low <= odd_df) & (odd_df <= high)
+                else:
+                    odd_mask = np.ones(shape=(mask.shape[0],), dtype=bool)
 
-                # Filter Percentiles.
+                # Filter percentiles.
                 prob_percentiles = self._percentiles[filter_id] if filter_id == 'None' else self._percentiles[ast.literal_eval(filter_id)]
 
                 if target_type == TargetType.RESULT:
@@ -433,12 +434,16 @@ class FixturesDialog(QDialog):
                     thresholds = np.float32([prob_percentiles['U'][1], prob_percentiles['O'][1]])
 
                 percentile_mask = np.all(self._y_prob >= thresholds, axis=1)
-                mask = mask & percentile_mask
+                filter_mask = odd_mask & percentile_mask
+                all_filter_mask = all_filter_mask | filter_mask
+            mask = mask & all_filter_mask
 
         highlight_ids = self._index[mask].tolist()
 
         if len(highlight_ids) > 0:
             self._table.highlight_rows(row_ids=highlight_ids)
+        else:
+            self._table.clear_selection()
 
     def _export(self):
         # Fetch the selected items.

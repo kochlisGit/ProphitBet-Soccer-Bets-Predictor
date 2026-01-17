@@ -7,6 +7,7 @@ from superqt import QLabeledSlider
 from src.database.model import ModelDatabase
 from src.gui.utils.taskrunner import TaskRunnerDialog
 from src.gui.widgets.tables import ExcelTable
+from src.metrics.balance import compute_profit_balance
 from src.preprocessing.utils.target import TargetType
 from src.preprocessing.utils.target import construct_targets
 
@@ -76,6 +77,7 @@ class EvaluatorDialog(QDialog):
         self._prec_label = None
         self._rec_label = None
         self._samples_label = None
+        self._profit_balance_label = None
 
         self._initialize_window()
         self._add_widgets()
@@ -214,7 +216,7 @@ class EvaluatorDialog(QDialog):
         metrics_row.addStretch(1)
         metrics_row.setSpacing(20)
         font = self.font()
-        font.setPointSize(13)
+        font.setPointSize(12)
         self._acc_label = QLabel('Accuracy: 0.0')
         self._acc_label.setFont(font)
         self._f1_label = QLabel('F1:  0.0')
@@ -225,11 +227,14 @@ class EvaluatorDialog(QDialog):
         self._rec_label.setFont(font)
         self._samples_label = QLabel(f'Samples: {self._df.shape[0]}')
         self._samples_label.setFont(font)
+        self._profit_balance_label = QLabel('Prof. Balance: 0.0')
+        self._profit_balance_label.setFont(font)
         metrics_row.addWidget(self._acc_label)
         metrics_row.addWidget(self._f1_label)
         metrics_row.addWidget(self._prec_label)
         metrics_row.addWidget(self._rec_label)
         metrics_row.addWidget(self._samples_label)
+        metrics_row.addWidget(self._profit_balance_label)
         metrics_row.addStretch(1)
         root.addLayout(metrics_row)
 
@@ -537,14 +542,28 @@ class EvaluatorDialog(QDialog):
                 self._prec_label.setText(f'Precision: {metrics_df.at[0, "Precision"]}')
                 self._rec_label.setText(f'Recall: {metrics_df.at[0, "Recall"]}')
                 self._samples_label.setText(f'Correct: {len(highlight_ids)}/{y_pred.shape[0]}')
+                self._profit_balance_label.setText(f'Prof. Balance: {self._compute_profit_balance(y_pred=y_pred, filter_mask=filter_mask)}')
             else:
                 self._acc_label.setText('Accuracy: 0.0')
                 self._f1_label.setText('F1: 0.0')
                 self._prec_label.setText('Precision: 0.0')
                 self._rec_label.setText('Recall: 0.0')
                 self._samples_label.setText(f'Samples: {self._df.shape[0]}')
+                self._profit_balance_label.setText('Prof. Balance: 0.0')
 
         TaskRunnerDialog(title='Updating Table', info='Evaluating matches...', parent=self, task_fn=_update).run()
+
+    def _compute_profit_balance(self, y_pred: pd.Series, filter_mask: np.ndarray) -> float:
+        target_type = self._target_types[self._combo_target.currentText()]
+
+        if target_type == TargetType.RESULT:
+            odds_df = self._df.loc[filter_mask, ['1', 'X', '2']]
+        else:
+            return 0.0
+
+        odds = odds_df.values[np.arange(y_pred.shape[0]), y_pred]
+        profit_balance = compute_profit_balance(odds=odds)
+        return profit_balance
 
     def _set_percentile_tooltips(self):
         target_type = self._target_types[self._combo_target.currentText()]
