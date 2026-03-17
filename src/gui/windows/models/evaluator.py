@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QDialog, QFrame, QLabel, QComboBox, QHBoxLayout, QMe
 from superqt import QLabeledSlider
 from src.database.model import ModelDatabase
 from src.gui.utils.taskrunner import TaskRunnerDialog
-from src.gui.widgets.tables import ExcelTable
+from src.gui.widgets.tables import ExcelTable, SimpleTableDialog
 from src.metrics.balance import compute_profit_balance
 from src.preprocessing.utils.target import TargetType
 from src.preprocessing.utils.target import construct_targets
@@ -24,7 +24,7 @@ class EvaluatorDialog(QDialog):
         self._model_ids = model_db.get_model_ids()
         self._title = 'Evaluation Dialog'
         self._width = 800
-        self._height = 600
+        self._height = 650
 
         # Declare placeholders.
         self._model = None
@@ -71,7 +71,9 @@ class EvaluatorDialog(QDialog):
         self._slider_percentile_under = None
         self._slider_percentile_over = None
         self._table = None
-        self._store_filters_btn = None
+        self._store_filter_btn = None
+        self._delete_filter_btn = None
+        self._seasonal_metrics_btn = None
         self._acc_label = None
         self._f1_label = None
         self._prec_label = None
@@ -203,14 +205,31 @@ class EvaluatorDialog(QDialog):
         btn_row = QHBoxLayout()
         btn_row.addStretch(1)
 
-        self._store_filters_btn = QPushButton('Store Filters')
-        self._store_filters_btn.setFixedWidth(120)
-        self._store_filters_btn.setFixedHeight(30)
-        self._store_filters_btn.setEnabled(False)
-        self._store_filters_btn.clicked.connect(self._store_filters)
-        btn_row.addWidget(self._store_filters_btn)
+        self._store_filter_btn = QPushButton('Store Filter')
+        self._store_filter_btn.setFixedWidth(120)
+        self._store_filter_btn.setFixedHeight(30)
+        self._store_filter_btn.setEnabled(False)
+        self._store_filter_btn.clicked.connect(self._store_filter)
+        btn_row.addWidget(self._store_filter_btn)
+
+        self._delete_filter_btn = QPushButton('Delete Filter')
+        self._delete_filter_btn.setFixedWidth(120)
+        self._delete_filter_btn.setFixedHeight(30)
+        self._delete_filter_btn.clicked.connect(self._delete_filter)
+        btn_row.addWidget(self._delete_filter_btn)
         btn_row.addStretch(1)
         root.addLayout(btn_row)
+
+        seasonal_row = QHBoxLayout()
+        seasonal_row.addStretch(1)
+        self._seasonal_metrics_btn = QPushButton('Seasonal Metrics')
+        self._seasonal_metrics_btn.setFixedWidth(150)
+        self._seasonal_metrics_btn.setFixedHeight(30)
+        self._seasonal_metrics_btn.setEnabled(False)
+        self._seasonal_metrics_btn.clicked.connect(self._display_seasonal_metrics)
+        seasonal_row.addWidget(self._seasonal_metrics_btn)
+        seasonal_row.addStretch(1)
+        root.addLayout(seasonal_row)
 
         metrics_row = QHBoxLayout()
         metrics_row.addStretch(1)
@@ -258,8 +277,9 @@ class EvaluatorDialog(QDialog):
 
         self._update_table_predictions()
         self._update_table_and_metrics()
-        self._store_filters_btn.setEnabled(True)
+        self._store_filter_btn.setEnabled(True)
         self._combo_dataset.setEnabled(True)
+        self._seasonal_metrics_btn.setEnabled(True)
 
     def _on_dataset_change(self):
         self._update_prob_percentiles()
@@ -270,11 +290,16 @@ class EvaluatorDialog(QDialog):
         self._update_prob_percentiles()
         self._update_table_and_metrics()
 
+        if self._percentiles and self._percentiles.get(self._odd_ranges[self._combo_range.currentIndex()], None):
+            self._delete_filter_btn.setEnabled(True)
+        else:
+            self._delete_filter_btn.setEnabled(False)
+
     def _on_percentile_change(self):
         self._update_prob_percentiles()
         self._update_table_and_metrics()
 
-    def _store_filters(self):
+    def _store_filter(self):
         """ Stores the selected filter (range-percentiles) pairs in config. """
 
         if self._percentiles is None:
@@ -290,12 +315,30 @@ class EvaluatorDialog(QDialog):
         self._model_config['eval']['percentiles'] = self._percentiles
         self._model_db.update_model_config(model_config=self._model_config)
 
+    def _delete_filter(self):
+        """ Deletes the selected filter (range-percentiles) pairs from config and disables the delete button. """
+
+        self._delete_filter_btn.setEnabled(False)
+
+        if self._percentiles is None:
+            return
+
+        odd_range = self._odd_ranges[self._combo_range.currentIndex()]
+
+        if odd_range not in self._percentiles:
+            return
+
+        del self._percentiles[odd_range]
+        self._model_db.update_model_config(model_config=self._model_config)
+
     def _reset_evaluator_state(self):
         self._model = self._model_config = self._percentiles = None
         self._num_eval_samples = self._num_train_samples = self._y_pred = self._y_prob = None
         self._y_pred = self._y_prob = self._prob_percentiles = self._correct_ids_set = self._correct_mask = None
         self._dataset_mask_dict.update({'Train': None, 'Eval': None})
 
+        self._seasonal_metrics_btn.setEnabled(False)
+        self._delete_filter_btn.setEnabled(False)
         self._combo_dataset.setEnabled(False)
         self._combo_dataset.setCurrentIndex(0)
         self._set_percentile_states()
@@ -552,6 +595,26 @@ class EvaluatorDialog(QDialog):
                 self._profit_balance_label.setText('Prof. Balance: 0.0')
 
         TaskRunnerDialog(title='Updating Table', info='Evaluating matches...', parent=self, task_fn=_update).run()
+
+    def _display_seasonal_metrics(self):
+        filter_mask = self._compute_hidden_mask()
+        target_type = self._target_types[self._combo_target.currentText()]
+        y_pred = self._y_pred[filter_mask]
+        eval_df = pd.DataFrame({
+            'y_true': self._y_true_dict[target_type][filter_mask],
+            'y_pred': y_pred,
+            'Season': self._df.loc[filter_mask, 'Season']
+        }, index=self._df.index[filter_mask])
+
+        def get_seasonal_stats(group_df: pd.DataFrame) -> pd.DataFrame:
+            metrics = self._model.compute_metrics(y_true=group_df['y_true'], y_pred=group_df['y_pred'])
+            metrics['Correct'] = (group_df['y_true'] == group_df['y_pred']).sum()
+            metrics['Total'] = group_df.shape[0]
+            metrics['Prof. Balance'] = self._compute_profit_balance(y_pred=group_df['y_pred'], filter_mask=group_df.index)
+            return metrics
+
+        seasonal_metrics_df = eval_df.groupby('Season').apply(get_seasonal_stats, include_groups=True).reset_index(drop=True)
+        SimpleTableDialog(df=seasonal_metrics_df, parent=self, title='Seasonal Metrics').show()
 
     def _compute_profit_balance(self, y_pred: pd.Series, filter_mask: np.ndarray) -> float:
         target_type = self._target_types[self._combo_target.currentText()]
