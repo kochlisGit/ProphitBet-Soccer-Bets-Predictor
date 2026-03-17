@@ -1,4 +1,15 @@
-# New Version (Release 01-17-2025)
+# New Version (Release 03-17-2026)
+
+Once again, thank you for your support and your valuable feedback. The new release includes the following updates:
+
+* Fixed several during model evaluation.
+* Fixed a bug where footystats parser would fail to parse upcoming fixtures.
+* Added Excel support into the pipeline. To use it, you will need to install `openpyxl` by opening the command line (cmd) and typinh: `pip install openpyxl`. If you installed the app in a custom environment, then you should first activate that environment.
+* Table store no longer replaces the metrics/predictions. Instead, it tries to append the new metrics or predictions into the existing file (works both in csv and excel format).
+* Added analytical evaluation metrics per season.
+* Added a "Delete Filter" button to remove unwanted filters.
+
+# New Version (Release 01-17-2026)
 
 Thank you for your support, feedback and most importantly, the donations! We constantly try to update ProphitBet and add more features, with the help of your feedback. The next patch is expected to drastically improve your experience!
 
