@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from typing import Dict, List, Optional, Union
+from openpyxl import load_workbook
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QFont, QKeyEvent
 from PyQt6.QtWidgets import (
@@ -568,19 +569,52 @@ class SimpleTableDialog(QDialog):
 
     def _to_csv(self):
         default_filepath = f'{self.windowTitle()}.csv'
-        path, _ = QFileDialog.getSaveFileName(self, 'Export to CSV', default_filepath, 'CSV Files (*.csv)')
+        path, _ = QFileDialog.getSaveFileName(
+            self,
+            'Export to CSV',
+            default_filepath,
+            'CSV Files (*.csv);;Excel Files (*.xlsx)',
+            options=QFileDialog.Option.DontConfirmOverwrite
+        )
 
         if not path:
             return
-        if not path.lower().endswith('.csv'):
-            path += '.csv'
+        else:
+            split_path = path.lower().rsplit('.', maxsplit=1)
 
-        file_exists = os.path.exists(path)
-        try:
-            if not file_exists:
-                self._df.to_csv(path, mode='w', header=True, index=False)
+            if len(split_path) == 1:
+                path += '.csv'
+                excel = False
             else:
-                self._df.to_csv(path, mode='a', header=False, index=False)
+                filetype = split_path[1]
+
+                if filetype == 'csv':
+                    excel = False
+                elif filetype == 'xlsx':
+                    excel = True
+                else:
+                    QMessageBox.critical(self, 'Export Failed', f'Invalid file type: "{filetype}"')
+                    return
+
+        try:
+            if excel:
+                if os.path.exists(path):
+                    workbook = load_workbook(filename=path)
+                    startrow, mode, header, if_sheet_exists = (workbook['Sheet1'].max_row, 'a', False, 'overlay')
+                else:
+                    startrow, mode, header, if_sheet_exists = (0, 'w', True, None)
+
+                with pd.ExcelWriter(path=path, engine='openpyxl', mode=mode, if_sheet_exists=if_sheet_exists) as writer:
+                    self._df.to_excel(
+                        writer,
+                        sheet_name='Sheet1',
+                        startrow=startrow,
+                        header=header,
+                        index=False
+                    )
+            else:
+                mode, header = ('a', False) if os.path.exists(path=path) else ('w', True)
+                self._df.to_csv(path, mode=mode, header=header, index=False)
 
             QMessageBox.information(self, 'Success', 'Export Completed!')
         except Exception as e:
