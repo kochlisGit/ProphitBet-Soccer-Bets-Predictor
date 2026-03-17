@@ -9,14 +9,14 @@ Once again, thank you for your support and your valuable feedback. The new relea
 * Added analytical evaluation metrics per season.
 * Added a "Delete Filter" button to remove unwanted filters.
 
-# New Version (Release 01-17-2026)
+# Version (Release 01-17-2026)
 
 Thank you for your support, feedback and most importantly, the donations! We constantly try to update ProphitBet and add more features, with the help of your feedback. The next patch is expected to drastically improve your experience!
 
 * Fixed several bugs which would cause the app to crash.
 * Added a new evaluation metric *"Profit Balance"*. If profit balance is lower than accuracy, then the selected matches are mathematically profitable!
 
-# New Version (Release 13-11-2025)
+# Version (Release 13-11-2025)
 
 The old version of ProphitBet is deprecated and has been moved to branch `ProphitBet-v1` (You can access it by selecting it from top-left combobox). The new version, ProphitBet-v2 has now been released! The new version features:
 
