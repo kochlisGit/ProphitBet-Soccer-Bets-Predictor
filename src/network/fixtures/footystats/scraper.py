@@ -1,7 +1,6 @@
 import json
 import logging
 import time
-import numpy as np
 import pandas as pd
 from typing import Optional
 from lxml import html
@@ -22,17 +21,17 @@ class FootyStatsScraper:
         if browser == 'chrome':
             options = ChromeOptions()
             options.add_argument('--incognito')
-            options.add_argument("--lang=en-US")
+            options.add_argument('--lang=en-US')
             self._web_driver = Chrome(options=options)
         elif browser == 'firefox':
             options = FirefoxOptions()
             options.add_argument('--incognito')
-            options.set_preference("intl.accept_languages", "en-US, en")
+            options.set_preference('intl.accept_languages', 'en-US, en')
             self._web_driver = Firefox(options=options)
         elif browser == 'edge':
             options = EdgeOptions()
             options.add_argument('--incognito')
-            options.add_argument("--lang=en-US")
+            options.add_argument('--lang=en-US')
             self._web_driver = Edge(options=options)
         else:
             raise NotImplementedError(
@@ -49,6 +48,7 @@ class FootyStatsScraper:
 
         # Load webpage using the web driver.
         self._web_driver.get(url=fixture_url)
+        self._web_driver.refresh()
         for _ in range(int(self._page_load_timeout//self._poll_frequency)):
             if self._web_driver.execute_script('return document.readyState') == 'complete':
                 break
