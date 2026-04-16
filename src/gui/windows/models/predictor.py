@@ -23,7 +23,7 @@ class PredictorDialog(QDialog):
 
         self._home_teams = sorted(df['Home'].unique().tolist())
         self._away_teams = sorted(df['Away'].unique().tolist())
-        self._result_dict = {0: 'H', 1: 'D', 'A': 2}
+        self._result_dict = {0: 'H', 1: 'D', 2: 'A'}
         self._result_uo_dict = {0: 'U', 1: 'O'}
 
         # Declare placeholders.
