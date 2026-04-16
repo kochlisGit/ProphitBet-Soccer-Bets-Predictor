@@ -52,10 +52,6 @@ class FootyStatsScraper:
         # Load webpage using the web driver.
         self._web_driver.get(url=fixture_url)
         self._web_driver.refresh()
-        # for _ in range(int(self._page_load_timeout//self._poll_frequency)):
-        #     if self._web_driver.execute_script('return document.readyState') == 'complete':
-        #         break
-        #     time.sleep(self._poll_frequency)
 
         try:
             WebDriverWait(self._web_driver, timeout=self._page_load_timeout).until(
@@ -64,8 +60,8 @@ class FootyStatsScraper:
         except Exception as _:
             logging.info('Timed out waiting for fixture table to load.')
             return False
-        
-        time.sleep(1.0)        
+
+        time.sleep(1.0)
         return True
 
     def parse_fixture_table(self, date_str: str) -> Optional[pd.DataFrame]:
