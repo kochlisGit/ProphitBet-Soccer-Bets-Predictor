@@ -1,4 +1,4 @@
-"""
+r"""
 !! --- IMPORTANT NOTES --- !!
 This installer detects (optionally) a provided virtual environment and installs the required libraries.
 These libraries (see requirements.txt) are needed for Prophitbet-v2 to run.
