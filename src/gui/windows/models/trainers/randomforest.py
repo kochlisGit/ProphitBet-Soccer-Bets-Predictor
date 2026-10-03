@@ -55,7 +55,8 @@ class RandomForestTrainerDialog(TrainerDialog):
             placeholder_name='criterion',
             widget=self._combo_criterion,
             layout=row1_box,
-            tooltip='The objective function of Decision Tree.'
+            tooltip='The objective function of Decision Tree.',
+            value_map=self._criterion_options
         )
 
         self._slider_leaf = QLabeledSlider(Qt.Orientation.Horizontal)
@@ -103,7 +104,8 @@ class RandomForestTrainerDialog(TrainerDialog):
             placeholder_name='max_features',
             widget=self._combo_features,
             layout=row2_box,
-            tooltip='The maximum number of features that is utilized.'
+            tooltip='The maximum number of features that is utilized.',
+            value_map=self._feature_options
         )
 
         self._slider_depth = QLabeledSlider(Qt.Orientation.Horizontal)
@@ -130,7 +132,8 @@ class RandomForestTrainerDialog(TrainerDialog):
             placeholder_name='class_weight',
             widget=self._combo_class,
             layout=row2_box,
-            tooltip='Whether to balance class weights (weight of each target).'
+            tooltip='Whether to balance class weights (weight of each target).',
+            value_map=self._class_weights
         )
 
         row2_box.addStretch(1)

@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-zinc-900 text-zinc-50 antialiased;
+    background-image:
+      radial-gradient(ellipse 120% 80% at 50% -30%, rgba(22, 163, 74, 0.15), transparent 55%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(39, 39, 42, 0.4), transparent 45%);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500/80 active:bg-emerald-700;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-md border border-zinc-600/90 bg-zinc-900/80 px-6 py-2.5 text-sm font-medium text-zinc-200 shadow-sm backdrop-blur-sm transition-colors hover:border-zinc-500 hover:bg-zinc-800/90 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500/50;
+  }
+  .card {
+    @apply rounded-lg border border-zinc-700/90 bg-zinc-800/70 p-6 shadow-surface backdrop-blur-sm;
+    @apply transition-[box-shadow,border-color,transform] duration-200 ease-out;
+  }
+  .card:hover {
+    @apply border-zinc-600/90 shadow-lg;
+  }
+  .input {
+    @apply w-full rounded-md border border-zinc-600/90 bg-zinc-800/60 px-4 py-2.5 text-sm text-zinc-50 placeholder-zinc-400 shadow-sm transition focus:border-emerald-600/70 focus:outline-none focus:ring-2 focus:ring-emerald-600/25;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide;
+  }
+  /* App shell: dashboard main column */
+  .app-main {
+    @apply min-h-[calc(100vh-4rem)] border-l border-zinc-800/60 bg-zinc-950/40;
+  }
+
+  /* Smooth, flicker-free entrance transition */
+  @keyframes subtleEntrance {
+    from {
+      opacity: 0.92;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .anim-page-title,
+  .anim-page-sub,
+  .anim-hero-line,
+  .anim-feature-card,
+  .anim-reveal-inner {
+    animation: subtleEntrance 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+

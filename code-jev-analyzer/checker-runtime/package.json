@@ -1,0 +1,7 @@
+{
+  "name": "prophitbet-system-checker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {"ai": "7.0.107", "@ai-sdk/gateway": "4.0.87"}
+}

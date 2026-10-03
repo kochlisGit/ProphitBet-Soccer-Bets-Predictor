@@ -1,0 +1,27 @@
+# Learning graph: desktop, shared ML, and SaaS source code.
+code-jev-analyzer/
+storage/
+docs/
+screenshots/
+__pycache__/
+pytest-cache-files-*/
+.kilo/
+.freebuff/
+.cursor/
+*.log
+node_modules/
+.next/
+.gitnexus/
+.venv/
+venv/
+tools/dots/
+monitoring/secrets/
+**/.env*
+*.pem
+*.key
+*.p12
+*.sqlite*
+*.db
+coverage/
+dist/
+build/

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def construct_inputs_by_teams(df: pd.DataFrame, match_df: pd.DataFrame) -> pd.DataFrame:
+def construct_inputs_by_teams(df: pd.DataFrame, match_df: pd.DataFrame, require_odds: bool = True) -> pd.DataFrame:
     """ Constructs a model input using the home team, away team and the odds from a fixture. """
 
     copy_df = df.dropna(ignore_index=True)
@@ -17,7 +17,7 @@ def construct_inputs_by_teams(df: pd.DataFrame, match_df: pd.DataFrame) -> pd.Da
     if match_df.shape[0] != 1:
         raise ValueError(f'match_df should contain a single match only, got {match_df.shape[0]} matches.')
 
-    required_cols = ['Home', 'Away', '1', 'X', '2']
+    required_cols = ['Home', 'Away'] + (['1', 'X', '2'] if require_odds else [])
     if any([c not in match_df.columns for c in required_cols]):
         raise ValueError(
             f'Missing columns found. Provided columns are: {match_df.columns.tolist()}, '

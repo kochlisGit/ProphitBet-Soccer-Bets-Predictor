@@ -1,0 +1,524 @@
+{
+  "evaluated_at": "2026-10-03",
+  "league_id": 6,
+  "league": "England Premier League",
+  "model": "random_forest",
+  "hyperparameters": {
+    "n_estimators": 20,
+    "max_depth": 6,
+    "min_samples_leaf": 10
+  },
+  "published": false,
+  "results": {
+    "result": {
+      "evaluation": "chronological_final_holdout",
+      "uses_odds": false,
+      "target_type": "result",
+      "training_rows": 3718,
+      "dataset_sha256": "47a5e0aa2a48757dae6fb86a427f37990d6ba7463a694969c53265b2513013a2",
+      "odds_excluded_unverified_timing": false,
+      "temporal_report": {
+        "method": "expanding_date_blocks",
+        "folds": [
+          {
+            "kind": "validation",
+            "training_rows": 798,
+            "training_end": "2010-03-16 00:00:00+00:00",
+            "evaluation_start": "2010-03-20 00:00:00+00:00",
+            "evaluation_end": "2014-05-05 00:00:00+00:00",
+            "model": {
+              "samples": 786,
+              "accuracy": 0.455470737913486,
+              "precision": 0.43152036640339625,
+              "recall": 0.42877450859900534,
+              "f1": 0.42829700832606327,
+              "log_loss": 1.0577039658219882,
+              "brier": 0.6329890209446871,
+              "calibration": [
+                {
+                  "count": 148,
+                  "confidence": 0.37817557884896497,
+                  "accuracy": 0.28378378378378377
+                },
+                {
+                  "count": 311,
+                  "confidence": 0.44780487705878835,
+                  "accuracy": 0.3762057877813505
+                },
+                {
+                  "count": 131,
+                  "confidence": 0.5476481002419089,
+                  "accuracy": 0.6106870229007634
+                },
+                {
+                  "count": 109,
+                  "confidence": 0.646929911446666,
+                  "accuracy": 0.6055045871559633
+                },
+                {
+                  "count": 67,
+                  "confidence": 0.74896206916753,
+                  "accuracy": 0.6119402985074627
+                },
+                {
+                  "count": 17,
+                  "confidence": 0.8374258125670673,
+                  "accuracy": 0.5294117647058824
+                },
+                {
+                  "count": 3,
+                  "confidence": 0.9251808795062016,
+                  "accuracy": 1
+                }
+              ]
+            },
+            "baseline": {
+              "samples": 786,
+              "accuracy": 0.4860050890585242,
+              "precision": 0.1620016963528414,
+              "recall": 0.3333333333333333,
+              "f1": 0.21803652968036527,
+              "log_loss": 1.0488609613824573,
+              "brier": 0.6316230208993768,
+              "calibration": [
+                {
+                  "count": 786,
+                  "confidence": 0.4893882646691636,
+                  "accuracy": 0.4860050890585242
+                }
+              ]
+            }
+          },
+          {
+            "kind": "validation",
+            "training_rows": 1584,
+            "training_end": "2014-05-05 00:00:00+00:00",
+            "evaluation_start": "2014-05-06 00:00:00+00:00",
+            "evaluation_end": "2019-03-03 00:00:00+00:00",
+            "model": {
+              "samples": 804,
+              "accuracy": 0.45149253731343286,
+              "precision": 0.4296062153754014,
+              "recall": 0.42836355765977957,
+              "f1": 0.42534561838997326,
+              "log_loss": 1.0362310941399253,
+              "brier": 0.6188527533209693,
+              "calibration": [
+                {
+                  "count": 205,
+                  "confidence": 0.3738978302288407,
+                  "accuracy": 0.32682926829268294
+                },
+                {
+                  "count": 325,
+                  "confidence": 0.43996730303782144,
+                  "accuracy": 0.36
+                },
+                {
+                  "count": 167,
+                  "confidence": 0.5443922445949795,
+                  "accuracy": 0.592814371257485
+                },
+                {
+                  "count": 83,
+                  "confidence": 0.6419141761719683,
+                  "accuracy": 0.7831325301204819
+                },
+                {
+                  "count": 24,
+                  "confidence": 0.7354942514843952,
+                  "accuracy": 0.625
+                }
+              ]
+            },
+            "baseline": {
+              "samples": 804,
+              "accuracy": 0.4763681592039801,
+              "precision": 0.1587893864013267,
+              "recall": 0.3333333333333333,
+              "f1": 0.2151081156978377,
+              "log_loss": 1.0536144482677232,
+              "brier": 0.6353352792025828,
+              "calibration": [
+                {
+                  "count": 804,
+                  "confidence": 0.48771266540642705,
+                  "accuracy": 0.4763681592039801
+                }
+              ]
+            }
+          },
+          {
+            "kind": "validation",
+            "training_rows": 2388,
+            "training_end": "2019-03-03 00:00:00+00:00",
+            "evaluation_start": "2019-03-09 00:00:00+00:00",
+            "evaluation_end": "2023-02-08 00:00:00+00:00",
+            "model": {
+              "samples": 627,
+              "accuracy": 0.430622009569378,
+              "precision": 0.4413300935816855,
+              "recall": 0.4235723667385483,
+              "f1": 0.416182569767135,
+              "log_loss": 1.052580598132342,
+              "brier": 0.6303332641804849,
+              "calibration": [
+                {
+                  "count": 150,
+                  "confidence": 0.37656385276657817,
+                  "accuracy": 0.32666666666666666
+                },
+                {
+                  "count": 273,
+                  "confidence": 0.4409384253986231,
+                  "accuracy": 0.3516483516483517
+                },
+                {
+                  "count": 115,
+                  "confidence": 0.5438449437476028,
+                  "accuracy": 0.5043478260869565
+                },
+                {
+                  "count": 66,
+                  "confidence": 0.6490072144322061,
+                  "accuracy": 0.7575757575757576
+                },
+                {
+                  "count": 23,
+                  "confidence": 0.733913221849245,
+                  "accuracy": 0.7391304347826086
+                }
+              ]
+            },
+            "baseline": {
+              "samples": 627,
+              "accuracy": 0.44178628389154706,
+              "precision": 0.14726209463051568,
+              "recall": 0.3333333333333333,
+              "f1": 0.2042772861356932,
+              "log_loss": 1.0694184220586822,
+              "brier": 0.6478188496012552,
+              "calibration": [
+                {
+                  "count": 627,
+                  "confidence": 0.4838979506482644,
+                  "accuracy": 0.44178628389154706
+                }
+              ]
+            }
+          },
+          {
+            "kind": "final_holdout",
+            "training_rows": 3015,
+            "training_end": "2023-02-08 00:00:00+00:00",
+            "evaluation_start": "2023-02-11 00:00:00+00:00",
+            "evaluation_end": "2026-05-24 00:00:00+00:00",
+            "model": {
+              "samples": 703,
+              "accuracy": 0.43243243243243246,
+              "precision": 0.42746152248655883,
+              "recall": 0.41897242942029944,
+              "f1": 0.41236131809902304,
+              "log_loss": 1.0370083737710019,
+              "brier": 0.6239637112742796,
+              "calibration": [
+                {
+                  "count": 227,
+                  "confidence": 0.37471395129413354,
+                  "accuracy": 0.2775330396475771
+                },
+                {
+                  "count": 247,
+                  "confidence": 0.44046748464288243,
+                  "accuracy": 0.4008097165991903
+                },
+                {
+                  "count": 108,
+                  "confidence": 0.5468185129947684,
+                  "accuracy": 0.5462962962962963
+                },
+                {
+                  "count": 51,
+                  "confidence": 0.6499861804008495,
+                  "accuracy": 0.5882352941176471
+                },
+                {
+                  "count": 61,
+                  "confidence": 0.7442805902582399,
+                  "accuracy": 0.7377049180327869
+                },
+                {
+                  "count": 9,
+                  "confidence": 0.8183617236276494,
+                  "accuracy": 0.8888888888888888
+                }
+              ]
+            },
+            "baseline": {
+              "samples": 703,
+              "accuracy": 0.4366998577524893,
+              "precision": 0.14556661925082978,
+              "recall": 0.3333333333333333,
+              "f1": 0.20264026402640264,
+              "log_loss": 1.0733223047868445,
+              "brier": 0.6500219770208502,
+              "calibration": [
+                {
+                  "count": 703,
+                  "confidence": 0.47514910536779326,
+                  "accuracy": 0.4366998577524893
+                }
+              ]
+            }
+          }
+        ],
+        "limitations": [
+          "Historical feature availability must be audited separately.",
+          "Calibration uses top-label confidence; Brier is multiclass sum, not class average."
+        ]
+      },
+      "beats_frequency_baseline": true,
+      "Accuracy": 0.4324,
+      "Precision": 0.4275,
+      "Recall": 0.419,
+      "F1": 0.4124,
+      "LogLoss": 1.0370083737710019,
+      "Brier": 0.6239637112742796
+    },
+    "over-under": {
+      "evaluation": "chronological_final_holdout",
+      "uses_odds": false,
+      "target_type": "over-under",
+      "training_rows": 3718,
+      "dataset_sha256": "c369971bc1869639e5994a2bdba7d4c0a5634a1c8390c67bd4769b8d1d01cf10",
+      "odds_excluded_unverified_timing": false,
+      "temporal_report": {
+        "method": "expanding_date_blocks",
+        "folds": [
+          {
+            "kind": "validation",
+            "training_rows": 798,
+            "training_end": "2010-03-16 00:00:00+00:00",
+            "evaluation_start": "2010-03-20 00:00:00+00:00",
+            "evaluation_end": "2014-05-05 00:00:00+00:00",
+            "model": {
+              "samples": 786,
+              "accuracy": 0.5241730279898219,
+              "precision": 0.5349445116143979,
+              "recall": 0.5337799455446515,
+              "f1": 0.5226772318384048,
+              "log_loss": 0.6992879153556464,
+              "brier": 0.5059206738970354,
+              "calibration": [
+                {
+                  "count": 618,
+                  "confidence": 0.5437419593657785,
+                  "accuracy": 0.5258899676375405
+                },
+                {
+                  "count": 158,
+                  "confidence": 0.6337870288639817,
+                  "accuracy": 0.5063291139240507
+                },
+                {
+                  "count": 9,
+                  "confidence": 0.7314212872991851,
+                  "accuracy": 0.6666666666666666
+                },
+                {
+                  "count": 1,
+                  "confidence": 0.8222961632595867,
+                  "accuracy": 1
+                }
+              ]
+            },
+            "baseline": {
+              "samples": 786,
+              "accuracy": 0.4541984732824427,
+              "precision": 0.22709923664122136,
+              "recall": 0.5,
+              "f1": 0.3123359580052493,
+              "log_loss": 0.7054803153374348,
+              "brier": 0.5122942748091603,
+              "calibration": [
+                {
+                  "count": 786,
+                  "confidence": 0.545,
+                  "accuracy": 0.4541984732824427
+                }
+              ]
+            }
+          },
+          {
+            "kind": "validation",
+            "training_rows": 1584,
+            "training_end": "2014-05-05 00:00:00+00:00",
+            "evaluation_start": "2014-05-06 00:00:00+00:00",
+            "evaluation_end": "2019-03-03 00:00:00+00:00",
+            "model": {
+              "samples": 804,
+              "accuracy": 0.5049751243781094,
+              "precision": 0.5167109929078014,
+              "recall": 0.5140252976190476,
+              "f1": 0.4885692366705025,
+              "log_loss": 0.7094082399387958,
+              "brier": 0.5155304580423294,
+              "calibration": [
+                {
+                  "count": 533,
+                  "confidence": 0.5454698331946033,
+                  "accuracy": 0.50093808630394
+                },
+                {
+                  "count": 215,
+                  "confidence": 0.6424821563724263,
+                  "accuracy": 0.4930232558139535
+                },
+                {
+                  "count": 55,
+                  "confidence": 0.7282599265785339,
+                  "accuracy": 0.5818181818181818
+                },
+                {
+                  "count": 1,
+                  "confidence": 0.846199923382132,
+                  "accuracy": 1
+                }
+              ]
+            },
+            "baseline": {
+              "samples": 804,
+              "accuracy": 0.47761194029850745,
+              "precision": 0.23880597014925373,
+              "recall": 0.5,
+              "f1": 0.32323232323232326,
+              "log_loss": 0.6931471805599452,
+              "brier": 0.5,
+              "calibration": [
+                {
+                  "count": 804,
+                  "confidence": 0.5,
+                  "accuracy": 0.47761194029850745
+                }
+              ]
+            }
+          },
+          {
+            "kind": "validation",
+            "training_rows": 2388,
+            "training_end": "2019-03-03 00:00:00+00:00",
+            "evaluation_start": "2019-03-09 00:00:00+00:00",
+            "evaluation_end": "2023-02-08 00:00:00+00:00",
+            "model": {
+              "samples": 627,
+              "accuracy": 0.5103668261562998,
+              "precision": 0.5180372743156669,
+              "recall": 0.5157701238390093,
+              "f1": 0.4970566333529296,
+              "log_loss": 0.6996267992316053,
+              "brier": 0.5055527724689315,
+              "calibration": [
+                {
+                  "count": 473,
+                  "confidence": 0.5435735144868854,
+                  "accuracy": 0.4799154334038055
+                },
+                {
+                  "count": 137,
+                  "confidence": 0.6282457837586051,
+                  "accuracy": 0.6131386861313869
+                },
+                {
+                  "count": 11,
+                  "confidence": 0.7468274652024661,
+                  "accuracy": 0.5454545454545454
+                },
+                {
+                  "count": 6,
+                  "confidence": 0.8272017503903326,
+                  "accuracy": 0.5
+                }
+              ]
+            },
+            "baseline": {
+              "samples": 627,
+              "accuracy": 0.5151515151515151,
+              "precision": 0.25757575757575757,
+              "recall": 0.5,
+              "f1": 0.34,
+              "log_loss": 0.6928041549796995,
+              "brier": 0.49965699607372543,
+              "calibration": [
+                {
+                  "count": 627,
+                  "confidence": 0.507531380753138,
+                  "accuracy": 0.5151515151515151
+                }
+              ]
+            }
+          },
+          {
+            "kind": "final_holdout",
+            "training_rows": 3015,
+            "training_end": "2023-02-08 00:00:00+00:00",
+            "evaluation_start": "2023-02-11 00:00:00+00:00",
+            "evaluation_end": "2026-05-24 00:00:00+00:00",
+            "model": {
+              "samples": 703,
+              "accuracy": 0.4694167852062589,
+              "precision": 0.4819920932725811,
+              "recall": 0.4822316986496091,
+              "f1": 0.46920627594820374,
+              "log_loss": 0.7054548022224958,
+              "brier": 0.5118941856320072,
+              "calibration": [
+                {
+                  "count": 642,
+                  "confidence": 0.5377019682361089,
+                  "accuracy": 0.470404984423676
+                },
+                {
+                  "count": 55,
+                  "confidence": 0.6261974222328688,
+                  "accuracy": 0.4727272727272727
+                },
+                {
+                  "count": 6,
+                  "confidence": 0.7484212308213413,
+                  "accuracy": 0.3333333333333333
+                }
+              ]
+            },
+            "baseline": {
+              "samples": 703,
+              "accuracy": 0.5718349928876245,
+              "precision": 0.28591749644381226,
+              "recall": 0.5,
+              "f1": 0.36380090497737555,
+              "log_loss": 0.69069397684744,
+              "brier": 0.4975470588673227,
+              "calibration": [
+                {
+                  "count": 703,
+                  "confidence": 0.509115014915479,
+                  "accuracy": 0.5718349928876245
+                }
+              ]
+            }
+          }
+        ],
+        "limitations": [
+          "Historical feature availability must be audited separately.",
+          "Calibration uses top-label confidence; Brier is multiclass sum, not class average."
+        ]
+      },
+      "beats_frequency_baseline": false,
+      "Accuracy": 0.4694,
+      "Precision": 0.482,
+      "Recall": 0.4822,
+      "F1": 0.4692,
+      "LogLoss": 0.7054548022224958,
+      "Brier": 0.5118941856320072
+    }
+  }
+}

@@ -21,7 +21,7 @@ class Trainer:
         """ Fits the model in the provided dataset. """
 
         # Clean Dataframe.
-        if check_nan and (train_df.isna().any().any() or eval_df.isna().any().any()):
+        if check_nan and (train_df.isna().any().any() or (eval_df is not None and eval_df.isna().any().any())):
             raise ValueError('Cannot apply cross validation with nan rows. Drop nans first.')
 
         metrics_df = model.fit(train_df=train_df, eval_df=eval_df)

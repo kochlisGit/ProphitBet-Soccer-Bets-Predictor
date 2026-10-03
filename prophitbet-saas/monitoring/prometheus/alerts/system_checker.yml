@@ -1,0 +1,24 @@
+groups:
+  - name: system-checker
+    rules:
+      - alert: SystemCheckerStale
+        expr: time() - prophitbet_checker_last_run_seconds > 1800 or absent(prophitbet_checker_last_run_seconds)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: System checker has not completed a recent cycle
+      - alert: JEvReviewUnavailableOrIncomplete
+        expr: prophitbet_checker_ai_available == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: JEv review is unavailable or incomplete; do not interpret as a pass
+      - alert: SystemCheckFailed
+        expr: prophitbet_checker_check_pass{check!="active_alerts"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: A deterministic system check failed

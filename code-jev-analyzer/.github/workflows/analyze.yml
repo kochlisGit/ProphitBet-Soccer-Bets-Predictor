@@ -1,0 +1,150 @@
+name: Analyze Changed Code with Jev
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Evaluate Changed Files and Post PR Comment
+        uses: actions/github-script@v7
+        env:
+          ANALYZER_URL: ${{ secrets.ANALYZER_URL }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const { execSync } = require('child_process');
+
+            const analyzerUrl = process.env.ANALYZER_URL;
+            if (!analyzerUrl) {
+              core.setFailed('Missing secret ANALYZER_URL. Please set ANALYZER_URL in repository secrets.');
+              return;
+            }
+
+            // Determine base and head commit SHAs
+            const baseSha = context.payload.pull_request?.base?.sha;
+            const headSha = context.payload.pull_request?.head?.sha;
+            if (!baseSha || !headSha) {
+              console.log('Unable to detect base/head SHA, skipping analysis.');
+              return;
+            }
+
+            // List changed files in the PR diff (excluding deleted files)
+            const diffOutput = execSync(`git diff --name-only --diff-filter=ACMR ${baseSha} ${headSha}`, { encoding: 'utf8' });
+            const files = diffOutput.trim().split('\n').filter(Boolean);
+
+            const relevantExtensions = new Set([
+              '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
+              '.py', '.go', '.rs', '.java', '.c', '.cpp', '.cs',
+              '.php', '.rb', '.sql'
+            ]);
+
+            const codeFiles = files.filter(file => {
+              const ext = path.extname(file).toLowerCase();
+              return relevantExtensions.has(ext) && fs.existsSync(file);
+            });
+
+            if (codeFiles.length === 0) {
+              console.log('No code files changed in this PR.');
+              return;
+            }
+
+            const findings = [];
+            let totalFlagged = 0;
+            let totalReview = 0;
+
+            const endpoint = analyzerUrl.replace(/\/$/, '') + '/api/analyze-code';
+
+            for (const file of codeFiles) {
+              const code = fs.readFileSync(file, 'utf8');
+              // Skip very large files or minified bundles
+              if (code.length > 250000) {
+                console.log(`Skipping large file: ${file} (${code.length} bytes)`);
+                continue;
+              }
+
+              try {
+                console.log(`Analyzing ${file}...`);
+                const response = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ code, filename: file })
+                });
+
+                if (!response.ok) {
+                  const errorText = await response.text();
+                  console.error(`Analyzer returned status ${response.status} for ${file}: ${errorText}`);
+                  continue;
+                }
+
+                const result = await response.json();
+                const summary = result.summary || [];
+                const answers = result.answers || {};
+
+                if (summary.length > 0) {
+                  const flaggedCount = summary.filter(s => s.flagged === true).length;
+                  const reviewCount = summary.filter(s => s.flagged === 'review').length;
+                  totalFlagged += flaggedCount;
+                  totalReview += reviewCount;
+
+                  findings.push({
+                    file,
+                    riskLevel: answers.riskLevel?.score ?? 'unknown',
+                    summary
+                  });
+                }
+              } catch (err) {
+                console.error(`Error requesting analysis for ${file}:`, err);
+              }
+            }
+
+            // Build PR comment markdown
+            let commentBody = '### 🛡️ TypeSafe AI Jev Code Evaluation\n\n';
+
+            if (findings.length === 0) {
+              commentBody += `✅ **All clean!** Evaluated **${codeFiles.length}** changed code file(s) and found no flagged or review-status security/quality issues.`;
+            } else {
+              commentBody += `⚠️ Evaluated **${codeFiles.length}** changed code file(s).\n\n`;
+              commentBody += `- **Flagged (>= 0.8 probability):** ${totalFlagged}\n`;
+              commentBody += `- **Needs Review (0.4 - 0.8 probability):** ${totalReview}\n\n`;
+
+              for (const finding of findings) {
+                commentBody += `#### 📄 \`${finding.file}\` (Risk Level Score: ${finding.riskLevel})\n\n`;
+                commentBody += '| Question | Status | Probability | Description |\n';
+                commentBody += '| :--- | :--- | :--- | :--- |\n';
+
+                for (const item of finding.summary) {
+                  const badge = item.flagged === true ? '🚨 **FLAGGED**' : '🔍 *REVIEW*';
+                  const prob = (item.probability * 100).toFixed(1) + '%';
+                  commentBody += `| \`${item.question}\` | ${badge} | ${prob} | ${item.description} |\n`;
+                }
+                commentBody += '\n';
+              }
+            }
+
+            commentBody += '\n---\n*Inference evaluated server-side via TypeSafe AI Jev on Vercel AI Gateway.*';
+
+            // Post comment to PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: commentBody
+            });

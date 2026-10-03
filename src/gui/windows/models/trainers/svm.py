@@ -49,7 +49,8 @@ class SVMTrainerDialog(TrainerDialog):
             placeholder_name='kernel',
             widget=self._combo_kernel,
             layout=row1_box,
-            tooltip='SVM kernel function.'
+            tooltip='SVM kernel function.',
+            value_map=self._kernels
         )
 
         self._slider_degree = QLabeledSlider(Qt.Orientation.Horizontal)
@@ -91,7 +92,8 @@ class SVMTrainerDialog(TrainerDialog):
             placeholder_name='class_weight',
             widget=self._combo_class,
             layout=row1_box,
-            tooltip='Whether to balance class weights (weight of each target).'
+            tooltip='Whether to balance class weights (weight of each target).',
+            value_map=self._class_weights
         )
 
         row1_box.addStretch(1)

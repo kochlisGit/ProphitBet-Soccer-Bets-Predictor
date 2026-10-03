@@ -1,3 +1,4 @@
+import logging
 import os
 import pandas as pd
 from typing import Dict, List, Optional, Union
@@ -10,6 +11,8 @@ from PyQt6.QtWidgets import (
     QToolButton, QPushButton, QHeaderView, QMainWindow, QMessageBox, QTableWidget
 )
 from src.gui.utils.taskrunner import TaskRunnerDialog
+
+logger = logging.getLogger(__name__)
 
 
 class FindDialog(QDialog):
@@ -204,16 +207,17 @@ class ExcelTable(QTableWidget):
         """ Initializes and customizes table widget. """
 
         def add_data_to_table():
+            logger.info(f"Adding {df.shape[0]} rows x {df.shape[1]} cols to table")
             for r in range(df.shape[0]):
                 for c in range(df.shape[1]):
                     val = df.iat[r, c]
                     item = QTableWidgetItem('' if pd.isna(val) else str(val))
-
-                    # Center to column.
                     item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                     self.setItem(r, c, item)
+            logger.info("Finished adding data to table")
 
         # Headers and fonts
+        logger.info(f"Initializing table: {df.shape[0]} rows, {df.shape[1]} cols, columns={df.columns.tolist()}")
         self.setHorizontalHeaderLabels(self.columns)
         hf = QFont()
         hf.setBold(True)
@@ -223,13 +227,8 @@ class ExcelTable(QTableWidget):
         self.setSortingEnabled(False)   # Disable sorting before data-loading to increase re-size speed.
         self.setUpdatesEnabled(False)   # Disable updating before data-loading to increase re-size speed.
 
-        # Add data to table.
-        TaskRunnerDialog(
-            title='League Table',
-            info='Adding league data to table...',
-            task_fn=add_data_to_table,
-            parent=self._parent
-        ).run()
+        # Add data to table on the main thread (Qt widgets cannot be modified from background threads).
+        add_data_to_table()
 
         # Stylize table.
         self.setAlternatingRowColors(True)                              # Setting alternate colors between rows.

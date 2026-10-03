@@ -50,7 +50,7 @@ class FootballDataDownloader(ABC):
 
         df = self._download_dataframe(league=league, start_year=start_year)
 
-        if df.shape[0] == 0 or df is None:
+        if df is None or df.shape[0] == 0:
             return None
 
         # Preprocess the downloaded dataframe.
@@ -87,9 +87,10 @@ class FootballDataDownloader(ABC):
         # sort matches by date and drop the duplicates.
         df['Date'] = pd.to_datetime(df['Date'], dayfirst=True, utc=True, format='mixed').dt.strftime(self._time_format)
         df = df.sort_values(by=['Date', 'Home'], ascending=True)
-        df = df.drop_duplicates()
+        from src.preprocessing.result_integrity import deduplicate_results
+        df = deduplicate_results(df)
 
-        if df.shape[0] == 0 or df is None:
+        if df is None or df.shape[0] == 0:
             return None
 
         # Add Result-U/O column.

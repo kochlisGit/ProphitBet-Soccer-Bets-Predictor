@@ -19,7 +19,10 @@ class LeagueDatabase:
             leagues_cfg = json.load(jsonfile)
 
         # Initialize all available leagues.
-        self._leagues = [League(**cfg) for cfg in leagues_cfg['leagues']]
+        # Desktop training requires bookmaker-odds CSVs. Other provider types
+        # are supported by the SaaS adapters, not this odds-filtering dialog.
+        self._leagues = [League(**cfg) for cfg in leagues_cfg['leagues']
+                        if cfg.get('category') in ('main', 'extra')]
         self._leagues_directory = leagues_cfg['leagues_directory']
         self._leagues_index_filepath = leagues_cfg['leagues_index_filepath']
 
@@ -65,6 +68,10 @@ class LeagueDatabase:
     def update_league(self, league_id: str) -> Optional[pd.DataFrame]:
         league = self._index[league_id]
         history_df = self.load_league(league_id=league_id)
+
+        if 'Season' not in history_df.columns:
+            return self._full_redownload(league=league, history_df=history_df)
+
         season = history_df.iloc[0]['Season']
         update_df = self._download_league(league=league, start_year=season)
 
@@ -74,6 +81,16 @@ class LeagueDatabase:
         else:
             df = history_df
 
+        return df.reset_index(drop=True)
+
+    def _full_redownload(self, league: League, history_df: pd.DataFrame) -> pd.DataFrame:
+        """ Falls back to a full re-download when the saved CSV lacks the Season column. """
+
+        df = self._download_league(league=league, start_year=None)
+        if df is not None:
+            self.save_league(df=df, league=league)
+        else:
+            df = history_df
         return df.reset_index(drop=True)
 
     def save_league(self, df: pd.DataFrame, league: League):

@@ -1,3 +1,4 @@
+import logging
 import math
 import pandas as pd
 from abc import abstractmethod
@@ -5,9 +6,11 @@ from typing import Any, Dict, Optional, Type
 from optuna.visualization.matplotlib import plot_param_importances
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
-    QDialog, QFrame, QLabel, QCheckBox, QComboBox, QHBoxLayout, QLineEdit, QMessageBox,
-    QPushButton, QSpinBox, QVBoxLayout, QWidget
+    QDialog, QDoubleSpinBox, QFrame, QLabel, QCheckBox, QComboBox, QHBoxLayout, QLineEdit,
+    QMessageBox, QPushButton, QSpinBox, QVBoxLayout, QWidget
 )
+
+logger = logging.getLogger(__name__)
 from src.database.model import ModelDatabase
 from src.gui.utils.taskrunner import TaskRunnerDialog
 from src.gui.widgets.plot import PlotWindow
@@ -266,6 +269,106 @@ class TrainerDialog(QDialog):
         fixed_params.update(**best_params)
         return fixed_params
 
+    def auto_tune(self):
+        """ Runs Optuna over ALL tunable hyperparameters and fills the UI widgets with the best-found values. """
+
+        model_cls = self.get_model_cls()
+
+        # Gather all tunable param ranges.
+        tunable_params = {}
+        for param_name in self._tunable_placeholders:
+            try:
+                tunable_params[param_name] = model_cls.get_suggest_param_values(param=param_name)
+            except (ValueError, KeyError):
+                logger.warning(f"Skipping param '{param_name}': no suggested values defined.")
+
+        if len(tunable_params) == 0:
+            QMessageBox.warning(self, 'Auto-Tune', 'No tunable parameters found for this model.')
+            return
+
+        # Build fixed params from current UI state.
+        fixed_params = self.get_model_params(model_id='__auto_tune__')
+
+        metric = self._combo_objective.currentText()
+        trials = self._spin_trials.value()
+
+        tuner = Tuner(
+            model_cls=model_cls,
+            fixed_params=fixed_params,
+            tunable_params=tunable_params,
+            df=self._df,
+            metric=metric
+        )
+
+        study = TaskRunnerDialog(
+            title='Auto-Tune',
+            info=f'Searching best hyperparameters ({trials} trials)...',
+            task_fn=lambda: tuner.tune(trials=trials),
+            parent=self
+        ).run()
+
+        if study is None:
+            QMessageBox.critical(self, 'Auto-Tune', 'Auto-Tune failed. Check the log for details.')
+            return
+
+        # Show results table.
+        try:
+            trials_df = study.trials_dataframe().drop(columns=['number', 'datetime_start', 'datetime_complete'])
+            trials_df['duration'] = (trials_df['duration'].dt.total_seconds() / 60)
+            trials_df = trials_df.rename(columns={
+                'value': metric,
+                'duration': 'Duration(m)',
+                **{col: col.split('_', 1)[1] for col in trials_df.columns if col.startswith('params_')}
+            }).sort_values(by=metric, ascending=False).round(3)
+            trials_dialog = SimpleTableDialog(df=trials_df, parent=self, title='Auto-Tune Results')
+            trials_dialog.table.selectRow(0)
+            trials_dialog.show()
+        except Exception as e:
+            logger.error(f"Failed to display auto-tune results: {e}")
+
+        # Apply best params to UI widgets.
+        best_params = study.best_trial.params
+        logger.info(f"Auto-Tune best params: {best_params}")
+
+        for param_name, value in best_params.items():
+            placeholder = self._tunable_placeholders.get(param_name)
+            if placeholder is None:
+                continue
+            self._set_widget_value(
+                widget=placeholder['widget'],
+                value=value,
+                value_map=placeholder.get('value_map')
+            )
+
+        QMessageBox.information(
+            self, 'Auto-Tune Complete',
+            f'Best hyperparameters have been applied to the form.\n'
+            f'Best {metric}: {round(study.best_value, 4)}\n\n'
+            f'Review the values and click "Train" when ready.'
+        )
+
+    @staticmethod
+    def _set_widget_value(widget: QWidget, value: Any, value_map: Optional[Dict[str, Any]] = None):
+        """ Sets a widget's value generically based on its type. """
+
+        if isinstance(widget, QComboBox):
+            if value_map is not None:
+                reverse_map = {v: k for k, v in value_map.items()}
+                display_text = reverse_map.get(value)
+                if display_text is not None:
+                    widget.setCurrentText(display_text)
+                    return
+            widget.setCurrentText(str(value))
+        elif isinstance(widget, QDoubleSpinBox):
+            widget.setValue(float(value))
+        elif isinstance(widget, QSpinBox):
+            widget.setValue(int(value))
+        else:
+            try:
+                widget.setValue(value)
+            except (TypeError, AttributeError):
+                logger.warning(f"Cannot set value {value} on widget {type(widget).__name__}")
+
     def _initialize_window(self):
         self.setWindowTitle(self._title)
         self.resize(self._width, self._height)
@@ -356,7 +459,8 @@ class TrainerDialog(QDialog):
             placeholder_name='normalizer',
             widget=self._combo_norm,
             layout=basic_hbox,
-            tooltip='Select feature normalization type.'
+            tooltip='Select feature normalization type.',
+            value_map=self._normalizer_types
         )
 
         self._combo_sampler = QComboBox()
@@ -368,7 +472,8 @@ class TrainerDialog(QDialog):
             placeholder_name='sampler',
             widget=self._combo_sampler,
             layout=basic_hbox,
-            tooltip='Select feature sampler type. Useful when classes are imbalanced.'
+            tooltip='Select feature sampler type. Useful when classes are imbalanced.',
+            value_map=self._sampler_types
         )
 
         if self._supports_calibration:
@@ -381,7 +486,8 @@ class TrainerDialog(QDialog):
                 placeholder_name='calibrate_probabilities',
                 widget=self._combo_calibration,
                 layout=basic_hbox,
-                tooltip='Whether to calibrate model output probabilities.'
+                tooltip='Whether to calibrate model output probabilities.',
+                value_map=self._calibration_options
             )
 
         basic_hbox.addStretch(1)
@@ -425,14 +531,25 @@ class TrainerDialog(QDialog):
         final_hbox.addStretch(1)
         root.addLayout(final_hbox)
 
+        btn_row = QHBoxLayout()
+        btn_row.setContentsMargins(0, 10, 0, 0)
+        btn_row.addStretch(1)
+
+        auto_tune_btn = QPushButton('Auto-Tune')
+        auto_tune_btn.setFixedWidth(100)
+        auto_tune_btn.setFixedHeight(30)
+        auto_tune_btn.setToolTip(
+            'Automatically find the best hyperparameters using Optuna and fill them into the form.'
+        )
+        auto_tune_btn.clicked.connect(self.auto_tune)
+        btn_row.addWidget(auto_tune_btn)
+
         train_btn = QPushButton('Train')
         train_btn.setFixedWidth(100)
         train_btn.setFixedHeight(30)
         train_btn.clicked.connect(self.train)
-        btn_row = QHBoxLayout()
-        btn_row.setContentsMargins(0, 10, 0, 0)
-        btn_row.addStretch(1)
         btn_row.addWidget(train_btn)
+
         btn_row.addStretch(1)
         root.addLayout(btn_row)
         root.addStretch(1)
@@ -443,9 +560,13 @@ class TrainerDialog(QDialog):
             placeholder_name: str,
             widget: QWidget,
             layout: QHBoxLayout,
-            tooltip: Optional[str]
+            tooltip: Optional[str],
+            value_map: Optional[Dict[str, Any]] = None
     ):
-        """ Adds a tunable option to the dialog & updates the tunable placeholder dict. """
+        """ Adds a tunable option to the dialog & updates the tunable placeholder dict.
+            :param value_map: For QComboBox widgets, a dict mapping display text to model param values
+                              (e.g. {'RBF': 'rbf'}). Used by auto_tune to reverse-lookup display text.
+        """
 
         checkbox = QCheckBox(text=f'{name}: ')
         checkbox.setChecked(False)
@@ -456,7 +577,9 @@ class TrainerDialog(QDialog):
         layout.addWidget(checkbox)
         layout.addWidget(widget)
 
-        self._tunable_placeholders[placeholder_name] = {'checkbox': checkbox, 'widget': widget}
+        self._tunable_placeholders[placeholder_name] = {
+            'checkbox': checkbox, 'widget': widget, 'value_map': value_map
+        }
 
     def _set_tunable_param_states(self, enabled: bool):
         """ Enables/Disables hyperparameter tuning selections. """

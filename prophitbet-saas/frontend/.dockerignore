@@ -1,0 +1,31 @@
+# Dependencies & build output (reinstalled / rebuilt in image)
+node_modules
+.next
+out
+dist
+
+# Dev & local
+.git
+.gitignore
+*.log
+npm-debug.log*
+.DS_Store
+.env*.local
+
+# IDE / tooling
+.vscode
+.idea
+*.swp
+*.swo
+
+# Tests & coverage (not needed for image build)
+coverage
+.nyc_output
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Misc
+README.md

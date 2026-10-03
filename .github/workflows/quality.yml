@@ -1,0 +1,43 @@
+name: System quality
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/check_repository_secrets.py
+      - run: docker build -f prophitbet-saas/backend/Dockerfile -t prophitbet-test .
+      - run: docker run --rm prophitbet-test python -m unittest discover -s backend/tests
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: prophitbet-saas/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: node tests/league-filter.cjs && node tests/prediction-groups.cjs
+      - run: npx tsc --noEmit
+      - run: npm run build
+  jev:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: code-jev-analyzer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm test -- --maxWorkers=1
+      - run: node --test scripts/checker-validation.test.mjs
+      - run: npx tsc --noEmit

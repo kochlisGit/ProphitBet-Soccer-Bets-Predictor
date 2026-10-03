@@ -1,0 +1,363 @@
+services:
+  system-checker:
+    build:
+      context: ..
+      dockerfile: code-jev-analyzer/Dockerfile.checker
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    env_file:
+      - path: ./monitoring/secrets/jev.env
+        required: false
+    volumes:
+      - ./backend/app:/source/backend/app:ro
+      - ../src:/source/src:ro
+      - checker_state:/state
+    ports:
+      - "127.0.0.1:9110:9110"
+    depends_on:
+      - backend
+      - prometheus
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: prophitbet
+      POSTGRES_PASSWORD: prophitbet
+      POSTGRES_DB: prophitbet
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prophitbet"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  qdrant:
+    image: qdrant/qdrant:v1.15.4
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - C:/Users/p3rc/qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ..
+      dockerfile: prophitbet-saas/backend/Dockerfile
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://prophitbet:prophitbet@postgres:5432/prophitbet
+      DATABASE_URL_SYNC: postgresql://prophitbet:prophitbet@postgres:5432/prophitbet
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://minio:9000
+      ML_CORE_PATH: /app/src
+      MIROFISH_API_URL: http://mirofish:5001
+      MIROFISH_ENABLED: "true"
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      QDRANT_URL: http://qdrant:6333
+    volumes:
+      - ../storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      qdrant:
+        condition: service_started
+    command: >
+      sh -c "export PROMETHEUS_MULTIPROC_DIR=$$(mktemp -d /tmp/prophitbet-metrics.XXXXXX) && cd /app/backend && alembic upgrade head && cd /app && exec uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --workers 2"
+
+  celery-worker: &ml-worker
+    build:
+      context: ..
+      dockerfile: prophitbet-saas/backend/Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://prophitbet:prophitbet@postgres:5432/prophitbet
+      DATABASE_URL_SYNC: postgresql://prophitbet:prophitbet@postgres:5432/prophitbet
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://minio:9000
+      ML_CORE_PATH: /app/src
+      MIROFISH_API_URL: http://mirofish:5001
+      MIROFISH_ENABLED: "true"
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      QDRANT_URL: http://qdrant:6333
+    volumes:
+      - ../storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    command: >
+      celery -A backend.app.workers.celery_app worker --loglevel=info --concurrency=1 -Q celery
+
+  celery-sync-worker:
+    <<: *ml-worker
+    command: >
+      celery -A backend.app.workers.celery_app worker --loglevel=info --concurrency=1 -Q data_sync
+
+  domain-exporter:
+    <<: *ml-worker
+    restart: unless-stopped
+    command: python -m backend.app.monitoring_exporter
+
+  celery-beat:
+    build:
+      context: ..
+      dockerfile: prophitbet-saas/backend/Dockerfile
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://prophitbet:prophitbet@postgres:5432/prophitbet
+      DATABASE_URL_SYNC: postgresql://prophitbet:prophitbet@postgres:5432/prophitbet
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://minio:9000
+      ML_CORE_PATH: /app/src
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      QDRANT_URL: http://qdrant:6333
+    volumes:
+      - ../storage:/app/storage
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    command: >
+      celery -A backend.app.workers.celery_app beat --loglevel=info
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8001
+      NODE_ENV: production
+    # Run the precompiled application. The former Windows bind mount + polling
+    # dev server compiled routes on first navigation and made every page feel slow.
+    command: npm run start
+
+  flower:
+    image: mher/flower:latest
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_PORT=5555
+    depends_on:
+      - redis
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8082:8080"
+    depends_on:
+      - postgres
+
+  pgweb:
+    image: sosedoff/pgweb:latest
+    restart: unless-stopped
+    ports:
+      - "8083:8081"
+    environment:
+      - DATABASE_URL=postgres://prophitbet:prophitbet@postgres:5432/prophitbet?sslmode=disable
+    depends_on:
+      - postgres
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: prophitbet-prometheus
+    restart: unless-stopped
+    ports:
+      - "9095:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/alerts:/etc/prometheus/alerts:ro
+      - ./monitoring/secrets/sonarqube-passcode:/etc/prometheus/sonarqube-passcode:ro
+      - ./monitoring/prometheus/consoles:/etc/prometheus/consoles:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  loki-init:
+    image: busybox:1.37.0
+    user: "0:0"
+    entrypoint: ["chown"]
+    command: ["10001:10001", "/loki"]
+    volumes:
+      - loki_data:/loki
+
+  loki:
+    image: grafana/loki:3.6.0
+    restart: unless-stopped
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - ./monitoring/loki/config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    depends_on:
+      loki-init:
+        condition: service_completed_successfully
+
+  alloy:
+    image: grafana/alloy:v1.11.0
+    restart: unless-stopped
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy /etc/alloy/config.alloy
+    volumes:
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - ../storage/bookmaker-feed/logs:/scraper-logs:ro
+      - sonarqube_logs:/sonarqube-logs:ro
+      - checker_state:/checker-logs:ro
+      - alloy_data:/var/lib/alloy
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: prophitbet-grafana
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=prophitbet
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/provisioning/dashboards/json:/etc/grafana/provisioning/dashboards/json
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: prophitbet-postgres-exporter
+    restart: unless-stopped
+    ports:
+      - "9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://prophitbet:prophitbet@postgres:5432/prophitbet?sslmode=disable"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.67.0
+    container_name: prophitbet-redis-exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # ── SonarQube Community Edition ──────────────────────────────────────────────
+  # Web UI: http://localhost:9100  (admin / admin on first login)
+  sonarqube:
+    image: sonarqube:community
+    env_file:
+      - ./monitoring/secrets/sonarqube.env
+    container_name: prophitbet-sonarqube
+    init: true
+    restart: unless-stopped
+    ports:
+      - "9100:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonarqube
+      SONAR_JDBC_USERNAME: prophitbet
+      SONAR_JDBC_PASSWORD: prophitbet
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+  # Run on-demand: docker compose run --rm sonar-scanner
+  # Scans the entire repo (Python backend + Next.js frontend + desktop src/)
+  sonar-scanner:
+    image: sonarsource/sonar-scanner-cli:11
+    container_name: prophitbet-sonar-scanner
+    profiles:
+      - scan
+    environment:
+      SONAR_HOST_URL: http://sonarqube:9000
+      SONAR_TOKEN: ${SONAR_TOKEN:-}
+    volumes:
+      - ..:/usr/src
+      - sonarqube_scanner_cache:/opt/sonar-scanner/.sonar/cache
+    working_dir: /usr/src
+    depends_on:
+      - sonarqube
+
+volumes:
+  checker_state:
+  pgdata:
+  minio_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  alloy_data:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
+  sonarqube_scanner_cache:

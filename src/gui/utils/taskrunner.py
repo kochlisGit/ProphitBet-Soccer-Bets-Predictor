@@ -1,6 +1,10 @@
+import logging
+import traceback
 from typing import Any, Callable, Optional, Sequence
 from PyQt6.QtCore import QObject, QThread, Qt, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout, QWidget
+
+logger = logging.getLogger(__name__)
 
 
 class ThreadWorker(QObject):
@@ -17,9 +21,12 @@ class ThreadWorker(QObject):
     @pyqtSlot()
     def run(self):
         try:
+            logger.info(f"Worker starting: {self._fn.__qualname__ if hasattr(self._fn, '__qualname__') else self._fn}")
             res = self._fn(*self._args, **self._kwargs)
+            logger.info(f"Worker finished successfully: {self._fn.__qualname__ if hasattr(self._fn, '__qualname__') else self._fn}")
             self.finished.emit(res)
         except Exception as e:
+            logger.error(f"Worker error: {e}\n{traceback.format_exc()}")
             self.error.emit(str(e))
 
 
@@ -40,6 +47,9 @@ class TaskRunnerDialog(QDialog):
 
         self._initialize_window(title=title)
         self._add_widgets(info=info)
+
+        self._result = None
+        self._error_message = None
 
         # Thread + worker
         self._thread = QThread(self)
@@ -70,10 +80,12 @@ class TaskRunnerDialog(QDialog):
         layout.addWidget(self._progress)
 
     def run(self) -> Any:
-        """Start the task and enter a modal loop. Returns the task result (also stored in self.result)."""
+        """Start the task and enter a modal loop. Returns the task result or None on error."""
+        logger.info(f"TaskRunnerDialog.run() starting: '{self.windowTitle()}'")
         self._thread.start()
         self.exec()               # modal; keeps UI responsive while worker runs
-        return self.result
+        logger.info(f"TaskRunnerDialog.run() completed: '{self.windowTitle()}', success={self._error_message is None}")
+        return self._result
 
     def _teardown(self):
         if self._thread.isRunning():
@@ -81,11 +93,13 @@ class TaskRunnerDialog(QDialog):
             self._thread.wait()
 
     def _on_finished(self, result: object):
-        self.result = result
+        logger.info(f"Task finished: '{self.windowTitle()}', result type: {type(result).__name__}")
+        self._result = result
         self._teardown()
         self.accept()  # close dialog (success)
 
     def _on_error(self, message: str):
-        self.error = message
+        logger.error(f"Task error: '{self.windowTitle()}': {message}")
+        self._error_message = message
         self._teardown()
         self.reject()  # close dialog (error)

@@ -1,0 +1,174 @@
+{
+  "uid": "prophitbet-sonarqube",
+  "title": "ProphitBet — SonarQube",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": [
+    "sonarqube",
+    "prophitbet"
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 7,
+      "title": "Compute engine queue",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+      "gridPos": {"x": 0, "y": 36, "w": 12, "h": 7},
+      "targets": [{"expr": "sonarqube_compute_engine_pending_tasks_total{job=\"sonarqube\"}", "refId": "A"}]
+    },
+    {
+      "id": 8,
+      "title": "Search disk usage",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "PBFA97CFB590B2093"},
+      "gridPos": {"x": 12, "y": 36, "w": 12, "h": 7},
+      "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100}},
+      "targets": [{"expr": "sonarqube_elasticsearch_disk_usage_percent{job=\"sonarqube\"}", "refId": "A"}]
+    },
+    {
+      "id": 1,
+      "title": "Prometheus scrape healthy",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"sonarqube\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Web process healthy",
+      "type": "stat",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "sonarqube_health_web_status{job=\"sonarqube\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Scrape duration",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "scrape_duration_seconds{job=\"sonarqube\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Native SonarQube metrics (live)",
+      "type": "table",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "expr": "{job=\"sonarqube\",__name__=~\"sonarqube_.+\"}",
+          "refId": "A",
+          "instant": true,
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "SonarQube logs (collection time)",
+      "type": "logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "prophitbet-loki"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 24,
+        "h": 12
+      },
+      "targets": [
+        {
+          "expr": "{job=\"sonarqube\"}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      }
+    },
+    {
+      "id": 6,
+      "title": "ERROR / WARN log lines per 5 minutes",
+      "type": "timeseries",
+      "datasource": {
+        "type": "loki",
+        "uid": "prophitbet-loki"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "sum by (filename) (count_over_time({job=\"sonarqube\"} |~ \"(?i)\\\\b(ERROR|WARN)\\\\b\" [5m]))",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "description": "Native instance monitoring and read-only file logs. These are not football-data validation results or per-project code quality findings."
+}

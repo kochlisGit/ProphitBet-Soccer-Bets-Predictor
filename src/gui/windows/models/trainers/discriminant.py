@@ -43,7 +43,8 @@ class DiscriminantTrainerDialog(TrainerDialog):
             placeholder_name='oas',
             widget=self._combo_oas,
             layout=row1_box,
-            tooltip='Whether to apply OAS optimization.'
+            tooltip='Whether to apply OAS optimization.',
+            value_map=self._oas_options
         )
 
         self._combo_boundaries = QComboBox()
@@ -55,7 +56,8 @@ class DiscriminantTrainerDialog(TrainerDialog):
             placeholder_name='decision_boundary',
             widget=self._combo_boundaries,
             layout=row1_box,
-            tooltip='Decision-Boundary algorithm.'
+            tooltip='Decision-Boundary algorithm.',
+            value_map=self._boundaries
         )
 
         row1_box.addStretch(1)

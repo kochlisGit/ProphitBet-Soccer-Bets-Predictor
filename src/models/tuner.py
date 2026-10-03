@@ -1,6 +1,6 @@
 import optuna
 import pandas as pd
-from typing import Any, Dict, List, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 from src.models.trainer import Trainer
 
 
@@ -34,9 +34,12 @@ class Tuner:
 
         self._trainer = Trainer()
 
-    def tune(self, trials: int) -> optuna.Study:
+    def tune(self, trials: int, progress_callback: Optional[Callable[[int, int], None]] = None) -> optuna.Study:
         study = optuna.create_study(direction='maximize')
-        study.optimize(self._objective, n_trials=trials, show_progress_bar=True)
+        callbacks = None
+        if progress_callback is not None:
+            callbacks = [lambda _study, trial: progress_callback(trial.number + 1, trials)]
+        study.optimize(self._objective, n_trials=trials, show_progress_bar=True, callbacks=callbacks)
         return study
 
     def _objective(self, trial: optuna.Trial) -> float:

@@ -1,0 +1,25 @@
+# Local Dots checkout, virtual environment, browser profiles and credentials.
+/tools/dots/
+/storage/bookmaker-feed/
+/prophitbet-saas/monitoring/secrets/
+**/.env
+**/.env.*
+!**/.env.example
+**/node_modules/
+**/__pycache__/
+*.py[cod]
+**/.pytest_cache/
+/pytest-cache-files-*/
+**/.next/
+**/.venv/
+**/venv/
+**/.vercel/
+*.tsbuildinfo
+*.log
+*.pem
+*.key
+/.gitnexus/
+/.kilo/
+/.freebuff/
+/storage/leagues/
+/prophitbet-saas/=

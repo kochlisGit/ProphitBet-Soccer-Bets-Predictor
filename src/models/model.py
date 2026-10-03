@@ -189,7 +189,8 @@ class ClassificationModel(ABC):
         x, y, _ = self._dataset_preprocessor.preprocess_dataset(
             df=df,
             target_type=self._target_type,
-            normalizer=self._normalizer
+            normalizer=self._normalizer,
+            include_targets=return_targets,
         )
 
         y_pred = self._classifier.predict(x)
@@ -205,7 +206,8 @@ class ClassificationModel(ABC):
         x, _, _ = self._dataset_preprocessor.preprocess_dataset(
             df=df,
             target_type=self._target_type,
-            normalizer=self._normalizer
+            normalizer=self._normalizer,
+            include_targets=False,
         )
         return self._classifier.predict_proba(x)
 

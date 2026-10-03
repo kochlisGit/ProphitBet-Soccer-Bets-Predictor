@@ -34,6 +34,7 @@
     {"country": "Sweden", "name": "Allsvenskan", "start_year": 2012, "category": "extra", "url": "https://www.football-data.co.uk/new/SWE.csv", "fixture": "https://footystats.org/sweden/allsvenskan/fixtures"},
     {"country": "Switzerland", "name": "Super-League", "start_year": 2012, "category": "extra", "url": "https://www.football-data.co.uk/new/SWZ.csv", "fixture": "https://footystats.org/switzerland/super-league/fixtures"},
     {"country": "Turkey", "name": "Super-Lig", "start_year": 2005, "category": "main", "url": "https://www.football-data.co.uk/mmz4281/{}/T1.csv", "fixture": "https://footystats.org/turkey/super-lig/fixtures"},
-    {"country": "USA", "name": "MLS", "start_year": 2012, "category": "extra", "url": "https://www.football-data.co.uk/new/USA.csv", "fixture": "ttps://footystats.org/usa/mls/fixtures"}
+    {"country": "USA", "name": "MLS", "start_year": 2012, "category": "extra", "url": "https://www.football-data.co.uk/new/USA.csv", "fixture": "https://footystats.org/usa/mls/fixtures"},
+    {"country": "Europe", "name": "Champions-League", "start_year": 2017, "category": "public-json", "url": "https://fixturedownload.com/feed/json/champions-league-{year}", "fixture": "https://fixturedownload.com/results/champions-league-2026"}
   ]
 }

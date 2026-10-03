@@ -11,6 +11,7 @@ class LogisticRegressionTrainerDialog(TrainerDialog):
 
     def __init__(self, df: pd.DataFrame, model_db: ModelDatabase):
         self._penalties = [None, 'l1', 'l2']
+        self._penalty_map = {'None': None, 'l1': 'l1', 'l2': 'l2'}
 
         self._combo_penalty = None
 
@@ -40,7 +41,8 @@ class LogisticRegressionTrainerDialog(TrainerDialog):
             placeholder_name='penalty',
             widget=self._combo_penalty,
             layout=row1_box,
-            tooltip='Whether to apply penalty: None, l1 or l2.'
+            tooltip='Whether to apply penalty: None, l1 or l2.',
+            value_map=self._penalty_map
         )
 
         row1_box.addStretch(1)

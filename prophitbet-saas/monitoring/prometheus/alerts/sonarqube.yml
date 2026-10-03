@@ -1,0 +1,18 @@
+groups:
+  - name: sonarqube
+    rules:
+      - alert: SonarQubeMetricsUnavailable
+        expr: up{job="sonarqube"} == 0 or absent(up{job="sonarqube"})
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: SonarQube metrics unavailable
+          description: Check SonarQube startup, connectivity and monitoring credentials.
+      - alert: SonarQubeWebUnhealthy
+        expr: sonarqube_health_web_status{job="sonarqube"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: SonarQube web process reports unhealthy

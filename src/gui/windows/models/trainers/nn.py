@@ -105,7 +105,8 @@ class NeuralNetworkTrainerDialog(TrainerDialog):
             placeholder_name='hidden_activation',
             widget=self._combo_hidden_activation,
             layout=row1_box,
-            tooltip='Hidden activation function of each neuron unit.'
+            tooltip='Hidden activation function of each neuron unit.',
+            value_map=self._activations
         )
 
         row1_box.addStretch(1)
@@ -124,7 +125,8 @@ class NeuralNetworkTrainerDialog(TrainerDialog):
             placeholder_name='vsn',
             widget=self._combo_vsn,
             layout=row2_box,
-            tooltip='Whether to apply variable selection to inputs.'
+            tooltip='Whether to apply variable selection to inputs.',
+            value_map=self._vsns
         )
         self._combo_vsn.setCurrentIndex(1)
 
@@ -137,7 +139,8 @@ class NeuralNetworkTrainerDialog(TrainerDialog):
             placeholder_name='layer_normalization',
             widget=self._combo_layer_normalization,
             layout=row2_box,
-            tooltip='Whether to apply layer normalization after each layer.'
+            tooltip='Whether to apply layer normalization after each layer.',
+            value_map=self._layer_normalizations
         )
 
         self._combo_batch_normalization = QComboBox()
@@ -149,7 +152,8 @@ class NeuralNetworkTrainerDialog(TrainerDialog):
             placeholder_name='batch_normalization',
             widget=self._combo_batch_normalization,
             layout=row2_box,
-            tooltip='Whether to apply batch normalization after each layer.'
+            tooltip='Whether to apply batch normalization after each layer.',
+            value_map=self._batch_normalizations
         )
 
         row2_box.addStretch(1)
@@ -200,7 +204,8 @@ class NeuralNetworkTrainerDialog(TrainerDialog):
             placeholder_name='class_weight',
             widget=self._combo_class,
             layout=row3_box,
-            tooltip='Whether to apply class weights. Recommended for imbalanced classes.'
+            tooltip='Whether to apply class weights. Recommended for imbalanced classes.',
+            value_map=self._class_weights
         )
 
         row3_box.addStretch(1)
@@ -219,7 +224,8 @@ class NeuralNetworkTrainerDialog(TrainerDialog):
             placeholder_name='optimizer',
             widget=self._combo_optimizer,
             layout=row4_box,
-            tooltip='Training (weight update) optimization algorithm. Adam is recommended.'
+            tooltip='Training (weight update) optimization algorithm. Adam is recommended.',
+            value_map=self._optimizers
         )
 
         self._combo_lookahead = QComboBox()
@@ -231,7 +237,8 @@ class NeuralNetworkTrainerDialog(TrainerDialog):
             placeholder_name='lookahead',
             widget=self._combo_lookahead,
             layout=row4_box,
-            tooltip='Whether to apply lookahead mechanism to optimizer.'
+            tooltip='Whether to apply lookahead mechanism to optimizer.',
+            value_map=self._lookaheads
         )
 
         self._slider_smoothing = QLabeledDoubleSlider(Qt.Orientation.Horizontal)

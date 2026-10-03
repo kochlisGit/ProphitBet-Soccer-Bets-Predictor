@@ -50,7 +50,10 @@ class MainLeagueDownloader(FootballDataDownloader):
                     )
                 return None
             except UnicodeDecodeError as _:
-                df = pd.read_csv(url, encoding='latin1')
+                # Some historical football-data files mix encodings and also
+                # contain malformed rows. Preserve the same bad-line policy as
+                # the primary UTF-8 read instead of failing the entire league.
+                df = pd.read_csv(url, encoding='latin1', on_bad_lines='skip')
             df['Season'] = year
             return df
 
@@ -70,14 +73,26 @@ class MainLeagueDownloader(FootballDataDownloader):
     def _preprocess_dataframe(self, df: pd.DataFrame, start_year: int) -> pd.DataFrame:
         """ Fetches the specified dataframe columns and renames them to match the base class expected columns. """
 
+        required = {'Date', 'Season', 'HomeTeam', 'AwayTeam', 'FTHG', 'FTAG', 'FTR'}
+        missing_required = required.difference(df.columns)
+        if missing_required:
+            raise ValueError(f'Missing factual match columns: {sorted(missing_required)}')
+
+        # Coverage differs by country and season. Keep unavailable optional
+        # statistics/odds explicitly null so score and result history remains
+        # usable without inventing values.
+        for column in self._columns:
+            if column not in df.columns:
+                df[column] = pd.NA
+
         # Fill missing average odd values with B365 odds.
         missing_ids = df['AvgH'].isna()
-        if missing_ids.any():
+        if missing_ids.any() and {'B365H', 'B365D', 'B365A'}.issubset(df.columns):
             b365_odds = df.loc[missing_ids, ['B365H', 'B365D', 'B365A']].values
             df.loc[missing_ids, ['AvgH', 'AvgD', 'AvgA']] = b365_odds
 
         missing_ids = df['Avg>2.5'].isna()
-        if missing_ids.any():
+        if missing_ids.any() and {'B365>2.5', 'B365<2.5'}.issubset(df.columns):
             b365_odds = df.loc[missing_ids, ['B365>2.5', 'B365<2.5']].values
             df.loc[missing_ids, ['Avg>2.5', 'Avg<2.5']] = b365_odds
 

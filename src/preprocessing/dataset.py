@@ -34,7 +34,8 @@ class DatasetPreprocessor:
             target_type: TargetType,
             normalizer: Optional[Union[NormalizerType, TransformerMixin]] = None,
             sampler: Optional[Union[SamplerType, BaseSampler]] = None,
-            seed: Optional[int] = None
+            seed: Optional[int] = None,
+            include_targets: bool = True
     ) -> Tuple[np.ndarray, np.ndarray, Optional[TransformerMixin]]:
         """
             Preprocesses the dataframe and returns ready-to-train dataset, consisting of (input, target) pairs.
@@ -47,13 +48,14 @@ class DatasetPreprocessor:
             :return: A tuple of: inputs (np.ndarray), targets (np.ndarray), normalizer (TransformerMixin)
         """
 
-        df = df.dropna()
+        if include_targets:
+            df = df.dropna()
 
         # Construct inputs.
         x = df.drop(columns=self._non_trainable_columns, errors='ignore').to_numpy(dtype=np.float32)
 
         # Construct targets.
-        y = construct_targets(df=df, target_type=target_type)
+        y = construct_targets(df=df, target_type=target_type) if include_targets else None
 
         # Apply input normalization and sampling.
         if normalizer is not None:
@@ -62,7 +64,7 @@ class DatasetPreprocessor:
             x, y, sampler = sample(x=x, y=y, sampler=sampler, seed=seed)
 
         # Validate (input, target) pair sizes.
-        if x.shape[0] != y.shape[0]:
+        if y is not None and x.shape[0] != y.shape[0]:
             raise ValueError(f'Found inconsistent sizes between input and target pairs: {x.shape[0]} vs {y.shape[0]}')
 
         return x, y, normalizer

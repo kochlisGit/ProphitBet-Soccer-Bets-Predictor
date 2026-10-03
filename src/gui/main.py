@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 import qdarktheme
 import webbrowser
@@ -12,6 +13,8 @@ from src.gui.windows import leagues
 from src.gui.windows import models
 from src.gui.widgets.tables import ExcelTable
 from src.network.leagues.league import League
+
+logger = logging.getLogger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -350,11 +353,6 @@ class MainWindow(QMainWindow):
         action_train_svm.triggered.connect(
             lambda _: models.trainers.SVMTrainerDialog(df=self._league_df, model_db=self._model_db).exec()
         )
-        action_train_dnn = QAction('Deep Neural Network (DNN)', self)
-        action_train_dnn.triggered.connect(
-            lambda _: models.trainers.NeuralNetworkTrainerDialog(df=self._league_df, model_db=self._model_db).exec()
-        )
-
         menu_train.addAction(action_train_logistic)
         menu_train.addAction(action_train_discriminant)
         menu_train.addAction(action_train_tree)
@@ -363,7 +361,13 @@ class MainWindow(QMainWindow):
         menu_train.addAction(action_train_knn)
         menu_train.addAction(action_train_nb)
         menu_train.addAction(action_train_svm)
-        menu_train.addAction(action_train_dnn)
+
+        if models.trainers.NeuralNetworkTrainerDialog is not None:
+            action_train_dnn = QAction('Deep Neural Network (DNN)', self)
+            action_train_dnn.triggered.connect(
+                lambda _: models.trainers.NeuralNetworkTrainerDialog(df=self._league_df, model_db=self._model_db).exec()
+            )
+            menu_train.addAction(action_train_dnn)
 
         # Creating evaluation menus.
         action_eval = QAction('Evaluate', self)
@@ -411,10 +415,6 @@ class MainWindow(QMainWindow):
         action_analysis_svm.setStatusTip('Explain/Interpret SVM Regression models.')
         action_analysis_svm.triggered.connect(lambda _: models.explainers.SVMExplainerDialog(df=self._league_df, model_db=self._model_db).exec())
 
-        action_analysis_dnn = QAction('Deep Neural Network (DNN)', self)
-        action_analysis_dnn.setStatusTip('Explain/Interpret Neural Networks.')
-        action_analysis_dnn.triggered.connect(lambda _: models.explainers.NeuralNetworkExplainerDialog(df=self._league_df, model_db=self._model_db).exec())
-
         menu_interpret.addAction(action_analysis_logistic)
         menu_interpret.addAction(action_analysis_lda)
         menu_interpret.addAction(action_analysis_tree)
@@ -423,7 +423,12 @@ class MainWindow(QMainWindow):
         menu_interpret.addAction(action_analysis_knn)
         menu_interpret.addAction(action_analysis_nb)
         menu_interpret.addAction(action_analysis_svm)
-        menu_interpret.addAction(action_analysis_dnn)
+
+        if models.explainers.NeuralNetworkExplainerDialog is not None:
+            action_analysis_dnn = QAction('Deep Neural Network (DNN)', self)
+            action_analysis_dnn.setStatusTip('Explain/Interpret Neural Networks.')
+            action_analysis_dnn.triggered.connect(lambda _: models.explainers.NeuralNetworkExplainerDialog(df=self._league_df, model_db=self._model_db).exec())
+            menu_interpret.addAction(action_analysis_dnn)
 
         menu_model.addMenu(menu_train)
         menu_model.addAction(action_eval)
@@ -650,14 +655,23 @@ class MainWindow(QMainWindow):
     def _load_new_league(self, df: Optional[pd.DataFrame], league: Optional[League]):
         """ Load league matches into the table and stores current matches, league id. """
 
+        logger.info(f"_load_new_league called, df is None: {df is None}, league: {league}")
+
         if df is None:
+            logger.warning("_load_new_league: df is None, returning early")
             return
 
+        logger.info(f"League data: {df.shape[0]} rows, {df.shape[1]} cols")
+        logger.info(f"Columns: {df.columns.tolist()}")
+
         if self._league_df is not None:
+            logger.info("Clearing existing table")
             self._clear_table()
 
         # Add matches to the league table.
+        logger.info("Creating ExcelTable")
         self._table = ExcelTable(parent=self, df=df, readonly=True, supports_sorting=True, supports_query_search=True)
+        logger.info("Setting ExcelTable as central widget")
         self.setCentralWidget(self._table)
 
         # Enable league menus and store data.
@@ -667,6 +681,7 @@ class MainWindow(QMainWindow):
         self._league_df = df.dropna()
         self._league = league
         self._model_db = ModelDatabase(league_id=self._league.league_id)
+        logger.info(f"League '{league.league_id}' loaded successfully")
 
     def _clear_table(self):
         """ Removes all league data from the table. """

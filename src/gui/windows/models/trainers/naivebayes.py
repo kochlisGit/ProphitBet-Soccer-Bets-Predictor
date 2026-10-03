@@ -40,7 +40,8 @@ class NaiveBayesTrainerDialog(TrainerDialog):
             placeholder_name='algorithm',
             widget=self._combo_algorithm,
             layout=row1_box,
-            tooltip='Naive Bayes algorithm for continuous variables.'
+            tooltip='Naive Bayes algorithm for continuous variables.',
+            value_map=self._algorithms
         )
 
         row1_box.addStretch(1)

@@ -4,6 +4,10 @@ from src.gui.windows.models.explainers.extremeboosting import ExtremeBoostingTre
 from src.gui.windows.models.explainers.knn import KNNExplainerDialog
 from src.gui.windows.models.explainers.logistic import LogisticExplainerDialog
 from src.gui.windows.models.explainers.naivebayes import NaiveBayesExplainerDialog
-from src.gui.windows.models.explainers.nn import NeuralNetworkExplainerDialog
 from src.gui.windows.models.explainers.randomforest import RandomForestExplainerDialog
+
+try:
+    from src.gui.windows.models.explainers.nn import NeuralNetworkExplainerDialog
+except ImportError:
+    NeuralNetworkExplainerDialog = None
 from src.gui.windows.models.explainers.svm import SVMExplainerDialog

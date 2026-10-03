@@ -64,7 +64,8 @@ class KNNTrainerDialog(TrainerDialog):
             placeholder_name='weights',
             widget=self._combo_weights,
             layout=row1_box,
-            tooltip='The weights of KNN neighbors. If uniform, then all distanced are equally weighted.'
+            tooltip='The weights of KNN neighbors. If uniform, then all distanced are equally weighted.',
+            value_map=self._weights
         )
 
         self._combo_distances = QComboBox()
@@ -77,7 +78,8 @@ class KNNTrainerDialog(TrainerDialog):
             placeholder_name='p',
             widget=self._combo_distances,
             layout=row1_box,
-            tooltip='Distance metric between 2 instances.'
+            tooltip='Distance metric between 2 instances.',
+            value_map=self._distances
         )
 
         row1_box.addStretch(1)

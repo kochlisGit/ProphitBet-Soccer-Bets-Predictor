@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ProphitBet · Prometheus graphs</title>
+<style>
+body{margin:0;background:#101722;color:#e5eef9;font:15px system-ui,sans-serif}main{max-width:1500px;margin:auto;padding:28px}h1{margin:0 0 8px;font-size:28px}p{color:#a9bad0}a{color:#72caff}header{margin-bottom:24px}.controls{display:flex;gap:16px;align-items:center;flex-wrap:wrap}select,button{background:#26374d;color:#fff;border:1px solid #53677f;border-radius:6px;padding:8px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,480px),1fr));gap:18px}article{background:#182435;border:1px solid #304157;border-radius:10px;padding:18px;min-width:0}h2{font-size:17px;margin:0 0 6px}.chart{width:100%;height:230px}.legend{font-size:12px;display:flex;gap:10px;flex-wrap:wrap;max-height:90px;overflow:auto}.legend span{border-left:4px solid;padding-left:6px}.status{font-size:12px;min-height:18px;color:#a9bad0}svg text{fill:#a9bad0;font-size:11px}.error{color:#ff9c9c}
+</style>
+</head>
+<body><main>
+<header><h1>ProphitBet · Prometheus graphs</h1>
+<p>Live metrics directly from Prometheus. Gaps mean missing samples; zero means a recorded zero. Task-runtime graphs need completed jobs.</p>
+<div class="controls"><label>Time range <select id="range"><option value="3600">Last hour</option><option value="21600">Last 6 hours</option><option value="86400">Last 24 hours</option></select></label><button id="refresh">Refresh now</button><label><input id="auto" type="checkbox" checked> Refresh every 30 seconds</label><a href="../targets">Targets</a><a href="../graph">Query explorer</a><span id="updated" role="status"></span></div>
+</header><section class="grid" id="graphs"></section>
+<script>
+'use strict';
+const panels = [
+ ['Bookmaker collector/import freshness','time() - prophitbet_scraper_timestamp_seconds','seconds'],
+ ['Bookmaker latest attempt duration','prophitbet_scraper_duration_seconds','seconds'],
+ ['Bookmaker observed vs accepted records','prophitbet_scraper_records','records'],
+ ['Bookmaker latest import rejections','prophitbet_scraper_rejected > 0','records'],
+ ['Scrape health · 1 up / 0 down','up',''],
+ ['Waiting jobs by queue','prophitbet_queue_depth','jobs'],
+ ['Workers online · 1 online / 0 offline','flower_worker_online',''],
+ ['Currently executing tasks · online workers','flower_worker_number_of_currently_executing_tasks and on(worker,job,instance) (flower_worker_online == 1)','tasks'],
+ ['Oldest reserved or running delivery','prophitbet_broker_oldest_unacked_seconds','seconds'],
+ ['Task completions and retries per second','sum by (status) (rate(prophitbet_shared_tasks_total[5m]))','/second'],
+ ['Mean completed task runtime · 5 minute window','sum by (task) (rate(flower_task_runtime_seconds_sum[5m])) / sum by (task) (rate(flower_task_runtime_seconds_count[5m]))','seconds'],
+ ['API requests per second','sum by (status) (rate(http_requests_total[5m]))','/second'],
+ ['API response latency · p95','histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))','seconds'],
+ ['Stored records · not lifetime counters','prophitbet_records','records'],
+ ['League sync age','prophitbet_league_sync_age_seconds / 3600','hours'],
+ ['Upcoming fixtures · next 7 days','prophitbet_upcoming_fixtures','fixtures'],
+ ['PostgreSQL connections','sum by (state) (pg_stat_activity_count)','connections'],
+ ['Redis memory','redis_memory_used_bytes / 1024 / 1024','MiB'],
+ ['Redis clients','redis_connected_clients','clients'],
+ ['Exporter snapshot age','time() - prophitbet_metrics_refresh_timestamp_seconds','seconds']
+];
+const colors=['#72caff','#7ce6b4','#ffcb75','#ec9af5','#ff9696','#a5b4fc','#d4e86c','#58d9df'];
+const ns='http://www.w3.org/2000/svg';
+function svgNode(tag,attrs,text){const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
+function draw(container,series,start,end,step,unit){
+ container.replaceChildren();
+ const finite=series.flatMap(s=>s.values.map(v=>Number(v[1])).filter(Number.isFinite));
+ if(!finite.length){container.textContent='No finite samples in this time range.';return;}
+ const svg=svgNode('svg',{viewBox:'0 0 640 230',class:'chart',role:'img','aria-label':'Time series in '+(unit||'metric units')});
+ const max=Math.max(1,...finite),min=Math.min(0,...finite),x=t=>58+(t-start)/(end-start)*565,y=v=>195-(v-min)/(max-min)*165;
+ for(let i=0;i<=4;i++){const v=min+(max-min)*i/4;svg.append(svgNode('line',{x1:58,x2:623,y1:y(v),y2:y(v),stroke:'#304157'}),svgNode('text',{x:52,y:y(v)+4,'text-anchor':'end'},Number(v.toPrecision(3)).toLocaleString()));}
+ for(let i=0;i<=2;i++){const t=start+(end-start)*i/2;svg.append(svgNode('text',{x:x(t),y:218,'text-anchor':i===0?'start':i===2?'end':'middle'},new Date(t*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})));}
+ const legend=document.createElement('div');legend.className='legend';
+ series.forEach((s,i)=>{
+  const color=colors[i%colors.length];let d='',last=null;
+  const label=Object.entries(s.metric).filter(([k])=>!['__name__','instance'].includes(k)).map(([k,v])=>k+'='+v).join(' · ')||'Value';
+  for(const [t,raw] of s.values){const v=Number(raw);if(!Number.isFinite(v)){last=null;continue;}d+=(last!==null&&t-last<=step*1.5?' L':' M')+x(t)+' '+y(v);last=t;}
+  const path=svgNode('path',{d,stroke:color,fill:'none','stroke-width':2});path.append(svgNode('title',{},label));svg.append(path);
+  const item=document.createElement('span');item.style.borderColor=color;const lastValue=s.values.at(-1)?.[1];item.textContent=label+' · '+(Number.isFinite(Number(lastValue))?Number(Number(lastValue).toPrecision(4)).toLocaleString():'unavailable')+' '+unit;legend.append(item);
+ });container.append(svg,legend);
+}
+const cards=panels.map(([title,query,unit])=>{
+ const article=document.createElement('article'),heading=document.createElement('h2'),link=document.createElement('a'),status=document.createElement('p'),chart=document.createElement('div');
+ heading.textContent=title;link.textContent='Open in query explorer ↗';const params=new URLSearchParams({'g0.expr':query,'g0.tab':'0','g0.range_input':'1h'});link.href='../graph?'+params;status.className='status';article.append(heading,link,status,chart);document.querySelector('#graphs').append(article);return{query,unit,status,chart};
+});
+let busy=false;
+async function refresh(){
+ if(busy)return;busy=true;document.querySelector('#refresh').disabled=true;
+ const end=Math.floor(Date.now()/1000),start=end-Number(document.querySelector('#range').value),step=Math.max(15,Math.ceil((end-start)/240));let failures=0,index=0;
+ async function worker(){while(index<cards.length){const card=cards[index++];card.status.textContent='Loading…';card.status.classList.remove('error');try{
+  const params=new URLSearchParams({query:card.query,start,end,step});const response=await fetch('../api/v1/query_range?'+params,{signal:AbortSignal.timeout(15000)});const body=await response.json();if(!response.ok||body.status!=='success')throw new Error(body.error||'HTTP '+response.status);
+  draw(card.chart,body.data.result,start,end,step,card.unit);card.status.textContent=body.data.result.length+' series · '+(card.unit||'unitless')+(body.warnings?' · '+body.warnings.join('; '):'');
+ }catch(error){failures++;card.chart.replaceChildren();card.status.classList.add('error');card.status.textContent='Query failed: '+error.message;}}}
+ try{await Promise.all([worker(),worker(),worker()]);document.querySelector('#updated').textContent='Updated '+new Date().toLocaleTimeString()+(failures?' · '+failures+' failed queries':'');}finally{busy=false;document.querySelector('#refresh').disabled=false;}
+}
+document.querySelector('#refresh').addEventListener('click',refresh);document.querySelector('#range').addEventListener('change',refresh);setInterval(()=>{if(document.querySelector('#auto').checked&&!document.hidden)refresh();},30000);refresh();
+</script></main></body></html>

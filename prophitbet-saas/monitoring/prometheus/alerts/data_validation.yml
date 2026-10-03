@@ -1,0 +1,278 @@
+groups:
+  # ─────────────────────────────────────────────────────────────
+  # DATA SYNC HEALTH
+  # ─────────────────────────────────────────────────────────────
+  - name: data_sync
+    rules:
+      # Any league that hasn't been synced in >26 hours (normal window is 24 h)
+      - alert: LeagueSyncStale
+        expr: prophitbet_league_sync_age_seconds > 93600
+        for: 5m
+        labels:
+          severity: warning
+          area: data_quality
+        annotations:
+          summary: "League {{ $labels.league_id }} sync is stale"
+          description: >
+            League {{ $labels.league_id }} last synced {{ $value | humanizeDuration }} ago.
+            Threshold is 26 h. Run sync_all_leagues_task or check the data_sync worker.
+
+      # League never synced at all
+      - alert: LeagueNeverSynced
+        expr: prophitbet_leagues_never_synced > 0
+        for: 1m
+        labels:
+          severity: warning
+          area: data_quality
+        annotations:
+          summary: "{{ $value }} leagues have never been synced"
+          description: >
+            {{ $value }} league(s) have a NULL last_synced_at. Run the admin pipeline:
+            Sync League Data -> Train House Models -> Scrape Fixtures -> Generate Predictions.
+
+      # Metrics source (redis or postgres) went dark
+      - alert: MetricsSourceDown
+        expr: prophitbet_metrics_source_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          area: infrastructure
+        annotations:
+          summary: "Metrics source {{ $labels.source }} is unreachable"
+          description: >
+            The domain-exporter cannot reach {{ $labels.source }}.
+            Data validation metrics will be missing until this is resolved.
+
+      # Domain exporter itself stopped refreshing
+      - alert: DomainExporterStale
+        expr: time() - prophitbet_metrics_refresh_timestamp_seconds > 120 or absent(prophitbet_metrics_refresh_timestamp_seconds)
+        for: 3m
+        labels:
+          severity: warning
+          area: infrastructure
+        annotations:
+          summary: "Domain exporter has not refreshed in > 2 minutes"
+          description: >
+            Last refresh was {{ $value | humanizeDuration }} ago.
+            Check the domain-exporter container logs.
+
+  # ─────────────────────────────────────────────────────────────
+  # FIXTURE DATA QUALITY
+  # ─────────────────────────────────────────────────────────────
+  - name: fixture_quality
+    rules:
+      # No upcoming fixtures stored — can't generate predictions
+      - alert: NoUpcomingFixtures
+        expr: prophitbet_upcoming_fixtures == 0
+        for: 10m
+        labels:
+          severity: warning
+          area: data_quality
+        annotations:
+          summary: "Zero fixtures stored for the next 7 days"
+          description: >
+            prophitbet_upcoming_fixtures == 0 for > 10 min.
+            Run Scrape Fixtures from the admin panel or check fixtures.py worker.
+
+      # Fixtures exist but NO predictions have been generated in 24 h
+      - alert: PredictionsStale
+        expr: >
+          prophitbet_upcoming_fixtures > 0
+          and prophitbet_recent_predictions == 0
+        for: 30m
+        labels:
+          severity: warning
+          area: data_quality
+        annotations:
+          summary: "Fixtures exist but no predictions generated in the last 24 h"
+          description: >
+            There are upcoming fixtures but prophitbet_recent_predictions == 0.
+            Run Generate Predictions from the admin panel.
+
+  # ─────────────────────────────────────────────────────────────
+  # PREDICTION DATA QUALITY
+  # ─────────────────────────────────────────────────────────────
+  - name: prediction_quality
+    rules:
+      # No models trained — prediction pipeline is completely blocked
+      - alert: NoTrainedModels
+        expr: prophitbet_records{entity="trained_models"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          area: data_quality
+        annotations:
+          summary: "No trained ML models found"
+          description: >
+            The trained_models table is empty. No predictions can be generated.
+            Run Train House Models from the admin panel first.
+
+      # Prediction table is empty — data was never generated or was wiped
+      - alert: NoPredictions
+        expr: prophitbet_records{entity="predictions"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          area: data_quality
+        annotations:
+          summary: "Predictions table is empty"
+          description: >
+            Zero prediction records in the DB. Full pipeline must be run:
+            Train -> Fixtures -> Predictions.
+
+      # Prediction rate dropped to zero while models & fixtures exist
+      - alert: PredictionGenerationStopped
+        expr: >
+          prophitbet_recent_predictions == 0
+          and on(job, instance) prophitbet_records{entity="trained_models"} > 0
+          and on(job, instance) prophitbet_upcoming_fixtures > 0
+        for: 30m
+        labels:
+          severity: warning
+          area: data_quality
+        annotations:
+          summary: "Prediction generation rate is zero despite models and fixtures being available"
+          description: >
+            No new prediction records have been generated in 24 hours even though models
+            and fixtures exist. Check generate_daily_predictions_task in Celery.
+
+  # ─────────────────────────────────────────────────────────────
+  # ODDS DATA QUALITY
+  # ─────────────────────────────────────────────────────────────
+  - name: odds_quality
+    rules:
+      # Odds scraping stopped (only fires if the odds table is non-empty, i.e. scraping was working)
+      - alert: OddsScrapingStalled
+        expr: >
+          time() - prophitbet_scraper_timestamp_seconds{stage="collection"} > 900
+        for: 5m
+        labels:
+          severity: warning
+          area: data_quality
+        annotations:
+          summary: "Bookmaker browser collection is older than 15 minutes"
+          description: >
+            The Windows browser collector has not produced a fresh observation. Run sync-bookmaker-data.ps1; importing an old snapshot does not refresh bookmaker prices.
+
+      # Odds table is completely empty
+      - alert: OddsTableEmpty
+        expr: prophitbet_records{entity="sa_bookmaker_odds"} == 0
+        for: 5m
+        labels:
+          severity: info
+          area: data_quality
+        annotations:
+          summary: "SA bookmaker odds table has no records"
+          description: >
+            The sa_bookmaker_odds table is empty. Expected on a fresh install,
+            but after first sync it should be non-zero.
+
+  # ─────────────────────────────────────────────────────────────
+  # CELERY QUEUE HEALTH (affects data pipeline throughput)
+  # ─────────────────────────────────────────────────────────────
+  - name: celery_health
+    rules:
+      # Tasks piling up — workers may be stuck or dead
+      - alert: CeleryQueueBacklog
+        expr: prophitbet_queue_depth > 20
+        for: 5m
+        labels:
+          severity: warning
+          area: infrastructure
+        annotations:
+          summary: "Celery queue {{ $labels.queue }} has {{ $value }} pending tasks"
+          description: >
+            Queue depth > 20 for 5 min. Data sync and prediction tasks may be delayed.
+            Check Flower at :5555 and celery-worker / celery-sync-worker logs.
+
+      # Long-running unacknowledged tasks
+      - alert: CeleryUnackedTasksOld
+        expr: prophitbet_broker_oldest_unacked_seconds > 1800
+        for: 5m
+        labels:
+          severity: warning
+          area: infrastructure
+        annotations:
+          summary: "Oldest unacked Celery task is {{ $value | humanizeDuration }} old"
+          description: >
+            A task has been reserved (not finished) for > 30 min. The worker may be
+            busy or stuck. Inspect progress and worker logs before interrupting; training may legitimately exceed 30 minutes.
+
+      # Task failure rate spike
+      - alert: CeleryHighFailureRate
+        expr: increase(prophitbet_shared_tasks_total{status="failure"}[15m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          area: infrastructure
+        annotations:
+          summary: "{{ $value }} Celery task failures in the last 15 minutes"
+          description: >
+            Repeated task failures will block data sync and prediction generation.
+            Check worker logs and Flower for stack traces.
+
+  # ─────────────────────────────────────────────────────────────
+  # DATASET RECORDS INTEGRITY
+  # ─────────────────────────────────────────────────────────────
+  - name: dataset_integrity
+    rules:
+      # No league datasets in S3/DB — the entire CSV layer is missing
+      - alert: NoLeagueDatasets
+        expr: prophitbet_records{entity="league_datasets"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          area: data_quality
+        annotations:
+          summary: "No league dataset CSV records in the database"
+          description: >
+            The league_datasets table is empty. Run sync_all_leagues_task to
+            download and upload match history CSVs to S3.
+
+      # Dataset count dropped significantly — bulk delete or import failure
+      - alert: LeagueDatasetCountDropped
+        expr: >
+          (
+            prophitbet_dataset_rows
+            /
+            (prophitbet_dataset_rows offset 1h)
+          ) < 0.8 and (prophitbet_dataset_rows offset 1h) > 0
+        for: 5m
+        labels:
+          severity: warning
+          area: data_quality
+        annotations:
+          summary: "League {{ $labels.league_id }} accepted CSV row count dropped >20%"
+          description: >
+            Current/prior CSV row ratio: {{ $value }}. This may indicate failed uploads or
+            a partial re-sync that deleted old records without replacing them.
+      - alert: DatasetObjectMissing
+        expr: prophitbet_dataset_object_present == 0
+        for: 5m
+        labels: { severity: critical, area: data_quality }
+        annotations:
+          summary: "League {{ $labels.league_id }} latest CSV is missing or empty"
+      - alert: DatasetStorageCheckFailed
+        expr: prophitbet_dataset_storage_check_up == 0
+        for: 5m
+        labels: { severity: warning, area: data_quality }
+        annotations:
+          summary: "League {{ $labels.league_id }} CSV storage could not be checked"
+      - alert: DataIntegrityEvidenceMissing
+        expr: prophitbet_data_integrity_issues > 0
+        for: 5m
+        labels: { severity: warning, area: data_quality }
+        annotations:
+          summary: "{{ $labels.check }}: {{ $value }} affected records"
+      - alert: DataQualityAuditUnavailable
+        expr: prophitbet_quality_check_up == 0 or absent(prophitbet_quality_check_up)
+        for: 5m
+        labels: { severity: critical, area: infrastructure }
+        annotations:
+          summary: "Data-quality audit unavailable; missing metrics do not mean healthy data"
+      - alert: ScraperTelemetryMissing
+        expr: prophitbet_scraper_telemetry_available == 0
+        for: 5m
+        labels: { severity: warning, area: data_quality }
+        annotations:
+          summary: "Scraper {{ $labels.stage }} telemetry is missing or invalid"

@@ -1,0 +1,44 @@
+local.file_match "scraper" {
+  path_targets = [{"__path__" = "/scraper-logs/*.jsonl", "job" = "prophitbet-scraper"}]
+  sync_period = "5s"
+}
+loki.source.file "scraper" {
+  targets    = local.file_match.scraper.targets
+  forward_to = [loki.process.scraper.receiver]
+}
+loki.process "scraper" {
+  stage.json {
+    expressions = { timestamp = "timestamp", stage = "stage" }
+  }
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339Nano"
+  }
+  stage.labels {
+    values = { stage = "" }
+  }
+  forward_to = [loki.write.local.receiver]
+}
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+local.file_match "system_checker" {
+  path_targets = [{"__path__" = "/checker-logs/checker.jsonl", "job" = "prophitbet-checker"}]
+  sync_period = "5s"
+}
+loki.source.file "system_checker" {
+  targets = local.file_match.system_checker.targets
+  forward_to = [loki.write.local.receiver]
+}
+
+local.file_match "sonarqube" {
+  path_targets = [{"__path__" = "/sonarqube-logs/*.log", "__path_exclude__" = "/sonarqube-logs/*.*.log", "job" = "sonarqube"}]
+  sync_period = "5s"
+}
+loki.source.file "sonarqube" {
+  targets = local.file_match.sonarqube.targets
+  forward_to = [loki.write.local.receiver]
+}

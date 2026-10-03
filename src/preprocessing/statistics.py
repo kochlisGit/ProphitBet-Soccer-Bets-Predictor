@@ -68,12 +68,46 @@ class StatisticsEngine:
     def get_extended_stat_columns() -> List[str]:
         return ['HSTF', 'ASTF', 'HCF', 'ACF']
 
+    _EXTENDED_STAT_SOURCE_COLUMNS = {
+        'HSTF': ('HST',),
+        'ASTF': ('AST',),
+        'HCF': ('HC',),
+        'ACF': ('AC',),
+    }
+
+    def filter_stat_columns_for_dataframe(self, df: pd.DataFrame, stat_columns: List[str]) -> List[str]:
+        """
+        Drop extended stats whose raw inputs are missing from this CSV.
+        Many football-data.co.uk 'new' league files omit shots/corners columns (HST, AST, HC, AC).
+        """
+        filtered: List[str] = []
+        for col in stat_columns:
+            deps = self._EXTENDED_STAT_SOURCE_COLUMNS.get(col)
+            if deps is not None:
+                # A number of feeds expose the optional column names while
+                # providing no observations. Treat all-null/non-numeric input
+                # as unavailable instead of manufacturing zero-valued stats.
+                if all(
+                    d in df.columns
+                    and pd.to_numeric(df[d], errors='coerce').notna().any()
+                    for d in deps
+                ):
+                    filtered.append(col)
+            else:
+                filtered.append(col)
+        return filtered
+
     def compute_stats(self, df: pd.DataFrame, stat_columns: List[str]) -> pd.DataFrame:
         """ Computes the requested statistic columns for each season. Finally, it sorts matches in descending order. """
+
+        stat_columns = self.filter_stat_columns_for_dataframe(df, stat_columns)
 
         # Validate that the matches are provided in ascending order, otherwise the calculations will be wrong.
         if not df['Date'].is_monotonic_increasing:
             raise ValueError('Expected dates to be sorted in a ascending order.')
+
+        if not stat_columns:
+            return df.sort_values(by=['Date', 'Home'], ascending=False)
 
         stat_funcs = [self._all_stats_fn[col] for col in stat_columns]
 
@@ -83,7 +117,11 @@ class StatisticsEngine:
             return reduce(lambda s_df, fn: fn(s_df), stat_funcs, season_df)
 
         tqdm.pandas(desc='Processing Season')
+        seasons = df['Season'].copy()
         df = df.groupby(by='Season', group_keys=False).progress_apply(season_pipeline)
+
+        if 'Season' not in df.columns:
+            df['Season'] = seasons
 
         # Sort matches by descending order and return dataframe.
         return df.sort_values(by=['Date', 'Home'], ascending=False)

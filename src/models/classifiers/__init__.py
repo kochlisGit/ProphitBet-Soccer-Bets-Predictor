@@ -4,6 +4,10 @@ from src.models.classifiers.extremeboosting import XGBoost
 from src.models.classifiers.knn import KNN
 from src.models.classifiers.logistic import LogisticRegressor
 from src.models.classifiers.naivebayes import NaiveBayes
-from src.models.classifiers.neuralnets.nn import NeuralNetwork
 from src.models.classifiers.randomforest import RandomForest
 from src.models.classifiers.svm import SVM
+
+try:
+    from src.models.classifiers.neuralnets.nn import NeuralNetwork
+except ImportError:
+    NeuralNetwork = None
