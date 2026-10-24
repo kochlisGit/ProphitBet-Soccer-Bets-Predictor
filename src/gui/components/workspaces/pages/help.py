@@ -1,22 +1,22 @@
 import webbrowser
 from typing import Any, Dict, Optional
-from PySide6.QtCore import QThread, Signal
+from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import QApplication, QGridLayout, QMessageBox, QProgressDialog, QWidget
 from src.gui.components.workspaces.page import WorkspacePage, WorkspaceActionCard
 
 
-class UpdateDownloadThread(QThread):
-    """Download an update without blocking the GUI event loop."""
+class ApplicationUpdateThread(QThread):
+    """Download, install, and verify an update without blocking the GUI."""
 
     progress = Signal(int)
-    downloaded = Signal(object)
+    updated = Signal(object)
     failed = Signal(str)
 
     def run(self) -> None:
-        from src.core.network.updater import stage_update
+        from src.core.network.updater import update_from_github
 
         try:
-            self.downloaded.emit(stage_update(self.progress.emit))
+            self.updated.emit(update_from_github(self.progress.emit))
         except Exception as error:
             self.failed.emit(str(error))
 
@@ -87,7 +87,7 @@ class HelpWorkspace(WorkspacePage):
         self._update_progress = None
 
     def update_application(self) -> None:
-        """Download the current main branch and replace the installation on exit."""
+        """Replace all project files from GitHub main and restart the application."""
 
         if self._update_thread is not None and self._update_thread.isRunning():
             return
@@ -104,42 +104,42 @@ class HelpWorkspace(WorkspacePage):
             return
 
         self._update_progress = QProgressDialog(
-            'Downloading the latest ProphitBet version...', '', 0, 100, self
+            'Downloading and installing all files from GitHub main...', '', 0, 100, self
         )
         self._update_progress.setWindowTitle('Updating ProphitBet')
+        self._update_progress.setWindowModality(Qt.WindowModality.ApplicationModal)
         self._update_progress.setCancelButton(None)
         self._update_progress.setMinimumDuration(0)
         self._update_progress.setAutoClose(False)
         self._update_progress.setValue(0)
 
-        self._update_thread = UpdateDownloadThread(self)
+        self._update_thread = ApplicationUpdateThread(self)
         self._update_thread.progress.connect(self._update_progress.setValue)
-        self._update_thread.downloaded.connect(self._apply_downloaded_update)
+        self._update_thread.updated.connect(self._update_completed)
         self._update_thread.failed.connect(self._update_failed)
         self._update_thread.finished.connect(self._update_finished)
         self._update_thread.finished.connect(self._update_thread.deleteLater)
         self._update_thread.start()
 
-    def _apply_downloaded_update(self, source) -> None:
-        from src.core.network.updater import launch_staged_update, project_root
+    def _update_completed(self, result) -> None:
+        """Restart only after every downloaded file has passed verification."""
 
         try:
-            launch_staged_update(source, project_root())
-        except Exception as error:
-            import shutil
+            from src.core.network.updater import restart_application
 
-            shutil.rmtree(source.parent.parent, ignore_errors=True)
-            self._update_failed(str(error))
+            if self._update_progress is not None:
+                self._update_progress.setLabelText(
+                    f'Updated and verified {result.file_count} files. Restarting ProphitBet...'
+                )
+                self._update_progress.setValue(100)
+            restart_application(result)
+        except Exception as error:
+            self._restart_failed(str(error))
             return
 
-        if self._update_progress is not None:
-            self._update_progress.close()
-        QMessageBox.information(
-            self,
-            'Update Ready',
-            'The update was downloaded successfully. ProphitBet will now restart.',
-        )
-        QApplication.quit()
+        application = QApplication.instance()
+        if application is not None:
+            application.exit(0)
 
     def _update_failed(self, error: str) -> None:
         if self._update_progress is not None:
@@ -148,6 +148,16 @@ class HelpWorkspace(WorkspacePage):
             self,
             'Update Failed',
             f'ProphitBet could not be updated.\n\n{error}',
+        )
+
+    def _restart_failed(self, error: str) -> None:
+        if self._update_progress is not None:
+            self._update_progress.close()
+        QMessageBox.critical(
+            self,
+            'Restart Failed',
+            'All application files were updated and verified, but ProphitBet '
+            f'could not restart automatically. Please open it manually.\n\n{error}',
         )
 
     def _update_finished(self) -> None:
