@@ -1,0 +1,27 @@
+{
+  "leagues": {
+    "last_league": null,
+    "stats_columns": null
+  },
+  "analysis": {
+    "checked_analyzers": [
+      "Dataset",
+      "Univariate",
+      "Bivariate",
+      "Selection",
+      "Importance",
+      "Rules",
+      "Team"
+    ]
+  },
+  "settings": {
+    "theme": "Default",
+    "window": {
+      "min_width": 800,
+      "min_height": 600,
+      "width": 1092,
+      "height": 698
+    },
+    "load_last_league": true
+  }
+}

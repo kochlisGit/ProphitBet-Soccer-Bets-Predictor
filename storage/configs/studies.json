@@ -1,0 +1,6 @@
+{
+  "storage_sqlite_prefix": "sqlite:///",
+  "storage_base_directory": "storage/leagues",
+  "models_study_filename": "models_study.db",
+  "agents_study_filename": "agents_study.db"
+}

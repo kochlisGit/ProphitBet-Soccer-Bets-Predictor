@@ -1,0 +1,4 @@
+{
+  "agents_directory": "storage/leagues",
+  "agents_index_filepath": "storage/leagues/agent_index.pkl"
+}
