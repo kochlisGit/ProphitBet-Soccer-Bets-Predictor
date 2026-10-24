@@ -1,0 +1,47 @@
+# ProphitBet-v3 runtime dependencies
+# Supported interpreter: 64-bit CPython 3.11
+# Graphviz itself is a separate system dependency; see README.md.
+
+# Desktop GUI, charts, and embedded tuning dashboard
+PySide6==6.11.2
+
+# Dataframes, numerical routines, Feather storage, and Excel export
+numpy==1.26.4
+pandas==3.0.5
+pyarrow==25.0.1
+scipy==1.17.1
+openpyxl==3.1.5
+
+# Historical data, fixtures, progress, and team-name matching
+requests==2.34.2
+lxml==6.1.1
+tqdm==4.70.0
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.27.3
+
+# Exploratory analysis and visualization
+matplotlib==3.11.1
+seaborn==0.13.2
+dcor==0.7
+Boruta==0.4.3
+dtreeviz==2.3.2
+graphviz==0.21
+
+# Machine learning, imbalance handling, and explanations
+scikit-learn==1.9.0
+imbalanced-learn==0.14.2
+xgboost==3.2.0
+lightgbm==4.7.0
+tensorflow==2.15.1
+shap==0.49.1
+
+# Hyperparameter tuning and persistent Optuna studies
+optuna==4.9.0
+optuna-dashboard==0.20.0
+SQLAlchemy==2.0.51
+
+# Deep reinforcement learning (PPO and QR-DQN)
+torch==2.13.0
+gymnasium==1.3.0
+stable-baselines3==2.9.0
+sb3-contrib==2.9.0

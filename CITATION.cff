@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use ProphitBet in your research or projects, please cite this software."
+type: software
+title: "ProphitBet - An Open Source Soccer Prediction App"
+authors:
+  - family-names: "Kochliaridis"
+    given-names: "Vasileios"
+    orcid: "https://orcid.org/0000-0001-9431-6679"
+repository-code: "https://github.com/kochlisGit/ProphitBet-Soccer-Bets-Predictor"
+version: "2.0.0"
+license: "MIT"
+keywords:
+  - soccer prediction
+  - machine learning
+  - betting agents
+  - football analytics
+  - sports betting
