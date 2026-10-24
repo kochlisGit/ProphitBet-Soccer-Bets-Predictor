@@ -1,7 +1,24 @@
 import webbrowser
 from typing import Any, Dict, Optional
-from PySide6.QtWidgets import QGridLayout, QMessageBox, QWidget
+from PySide6.QtCore import QThread, Signal
+from PySide6.QtWidgets import QApplication, QGridLayout, QMessageBox, QProgressDialog, QWidget
 from src.gui.components.workspaces.page import WorkspacePage, WorkspaceActionCard
+
+
+class UpdateDownloadThread(QThread):
+    """Download an update without blocking the GUI event loop."""
+
+    progress = Signal(int)
+    downloaded = Signal(object)
+    failed = Signal(str)
+
+    def run(self) -> None:
+        from src.core.network.updater import stage_update
+
+        try:
+            self.downloaded.emit(stage_update(self.progress.emit))
+        except Exception as error:
+            self.failed.emit(str(error))
 
 
 class HelpWorkspace(WorkspacePage):
@@ -40,6 +57,7 @@ class HelpWorkspace(WorkspacePage):
             description='Update ProphitBet to the latest version.',
             icon_size=135
         )
+        update.clicked.connect(self.update_application)
         bug = WorkspaceActionCard(
             icon_filepath='storage/icons/menu/help-bug.png',
             title='Submit Bug',
@@ -64,6 +82,76 @@ class HelpWorkspace(WorkspacePage):
         grid.setRowStretch(0, 1)
         grid.setRowStretch(1, 1)
         self.main_layout.addLayout(grid, 1)
+
+        self._update_thread = None
+        self._update_progress = None
+
+    def update_application(self) -> None:
+        """Download the current main branch and replace the installation on exit."""
+
+        if self._update_thread is not None and self._update_thread.isRunning():
+            return
+
+        answer = QMessageBox.question(
+            self,
+            'Update ProphitBet',
+            'Download the latest ProphitBet version and overwrite existing '
+            'application files?\n\nThe application will close and restart automatically.',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        self._update_progress = QProgressDialog(
+            'Downloading the latest ProphitBet version...', '', 0, 100, self
+        )
+        self._update_progress.setWindowTitle('Updating ProphitBet')
+        self._update_progress.setCancelButton(None)
+        self._update_progress.setMinimumDuration(0)
+        self._update_progress.setAutoClose(False)
+        self._update_progress.setValue(0)
+
+        self._update_thread = UpdateDownloadThread(self)
+        self._update_thread.progress.connect(self._update_progress.setValue)
+        self._update_thread.downloaded.connect(self._apply_downloaded_update)
+        self._update_thread.failed.connect(self._update_failed)
+        self._update_thread.finished.connect(self._update_finished)
+        self._update_thread.finished.connect(self._update_thread.deleteLater)
+        self._update_thread.start()
+
+    def _apply_downloaded_update(self, source) -> None:
+        from src.core.network.updater import launch_staged_update, project_root
+
+        try:
+            launch_staged_update(source, project_root())
+        except Exception as error:
+            import shutil
+
+            shutil.rmtree(source.parent.parent, ignore_errors=True)
+            self._update_failed(str(error))
+            return
+
+        if self._update_progress is not None:
+            self._update_progress.close()
+        QMessageBox.information(
+            self,
+            'Update Ready',
+            'The update was downloaded successfully. ProphitBet will now restart.',
+        )
+        QApplication.quit()
+
+    def _update_failed(self, error: str) -> None:
+        if self._update_progress is not None:
+            self._update_progress.close()
+        QMessageBox.critical(
+            self,
+            'Update Failed',
+            f'ProphitBet could not be updated.\n\n{error}',
+        )
+
+    def _update_finished(self) -> None:
+        self._update_thread = None
 
     def open_learn_dialog(self) -> None:
         """Open the tutorial link browser."""
