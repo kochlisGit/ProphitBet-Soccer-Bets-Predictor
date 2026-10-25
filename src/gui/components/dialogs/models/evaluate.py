@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
+from decimal import Decimal, ROUND_CEILING, ROUND_FLOOR
 from typing import Dict, List, Optional
 from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtWidgets import (
@@ -39,6 +40,22 @@ from src.gui.components.dialogs.tasks import Task
 from src.gui.widgets import CheckableComboBox, ExcelTable, FloatDoubleRangeSlider
 
 _MODEL_CONFIG_WRITER = ThreadPoolExecutor(max_workers=1, thread_name_prefix='ModelConfigWriter')
+_ODD_FILTER_STEP = 0.1
+
+
+def _expand_odd_slider_range(minimum: float, maximum: float) -> tuple[float, float]:
+    """Expand data limits onto the slider's displayed 0.1 odds grid."""
+
+    step = Decimal(str(_ODD_FILTER_STEP))
+    lower = (Decimal(str(minimum)) / step).to_integral_value(rounding=ROUND_FLOOR) * step
+    upper = (Decimal(str(maximum)) / step).to_integral_value(rounding=ROUND_CEILING) * step
+
+    # The range slider requires two distinct endpoints, even if every match
+    # happens to have the same odd.
+    if upper <= lower:
+        upper = lower + step
+
+    return float(lower), float(upper)
 
 
 def _load_agent_and_compute_actions(
@@ -93,7 +110,7 @@ class EvaluateModelDialog(QDialog):
         odd_lower_limits = self._df[ODDS_COLUMNS + DOUBLE_CHANCE_ODD_COLUMNS].min(axis=0)
         odd_upper_limits = self._df[ODDS_COLUMNS + DOUBLE_CHANCE_ODD_COLUMNS].max(axis=0)
         self._odd_limits = {
-            odd: (odd_lower_limits[odd], odd_upper_limits[odd])
+            odd: _expand_odd_slider_range(odd_lower_limits[odd], odd_upper_limits[odd])
             for odd in odd_lower_limits.index.tolist()
         }
 
@@ -203,8 +220,8 @@ class EvaluateModelDialog(QDialog):
         filters_layout.setVerticalSpacing(8)
 
         filter_combo_width = 140
-        odd_slider_width = 300
-        percentile_slider_width = odd_slider_width - 150
+        odd_slider_width = 400
+        percentile_slider_width = 150
 
         prediction_label = QLabel('Prediction', filters_group)
         self._prediction_combo = QComboBox(filters_group)
@@ -220,7 +237,12 @@ class EvaluateModelDialog(QDialog):
         self._odd_combo.setEnabled(False)
         self._odd_combo.setToolTip('Selects the odd to apply the value range filter.')
 
-        self._odd_slider = FloatDoubleRangeSlider(minimum=self._odd_limits['1'][0], maximum=self._odd_limits['1'][1], step=0.1, parent=filters_group)
+        self._odd_slider = FloatDoubleRangeSlider(
+            minimum=self._odd_limits['1'][0],
+            maximum=self._odd_limits['1'][1],
+            step=_ODD_FILTER_STEP,
+            parent=filters_group
+        )
         self._odd_slider.setFixedWidth(odd_slider_width)
         self._odd_slider.setEnabled(False)
         self._odd_slider.setToolTip('Filters the value range of the specified odd.')
@@ -237,6 +259,7 @@ class EvaluateModelDialog(QDialog):
         self._percentile_slider = QSlider(Qt.Orientation.Horizontal, percentile_slider_container)
         self._percentile_slider.setRange(0, 100)
         self._percentile_slider.setSingleStep(1)
+        self._percentile_slider.setPageStep(1)
         self._percentile_slider.setValue(0)
         self._percentile_slider.setFixedWidth(percentile_slider_width)
         self._percentile_slider.setEnabled(False)
