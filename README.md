@@ -198,7 +198,7 @@ specific envrionment, you can also use *python install.py --venv "C:\Users\You\p
 or specify the `VENV_PATH` variable inside the `install.py` script.
 
 ## Step 6 - Run Application
-To open ProphitBet, you can navigate the CMD to the folder and type `python app.py`. You can also run the application by double-clicking the *app.bat* file (In linux, you can use the *app.sh* respectively). If you have an anti-virus enabled, it is possible that it slows down the initialization of the app.
+To open ProphitBet, you can navigate the CMD to the folder and type `python main.py`. You can also run the application by double-clicking the *app.bat* file (In linux, you can use the *app.sh* respectively). If you have an anti-virus enabled, it is possible that it slows down the initialization of the app.
 
 # Features
 ProphitBet-v3 comes with several upgraded features, in comparison to its predecessor, ProphitBet-v2.
